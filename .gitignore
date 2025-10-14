@@ -1,0 +1,219 @@
+# ===================================
+# ASP.NET Core / Visual Studio
+# ===================================
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio cache/options
+.vs/
+.vscode/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## User-specific files
+*.userprefs
+
+## Build Results of an ATL Project
+[Dd]ebugPS/
+[Rr]eleasePS/
+
+## Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Publish profiles
+PublishScripts/
+*.pubxml
+*.publishproj
+
+## Web workbench (sass)
+.sass-cache/
+
+## ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# ===================================
+# Angular / Node.js
+# ===================================
+
+## Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+## Build outputs
+dist/
+dist-ssr/
+tmp/
+out-tsc/
+.angular/
+
+## Angular cache
+.angular/cache/
+
+## IDEs and editors
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+## System Files
+.DS_Store
+Thumbs.db
+
+## Environment files
+.env
+.env.local
+.env.*.local
+
+# ===================================
+# WebStorm / JetBrains IDEs
+# ===================================
+
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# ===================================
+# SQL Server / Database
+# ===================================
+
+## SQL Server database files
+*.mdf
+*.ldf
+*.ndf
+
+## SQL Server backup files
+*.bak
+*.trn
+
+## SQL Server Management Studio Temp files
+~$*
+*.tmp
+
+## Local database files
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+## Database connection strings (if stored locally)
+appsettings.Development.json
+appsettings.Local.json
+
+# ===================================
+# General
+# ===================================
+
+## OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+## Logs
+*.log
+logs/
+
+## Temporary files
+*.tmp
+*.temp
+*.cache
+
+## Sensitive information
+*.pfx
+*.p12
+secrets.json
+appsettings.Production.json
+
+## Test results
+TestResults/
+*.trx
+coverage/
+*.coverage
+*.coveragexml
+
+## Backup files
+*~
+*.orig
+*.bak
+*.backup
