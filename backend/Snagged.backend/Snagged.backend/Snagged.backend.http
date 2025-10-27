@@ -1,0 +1,6 @@
+@Snagged.backend_HostAddress = http://localhost:5093
+
+GET {{Snagged.backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
