@@ -35,7 +35,7 @@ Snagged is a full-stack thrift shop platform that connects buyers and sellers of
 
 ### Development Tools
 - **Visual Studio** - Backend IDE
-- **Visual Studio Code** - Frontend development
+- **Webstorm** - Frontend development
 - **SQL Server Management Studio** - Database administration
 - **Angular CLI** - Project scaffoling and tooling
 
