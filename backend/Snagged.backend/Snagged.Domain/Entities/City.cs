@@ -12,6 +12,6 @@ namespace Snagged.Domain.Entities
         public string Name { get; set; }    
         public int CountryId {  get; set; }
         public Country Country { get; set; }
-        public ICollection<Adress> Adressses { get; set; } = new List<Adresss>();
+        public ICollection<Address> Addresses { get; set; } = new List<Address>();
     }
 }
