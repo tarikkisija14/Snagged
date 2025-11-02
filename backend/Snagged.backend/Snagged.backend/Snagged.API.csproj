@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Snagged.Application\Snagged.Application.csproj" />
     <ProjectReference Include="..\Snagged.Domain\Snagged.Domain.csproj" />
     <ProjectReference Include="..\Snagged.Infrastructure\Snagged.Infrastructure.csproj" />
