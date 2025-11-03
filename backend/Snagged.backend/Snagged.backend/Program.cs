@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Snagged.Application.Items.Queries.GetItems;
+using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Domain.Entities;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;

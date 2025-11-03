@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Snagged.Application.Catalog.Orders.Commands;
+using Snagged.Application.Catalog.Orders.Commands.CreateOrder;
+using Snagged.Application.Catalog.Orders.Commands.DeleteOrder;
+using Snagged.Application.Catalog.Orders.Commands.UpdateOrder;
+using Snagged.Application.Catalog.Orders.Queries.GetOrders;
+using Snagged.Application.Catalog.Orders.Queries.GetOrdersById;
+using Snagged.Application.Catalog.Orders.Queries.GetOrdersPaged;
 using Snagged.Application.Commom.Paging;
-using Snagged.Application.Orders.Commands;
-using Snagged.Application.Orders.Commands.CreateOrder;
-using Snagged.Application.Orders.Commands.DeleteOrder;
-using Snagged.Application.Orders.Commands.UpdateOrder;
-using Snagged.Application.Orders.Queries.GetOrders;
-using Snagged.Application.Orders.Queries.GetOrdersById;
 
 namespace Snagged.API.Controllers
 {
@@ -31,9 +32,16 @@ namespace Snagged.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrderById(int id)
         {
-            var query = new GetOrdersByIdQuery { Id = id };
-            var result = await _mediator.Send(query);
-            return Ok(result);
+            try
+            {
+                var query = new GetOrdersByIdQuery { Id = id };
+                var result = await _mediator.Send(query);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Order with Id {id} not found.");
+            }
         }
 
         [HttpPost]
@@ -49,22 +57,37 @@ namespace Snagged.API.Controllers
             if (id != command.Id)
                 return BadRequest("ID mismatch");
 
-            await _mediator.Send(command);
-            return NoContent();
+            try
+            {
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Order with Id {id} not found.");
+            }
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var command = new DeleteOrderCommand { Id = id };
-            await _mediator.Send(command);
-            return NoContent();
+            try
+            {
+                var command = new DeleteOrderCommand { Id = id };
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Order with Id {id} not found.");
+            }
         }
+
         [HttpGet("paged")]
         public async Task<ActionResult<PageResult<OrderDto>>> GetPagedOrders([FromQuery] GetOrdersPagedQuery query)
         {
             var result = await _mediator.Send(query);
             return Ok(result);
         }
-
     }
 }
