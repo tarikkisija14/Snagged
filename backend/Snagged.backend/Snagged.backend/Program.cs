@@ -1,5 +1,8 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Snagged.Application.Items.Queries.GetItems;
+using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,10 +14,17 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
         sqlOptions => sqlOptions.MigrationsAssembly("Snagged.Infrastructure") // migrations go here
     )
 );
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<GetItemsQueryHandler>();
+});
+
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 

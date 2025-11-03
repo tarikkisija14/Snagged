@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Snagged.Application.Commom
+namespace Snagged.Application.Commom.Paging
 {
     public sealed class PageResult<T>
     {

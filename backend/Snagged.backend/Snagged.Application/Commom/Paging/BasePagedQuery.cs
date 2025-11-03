@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Commom
+namespace Snagged.Application.Commom.Paging
 {
     public abstract class BasePagedQuery<TItem> : IRequest<PageResult<TItem>>
     {

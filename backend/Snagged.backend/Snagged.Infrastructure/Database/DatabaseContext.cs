@@ -6,10 +6,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Snagged.Application.Abstractions;
 
 namespace Snagged.Infrastructure.Database
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext,IAppDbContext
+
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
