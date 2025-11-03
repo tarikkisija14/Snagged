@@ -10,9 +10,6 @@ namespace Snagged.Application.Items.Queries.GetPagedItems
 {
     public class GetPagedItemsQuery:BasePagedQuery<ItemDto>
     {
-        public string? Title { get; init; }
-        public int? CategoryId { get; init; }
-        public int? SubcategoryId { get; init; }
-        public bool? IsSold { get; init; }
+       
     }
 }

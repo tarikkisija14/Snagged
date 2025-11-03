@@ -6,6 +6,7 @@ using Snagged.Application.Items.Commands.DeleteItem;
 using Snagged.Application.Items.Commands.UpdateItem;
 using Snagged.Application.Items.Queries.GetItems;
 using Snagged.Application.Items.Queries.GetItemsById;
+using Snagged.Application.Items.Queries.GetItemsFiltered;
 using Snagged.Application.Items.Queries.GetPagedItems;
 using System.Runtime.CompilerServices;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -66,6 +67,13 @@ namespace Snagged.API.Controllers
 
         [HttpGet("paged")]
         public async Task<ActionResult<PageResult<ItemDto>>> GetPagedItems([FromQuery] GetPagedItemsQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("filtered")]
+        public async Task<ActionResult<List<ItemDto>>> GetFilteredItems([FromQuery] GetItemsFilteredQuery query)
         {
             var result = await _mediator.Send(query);
             return Ok(result);

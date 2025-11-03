@@ -5,7 +5,7 @@ using Snagged.Application.Abstractions;
 
 namespace Snagged.Application.Items.Queries.GetItems
 {
-    public sealed class GetItemsQueryHandler(IAppDbContext ctx)
+    public class GetItemsQueryHandler(IAppDbContext ctx)
         : IRequestHandler<GetItemsQuery, List<ItemDto>>
     {
         public async Task<List<ItemDto>> Handle(GetItemsQuery request, CancellationToken ct)
