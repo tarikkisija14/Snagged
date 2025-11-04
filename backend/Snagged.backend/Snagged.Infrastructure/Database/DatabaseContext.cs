@@ -37,6 +37,8 @@ namespace Snagged.Infrastructure.Database
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
 
 
@@ -60,6 +62,12 @@ namespace Snagged.Infrastructure.Database
                 .HasOne(u => u.Profile)
                 .WithOne(p => p.User)
                 .HasForeignKey<Profile>(p => p.UserId);
+
+            // User → Cart (1:1)
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Cart)
+                .WithOne(c => c.User)
+                .HasForeignKey<Cart>(c => c.UserId);
 
             // ====================
             // LOCATION RELATIONSHIPS
@@ -109,6 +117,23 @@ namespace Snagged.Infrastructure.Database
                 .HasOne(ii => ii.Item)
                 .WithMany(i => i.Images)
                 .HasForeignKey(ii => ii.ItemId);
+
+            // ====================
+            // CART RELATIONSHIPS
+            // ====================
+            // CartItem → Cart (1:N)
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.CartItems)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // CartItem → Item (1:N)
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.Item)
+                .WithMany(i => i.CartItems)
+                .HasForeignKey(ci => ci.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ====================
             // ORDER RELATIONSHIPS
@@ -223,6 +248,11 @@ namespace Snagged.Infrastructure.Database
                 .HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId);
+
+
+
+
+
         }
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

@@ -30,6 +30,9 @@ namespace Snagged.Application.Abstractions
         public DbSet<Message> Messages { get; }
         public DbSet<Notification> Notifications { get; }
 
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
