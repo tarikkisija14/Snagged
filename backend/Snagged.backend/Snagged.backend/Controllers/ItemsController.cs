@@ -1,13 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Snagged.Application.Catalog.Items.Commands.AddItem;
+using Snagged.Application.Catalog.Items.Commands.DeleteItem;
+using Snagged.Application.Catalog.Items.Commands.UpdateItem;
+using Snagged.Application.Catalog.Items.Queries.GetItems;
+using Snagged.Application.Catalog.Items.Queries.GetItemsById;
+using Snagged.Application.Catalog.Items.Queries.GetItemsFiltered;
+using Snagged.Application.Catalog.Items.Queries.GetPagedItems;
 using Snagged.Application.Commom.Paging;
-using Snagged.Application.Items.Commands.AddItem;
-using Snagged.Application.Items.Commands.DeleteItem;
-using Snagged.Application.Items.Commands.UpdateItem;
-using Snagged.Application.Items.Queries.GetItems;
-using Snagged.Application.Items.Queries.GetItemsById;
-using Snagged.Application.Items.Queries.GetItemsFiltered;
-using Snagged.Application.Items.Queries.GetPagedItems;
 using System.Runtime.CompilerServices;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 

@@ -1,9 +1,11 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Snagged.Application.Items.Queries.GetItems;
+using Snagged.Application.Catalog.Items.Queries.GetItems;
+using Snagged.Domain.Entities;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
+using System.Reflection.Emit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,9 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<GetItemsQueryHandler>();
 });
+
+
+
 
 // Add services to the container
 builder.Services.AddControllers();
