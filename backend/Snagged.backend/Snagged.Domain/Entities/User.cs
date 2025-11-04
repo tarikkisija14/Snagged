@@ -24,6 +24,8 @@ namespace Snagged.Domain.Entities
 
         public Profile Profile { get; set; }
 
+        public Cart Cart { get; set; }
+
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public ICollection<Item> Items { get; set; } = new List<Item>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();

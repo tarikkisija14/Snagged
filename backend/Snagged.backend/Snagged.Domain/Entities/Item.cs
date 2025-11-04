@@ -27,5 +27,7 @@ namespace Snagged.Domain.Entities
         public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
         public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+        public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+
     }
 }
