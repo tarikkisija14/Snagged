@@ -1,14 +1,13 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
-using Snagged.Domain.Entities;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
 using System.Reflection.Emit;
 using System.Threading.RateLimiting;
 using System.Net;
 using Microsoft.AspNetCore.RateLimiting;
+using Snagged.Application.Abstractions; // for IJwtService
+using Snagged.Infrastructure.Services; //  for JwtService
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +18,12 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
         sqlOptions => sqlOptions.MigrationsAssembly("Snagged.Infrastructure") // migrations go here
     )
 );
+
+//Register IAppDbContext so DI can resolve it in handlers
+builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<DatabaseContext>());
+
+//Register JwtService for IJwtService
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -55,7 +60,7 @@ options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(conte
         await context.HttpContext.Response.WriteAsJsonAsync(new
         {
             error = "TooManyRequests",
-            message = "Previše zahtjeva, pokušajte kasnije.",
+            message = "Previï¿½e zahtjeva, pokuï¿½ajte kasnije.",
             timestamp = DateTime.UtcNow
         }, cancellationToken: token);
     };
