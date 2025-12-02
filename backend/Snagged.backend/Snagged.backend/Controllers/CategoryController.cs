@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Catalog.Categories.Commands.AddCategory;
 using Snagged.Application.Catalog.Categories.Commands.DeleteCategory;
 using Snagged.Application.Catalog.Categories.Commands.UpdateCategory;
@@ -22,26 +23,45 @@ namespace Snagged.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _mediator.Send(new GetCategoriesQuery());
-            return Ok(result);
+            try
+            {
+                var result = await _mediator.Send(new GetCategoriesQuery());
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
         
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _mediator.Send(new GetCategoryByIdQuery(id));
-
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
+            try
+            {
+                var result = await _mediator.Send(new GetCategoryByIdQuery(id));
+                if (result == null)
+                    return NotFound();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(AddCategoryCommand command)
         {
-            int id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id }, null);
+            try
+            {
+                int id = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetById), new { id }, null);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
@@ -50,23 +70,43 @@ namespace Snagged.API.Controllers
             if (id != command.Id)
                 return BadRequest("Id mismatch");
 
-            var updated = await _mediator.Send(command);
-
-            if (!updated)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                var updated = await _mediator.Send(command);
+                if (!updated)
+                    return NotFound();
+                return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                
+                return Conflict("Unable to update category: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _mediator.Send(new DeleteCategoryCommand { Id = id });
-
-            if (!deleted)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                var deleted = await _mediator.Send(new DeleteCategoryCommand { Id = id });
+                if (!deleted)
+                    return NotFound();
+                return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                
+                return Conflict("Unable to delete category: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
     }

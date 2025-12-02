@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Catalog.Subcategories.Commands.AddSubcategory;
 using Snagged.Application.Catalog.Subcategories.Commands.DeleteSubCategory;
 using Snagged.Application.Catalog.Subcategories.Commands.UpdateSubCategory;
@@ -21,28 +22,52 @@ namespace Snagged.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int? categoryId)
         {
-            var result = await _mediator.Send(new GetSubcategoriesQuery { CategoryId = categoryId });
-            return Ok(result);
+            try
+            {
+                var result = await _mediator.Send(new GetSubcategoriesQuery { CategoryId = categoryId });
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _mediator.Send(new GetSubcategoryByIdQuery(id));
+            try
+            {
+                var result = await _mediator.Send(new GetSubcategoryByIdQuery(id));
+                if (result == null)
+                    return NotFound(new { message = "Subcategory not found." });
 
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
        
         [HttpPost]
         public async Task<IActionResult> Create(AddSubcategoryCommand command)
         {
-            int id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id }, null);
+            try
+            {
+                int id = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetById), new { id }, null);
+            }
+            catch (DbUpdateException ex)
+            {
+                return Conflict(new { message = "Unable to create subcategory: " + ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         
@@ -50,14 +75,24 @@ namespace Snagged.API.Controllers
         public async Task<IActionResult> Update(int id, UpdateSubcategoryCommand command)
         {
             if (id != command.Id)
-                return BadRequest("Id mismatch");
+                return BadRequest(new { message = "Id mismatch" });
 
-            var updated = await _mediator.Send(command);
+            try
+            {
+                var updated = await _mediator.Send(command);
+                if (!updated)
+                    return NotFound(new { message = "Subcategory not found." });
 
-            if (!updated)
-                return NotFound();
-
-            return NoContent();
+                return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                return Conflict(new { message = "Unable to update subcategory: " + ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
        
