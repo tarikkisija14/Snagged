@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36401.2 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.API", "Snagged.backend\Snagged.API.csproj", "{E48F7803-7DE5-4136-8F38-07287D318CA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.API", "Snagged.API\Snagged.API.csproj", "{E48F7803-7DE5-4136-8F38-07287D318CA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.Domain", "Snagged.Domain\Snagged.Domain.csproj", "{C94C2AD4-561A-4403-AB14-675B87D08F02}"
 EndProject

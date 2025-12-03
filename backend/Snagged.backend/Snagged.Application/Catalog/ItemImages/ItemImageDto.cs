@@ -4,17 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snagged.Domain.Entities
+namespace Snagged.Application.Catalog.ItemImages
 {
-    public class ItemImage
+    public class ItemImageDto
     {
         public int Id { get; set; }
-        public int ItemId { get; set; }
-        public Item Item { get; set; }
         public string ImageUrl { get; set; }
-
-        public bool IsMain { get; set; }
-
-
+        public int ItemId { get; set; }
     }
 }
