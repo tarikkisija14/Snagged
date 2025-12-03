@@ -1,13 +1,14 @@
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Snagged.Application.Abstractions; // for IJwtService
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
+using Snagged.Infrastructure.Services; //  for JwtService
+using System.Net;
 using System.Reflection.Emit;
 using System.Threading.RateLimiting;
-using System.Net;
-using Microsoft.AspNetCore.RateLimiting;
-using Snagged.Application.Abstractions; // for IJwtService
-using Snagged.Infrastructure.Services; //  for JwtService
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredServic
 
 //Register JwtService for IJwtService
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -74,6 +77,19 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+
+
+var projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+var imagesFolder = Path.Combine(projectRoot, builder.Configuration["ImageSettings:ItemsPath"]);
+
+if (!Directory.Exists(imagesFolder))
+    Directory.CreateDirectory(imagesFolder);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(imagesFolder),
+    RequestPath = "/images/items"
+});
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
