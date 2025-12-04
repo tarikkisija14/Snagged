@@ -15,6 +15,7 @@ namespace Snagged.Domain.Entities
         public Item Item { get; set; }
         public int Quantity { get; set; } = 1;
         public DateTime AddedAt { get; set; } = DateTime.Now;
-      
+       
+
     }
 }

@@ -14,11 +14,12 @@ namespace Snagged.Application.Catalog.Cart.Queries.GetCartByUser
         public async Task<CartDto> Handle(GetCartByUserQuery request, CancellationToken ct)
         {
             var cart = await ctx.Carts
-                .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.Item)
-                .FirstOrDefaultAsync(c => c.UserId == request.UserId, ct);
+                 .Include(c => c.CartItems)
+                     .ThenInclude(ci => ci.Item)
+                 .FirstOrDefaultAsync(c => c.UserId == request.UserId && !c.IsSavedForLater, ct);
 
-            if (cart == null) return null;
+            if (cart == null)
+                return null;
 
             return new CartDto
             {

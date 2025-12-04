@@ -16,7 +16,7 @@ namespace Snagged.Domain.Entities
         public User Buyer { get; set; }
         public Payment Payment { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public string? StripePaymentIntentId { get; set; }
 
-      
     }
 }

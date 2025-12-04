@@ -23,15 +23,14 @@ namespace Snagged.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CartDto>>> GetAllCarts()
+        public async Task<IActionResult> GetAllCarts()
         {
             var result = await _mediator.Send(new GetAllCartsQuery());
             return Ok(result);
         }
 
-
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<CartDto>> GetCartByUserId(int userId)
+        public async Task<IActionResult> GetCartByUserId(int userId)
         {
             var result = await _mediator.Send(new GetCartByUserQuery { UserId = userId });
             if (result == null)
@@ -39,8 +38,9 @@ namespace Snagged.API.Controllers
 
             return Ok(result);
         }
+
         [HttpPost("item")]
-        public async Task<ActionResult<int>> AddCartItem([FromBody] AddCartItemCommand command)
+        public async Task<IActionResult> AddCartItem([FromBody] AddCartItemCommand command)
         {
             var cartId = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetCartByUserId), new { userId = command.UserId }, cartId);
@@ -55,25 +55,26 @@ namespace Snagged.API.Controllers
             await _mediator.Send(command);
             return NoContent();
         }
+
         [HttpDelete("item/{cartItemId}")]
         public async Task<IActionResult> DeleteCartItem(int cartItemId)
         {
             await _mediator.Send(new DeleteCartItemCommand { CartItemId = cartItemId });
             return NoContent();
         }
+
         [HttpDelete("user/{userId}/clear")]
         public async Task<IActionResult> ClearCart(int userId)
         {
             await _mediator.Send(new ClearCartCommand { UserId = userId });
             return NoContent();
         }
+
         [HttpPost("checkout")]
-        public async Task<ActionResult<int>> Checkout([FromBody] CheckoutCommand command)
+        public async Task<IActionResult> Checkout([FromBody] CheckoutCommand command)
         {
             var orderId = await _mediator.Send(command);
-            return Ok(orderId); 
+            return Ok(orderId);
         }
-
-
     }
 }

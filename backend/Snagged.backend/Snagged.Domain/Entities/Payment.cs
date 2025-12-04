@@ -13,8 +13,9 @@ namespace Snagged.Domain.Entities
         public decimal? PaidAmount { get; set; }
         public DateTime? PaymentDate { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public string StripePaymentIntentId { get; set; }
+        public string StripeChargeId { get; set; }
 
-        
 
     }
 }
