@@ -13,5 +13,6 @@ namespace Snagged.Application.Catalog.Cart
         public string ItemName { get; set; }
         public int Quantity { get; set; }
         public DateTime AddedAt { get; set; }
+        
     }
 }

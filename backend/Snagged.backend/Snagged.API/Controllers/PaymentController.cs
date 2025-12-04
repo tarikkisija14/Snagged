@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Snagged.Application.Catalog.Payment;
 using Snagged.Application.Catalog.Payment.Commands.CreatePayment;
+using Snagged.Application.Catalog.Payment.Commands.CreateStripePayment;
 using Snagged.Application.Catalog.Payment.Queries.GetAllPayments;
 using Snagged.Application.Catalog.Payment.Queries.GetAllPaymentsByUser;
 
@@ -38,5 +39,30 @@ namespace Snagged.API.Controllers
             var paymentId = await _mediator.Send(command);
             return Ok(paymentId);
         }
+        [HttpPost("stripe/create-intent/{orderId}")]
+        public async Task<ActionResult> CreateStripePaymentIntent(int orderId)
+        {
+            try
+            {
+                var clientSecret = await _mediator.Send(new CreateStripePaymentCommand
+                {
+                    OrderId = orderId,
+                    Currency = "usd"
+                });
+
+                return Ok(new { clientSecret });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+
+
     }
 }

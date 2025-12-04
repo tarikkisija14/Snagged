@@ -9,6 +9,8 @@ using Snagged.Infrastructure.Services; //  for JwtService
 using System.Net;
 using System.Reflection.Emit;
 using System.Threading.RateLimiting;
+using Stripe;
+using Snagged.Application.Commom.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +77,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
+// register services
+builder.Services.AddScoped<IStripeService, StripeService>();
+
 
 var app = builder.Build();
 
@@ -97,6 +105,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+
+
+
 
 app.UseHttpsRedirection();
 app.UseRateLimiter();

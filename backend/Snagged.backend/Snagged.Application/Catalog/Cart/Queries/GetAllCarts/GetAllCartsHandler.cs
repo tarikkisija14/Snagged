@@ -14,9 +14,10 @@ namespace Snagged.Application.Catalog.Cart.Queries.GetAllCarts
         public async Task<List<CartDto>> Handle(GetAllCartsQuery request, CancellationToken ct)
         {
             var carts = await ctx.Carts
-                .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.Item)
-                .ToListAsync(ct);
+                     .Include(c => c.CartItems)
+                         .ThenInclude(ci => ci.Item)
+                     .Where(c => !c.IsSavedForLater)
+                     .ToListAsync(ct);
 
             return carts.Select(cart => new CartDto
             {

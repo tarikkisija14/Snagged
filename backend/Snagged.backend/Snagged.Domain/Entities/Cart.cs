@@ -13,6 +13,7 @@ namespace Snagged.Domain.Entities
         public User User { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public bool IsSavedForLater { get; set; } = false;
 
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
