@@ -14,5 +14,7 @@ namespace Snagged.Domain.Entities
         public DateTime? PaymentDate { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
+        
+
     }
 }
