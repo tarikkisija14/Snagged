@@ -3,16 +3,23 @@ using Snagged.Application.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewerQuery
+namespace Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewer
 {
-    public class GetReviewsByReviewerHandler(IAppDbContext ctx) : IRequestHandler<GetReviewsByReviewerQuery, List<ReviewDto>>
+    public class GetReviewsByReviewerHandler : IRequestHandler<GetReviewsByReviewerQuery, List<ReviewDto>>
     {
+        private readonly IAppDbContext _ctx;
+
+        public GetReviewsByReviewerHandler(IAppDbContext ctx)
+        {
+            _ctx = ctx;
+        }
+
         public async Task<List<ReviewDto>> Handle(GetReviewsByReviewerQuery request, CancellationToken cancellationToken)
         {
-            return ctx.Reviews
+            return _ctx.Reviews
                 .Where(r => r.ReviewerId == request.ReviewerId)
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => new ReviewDto

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewerQuery
+namespace Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewer
 {
     public class GetReviewsByReviewerQuery : IRequest<List<ReviewDto>>
     {

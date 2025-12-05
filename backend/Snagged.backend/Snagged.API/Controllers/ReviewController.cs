@@ -6,7 +6,7 @@ using Snagged.Application.Catalog.Review.Commands.DeleteReview;
 using Snagged.Application.Catalog.Review.Commands.UpdateReview;
 using Snagged.Application.Catalog.Review.Queries.GetReviewById;
 using Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewedUser;
-using Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewerQuery;
+using Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewer;
 
 namespace Snagged.API.Controllers
 {
