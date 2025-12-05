@@ -7,6 +7,12 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+	  <PreserveCompilationContext>true</PreserveCompilationContext>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+	  <!-- IMPORTANT: Disable shadow copying -->
+	  <ShadowCopyFiles>false</ShadowCopyFiles>
+	  
   </PropertyGroup>
 
   <ItemGroup>
