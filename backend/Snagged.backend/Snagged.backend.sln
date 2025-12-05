@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36401.2 d17.14
+VisualStudioVersion = 17.14.36401.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.API", "Snagged.API\Snagged.API.csproj", "{E48F7803-7DE5-4136-8F38-07287D318CA3}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.Application", "Snagged.Application\Snagged.Application.csproj", "{C11019B6-1845-4BCD-9708-B3015860A590}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.Infrastructure", "Snagged.Infrastructure\Snagged.Infrastructure.csproj", "{A9B9AC06-84C8-40E5-B19E-42A2B4834C78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snagged.Test", "Snagged.Test\Snagged.Test.csproj", "{E841E2EC-FEA1-4128-92F8-C39F08411FA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{A9B9AC06-84C8-40E5-B19E-42A2B4834C78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9B9AC06-84C8-40E5-B19E-42A2B4834C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9B9AC06-84C8-40E5-B19E-42A2B4834C78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E841E2EC-FEA1-4128-92F8-C39F08411FA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E841E2EC-FEA1-4128-92F8-C39F08411FA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E841E2EC-FEA1-4128-92F8-C39F08411FA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E841E2EC-FEA1-4128-92F8-C39F08411FA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
