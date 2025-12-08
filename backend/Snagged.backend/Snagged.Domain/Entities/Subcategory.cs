@@ -10,8 +10,8 @@ namespace Snagged.Domain.Entities
     {
         public int Id { get; set; }
         public int CategoryId { get; set; }
-        public string Name { get; set; }
-        public Category Category { get; set; }
+        public string? Name { get; set; }
+        public Category? Category { get; set; }
         public ICollection<Item> Items { get; set; } = new List<Item>();
     }
 }

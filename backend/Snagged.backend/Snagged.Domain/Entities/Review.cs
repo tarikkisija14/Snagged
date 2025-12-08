@@ -10,12 +10,12 @@ namespace Snagged.Domain.Entities
     {
         public int Id { get; set; }
         public int ReviewerId { get; set; }
-        public User Reviewer { get; set; }
+        public User? Reviewer { get; set; }
         
         public int ReviewedUserId { get; set; }
-        public User ReviewedUser { get; set; }
+        public User? ReviewedUser { get; set; }
         public int Rating { get; set; }
-        public string Comment { get; set; }
+        public string Comment { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         
         

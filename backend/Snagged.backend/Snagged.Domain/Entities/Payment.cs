@@ -9,12 +9,12 @@ namespace Snagged.Domain.Entities
     public class Payment
     {
         public int Id { get; set; }
-        public string PaymentMethod { get; set; }
+        public string? PaymentMethod { get; set; }
         public decimal? PaidAmount { get; set; }
         public DateTime? PaymentDate { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
-        public string StripePaymentIntentId { get; set; }
-        public string StripeChargeId { get; set; }
+        public string? StripePaymentIntentId { get; set; }
+        public string? StripeChargeId { get; set; }
 
 
     }
