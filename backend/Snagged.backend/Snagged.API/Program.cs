@@ -1,14 +1,20 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Snagged.Application.Abstractions; // for IJwtService
+using Snagged.Application.Catalog.Cities.Commands.AddCity;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
+using Snagged.Application.Commom.Behaviours;
 using Snagged.Application.Commom.Helper;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
 using Snagged.Infrastructure.Services; //  for JwtService
 using Stripe;
+using System.Reflection;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -85,6 +91,16 @@ builder.Services.AddCors(options =>
 });
 // Add services to the container
 builder.Services.AddControllers();
+
+builder.Services
+    .AddFluentValidationAutoValidation()      
+    .AddFluentValidationClientsideAdapters();
+
+builder.Services.AddValidatorsFromAssembly(Assembly.Load("Snagged.Application"));
+
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -94,6 +110,9 @@ builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Str
 
 // register services
 builder.Services.AddScoped<IStripeService, StripeService>();
+
+
+
 
 
 var app = builder.Build();
