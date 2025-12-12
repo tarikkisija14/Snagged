@@ -1,3 +1,89 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import "tailwindcss";
+
+/* src/styles.css */
+
+/* Colors */
+:root {
+  --primary: #8a4fff;
+  --primary-light: #b18aff;
+  --primary-dark: #6a2fd4;
+  --secondary: #ff6bcb;
+  --accent: #6ef2ff;
+  --light: #f8f5ff;
+  --dark: #2d1b69;
+  --gray: #e2d9ff;
+  --text: #333333;
+  --text-light: #666666;
+  --white: #ffffff;
+  --shadow: 0 8px 30px rgba(138, 79, 255, 0.15);
+  --shadow-hover: 0 15px 40px rgba(138, 79, 255, 0.25);
+  --radius: 16px;
+  --transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+  --reverse-gradient: linear-gradient(135deg, var(--secondary), var(--primary));
+
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Body Styles */
+body {
+  background-color: var(--light);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Container - Used throughout the app */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gradient);
+  color: var(--white);
+  padding: 15px 35px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.25);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+}
+
+.btn:hover:before {
+  left: 100%;
+}
+.btn-outline {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  margin-left: 15px;
+}
