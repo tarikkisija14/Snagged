@@ -1,0 +1,118 @@
+<div class="container">
+  <div class="main-content">
+
+    <!-- Filters -->
+    <aside class="filters">
+      <!-- Categories Filter -->
+      <div class="filter-section">
+        <h3>Categories <span (click)="clearFilters()">Clear</span></h3>
+        <div class="filter-options">
+          <div class="filter-option" *ngFor="let cat of categories">
+            <input type="checkbox"
+                   [id]="'category' + cat.id"
+                   [checked]="selectedCategoryIds.includes(cat.id)"
+                   (change)="onCategoryChange(cat.id, $any($event.target).checked)">
+            <label [for]="'category' + cat.id">{{cat.name}}</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subcategories Filter -->
+      <div class="filter-section" *ngIf="subcategories.length > 0">
+        <h3>Subcategories <span (click)="selectedSubcategoryIds=[]; loadItems()">Clear</span></h3>
+        <div class="filter-options">
+          <div class="filter-option" *ngFor="let sub of subcategories">
+            <input type="checkbox"
+                   [id]="'sub' + sub.id"
+                   [checked]="selectedSubcategoryIds.includes(sub.id)"
+                   (change)="onSubcategoryChange(sub.id, $any($event.target).checked)">
+            <label [for]="'sub' + sub.id">{{sub.name}}</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3>Price Range <span (click)="clearPriceRange()">Clear</span></h3>
+        <div class="price-inputs">
+
+          <input type="number"
+                 #minInput
+                 placeholder="Min"
+                 [value]="currentMinPrice"
+                 (input)="onMinPriceChange(minInput.value)"
+                 min="0"
+                 max="10000">
+          <input type="number"
+                 #maxInput
+                 placeholder="Max"
+                 [value]="currentMaxPrice"
+                 (input)="onMaxPriceChange(maxInput.value)"
+                 min="0"
+                 max="10000">
+        </div>
+      </div>
+
+      <!-- Condition Filter -->
+      <div class="filter-section">
+        <h3>Condition <span (click)="clearCondition()">Clear</span></h3>
+        <div class="filter-options">
+          <div class="filter-option" *ngFor="let cond of allConditions">
+            <input type="checkbox"
+                   [id]="'cond' + cond"
+                   [checked]="selectedConditions.includes(cond)"
+                   (change)="onConditionChange(cond, $any($event.target).checked)">
+            <label [for]="'cond' + cond">{{cond}}</label>
+          </div>
+        </div>
+      </div>
+
+
+    </aside>
+
+    <!-- Products -->
+    <main class="products">
+      <div class="products-header">
+        <h2>Featured Items</h2>
+        <div class="sort-options">
+          <select (change)="onSortChange($event)">
+            <option value="newest">Newest</option>
+            <option value="price-low-high">Price: Low to High</option>
+            <option value="price-high-low">Price: High to Low</option>
+            <option value="most-popular">Most Popular</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let item of items">
+          <div class="product-image"
+               [style.backgroundImage]="'url(' + getItemImage(item) + ')'">
+            <div class="product-badge" *ngIf="item.condition === 'New'">New</div>
+            <div class="product-actions">
+              <button class="product-action-btn"><i class="far fa-heart"></i></button>
+              <button class="product-action-btn"><i class="fas fa-expand"></i></button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category">{{item.category?.name}}</span>
+            <h3 class="product-title">{{item.title}}</h3>
+            <div class="product-price">${{item.price}}</div>
+            <div class="product-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+              <span>(0)</span>
+            </div>
+            <div class="product-footer">
+              <button class="add-to-cart">Add to Cart</button>
+              <button class="view-details">Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>

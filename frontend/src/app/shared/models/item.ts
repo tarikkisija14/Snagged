@@ -28,4 +28,5 @@ export interface Item {
   reports: Report[];
   conversations: Conversation[];
   cartItems: CartItem[];
+  imageUrls:string;
 }
