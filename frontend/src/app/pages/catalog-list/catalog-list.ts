@@ -6,7 +6,7 @@ import {ItemService} from '../../shared/services/item-service';
 import {CategoryService} from '../../shared/services/category-service';
 import {SubcategoryService} from '../../shared/services/subcategory-service';
 import {PageResult} from '../../shared/models/page-result';
-import {environment} from '../../../environments/development';
+
 
 @Component({
   selector: 'app-catalog-list',
@@ -67,7 +67,7 @@ export class CatalogList implements OnInit {
   }
 
   loadItems(): void {
-    console.log('=== LOADING ITEMS ===');
+
 
 
     const filter: any = {
@@ -79,19 +79,19 @@ export class CatalogList implements OnInit {
 
     if (this.selectedCategoryIds.length > 0) {
       filter.categoryIds = this.selectedCategoryIds;
-      console.log('Categories (OR within):', this.selectedCategoryIds);
+
     }
 
 
     if (this.selectedSubcategoryIds.length > 0) {
       filter.subcategoryIds = this.selectedSubcategoryIds;
-      console.log('Subcategories (OR within):', this.selectedSubcategoryIds);
+
     }
 
 
     if (this.selectedConditions.length > 0) {
       filter.conditions = this.selectedConditions;
-      console.log('Conditions (OR within):', this.selectedConditions);
+
     }
 
 
@@ -103,18 +103,17 @@ export class CatalogList implements OnInit {
       filter.maxPrice = this.currentMaxPrice;
     }
 
-    console.log('Full filter object:', JSON.stringify(filter, null, 2));
+
 
     this.itemService.getFilteredItems(filter).subscribe({
       next: (res: PageResult<Item>) => {
-        console.log('✅ Backend returned:', res.items?.length, 'items');
-        console.log('Total in DB:', res.total);
+
         this.items = res.items || [];
         this.totalItems = res.total || 0;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('❌ Items error:', err);
+        console.error(' Items error:', err);
         console.error('Error details:', err.status, err.message, err.error);
         this.items = [];
         this.cdr.detectChanges();
@@ -124,7 +123,7 @@ export class CatalogList implements OnInit {
 
 
   onCategoryChange(categoryId: number, checked: boolean): void {
-    console.log('Category changed:', categoryId, checked);
+
 
     if (checked) {
 
@@ -147,8 +146,9 @@ export class CatalogList implements OnInit {
 
 
 
-  onSubcategoryChange(subcategoryId: number, checked: boolean): void {
-    console.log('Subcategory changed:', subcategoryId, checked);
+  onSubcategoryChange(subcategoryId: number, checked: boolean, categoryId: number): void {
+
+    if (!this.selectedCategoryIds.includes(categoryId)) return;
 
     if (checked) {
       if (!this.selectedSubcategoryIds.includes(subcategoryId)) {
@@ -158,13 +158,12 @@ export class CatalogList implements OnInit {
       this.selectedSubcategoryIds = this.selectedSubcategoryIds.filter(id => id !== subcategoryId);
     }
 
-
     this.loadItems();
   }
 
 
   onConditionChange(condition: string, checked: boolean): void {
-    console.log('Condition changed:', condition, checked);
+
 
     if (checked) {
       if (!this.selectedConditions.includes(condition)) {
@@ -185,7 +184,7 @@ export class CatalogList implements OnInit {
       return;
     }
 
-    console.log('Loading subcategories for categories:', this.selectedCategoryIds);
+
 
 
     this.subcategoryService.getSubcategories().subscribe({
@@ -194,11 +193,11 @@ export class CatalogList implements OnInit {
         this.subcategories = allSubcategories.filter(sub =>
           sub.categoryId && this.selectedCategoryIds.includes(sub.categoryId)
         );
-        console.log('✅ Filtered subcategories:', this.subcategories.length);
+
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('❌ Subcategories error:', err);
+        console.error(' Subcategories error:', err);
         this.subcategories = [];
         this.cdr.detectChanges();
       }
@@ -214,7 +213,7 @@ export class CatalogList implements OnInit {
   }
 
   clearFilters(): void {
-    console.log('Clearing all filters...');
+
 
     this.selectedCategoryIds = [];
     this.selectedSubcategoryIds = [];

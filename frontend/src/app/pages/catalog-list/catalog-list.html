@@ -25,7 +25,7 @@
             <input type="checkbox"
                    [id]="'sub' + sub.id"
                    [checked]="selectedSubcategoryIds.includes(sub.id)"
-                   (change)="onSubcategoryChange(sub.id, $any($event.target).checked)">
+                   (change)="onSubcategoryChange(sub.id, $any($event.target).checked, sub.categoryId)">
             <label [for]="'sub' + sub.id">{{sub.name}}</label>
           </div>
         </div>
