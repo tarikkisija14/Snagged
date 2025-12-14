@@ -10,11 +10,15 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
 {
     public class GetItemsFilteredQuery: BasePagedQuery<ItemDto>
     {
-        public int? UserId { get; init; }
-        public int? CategoryId { get; init; }
-        public int? SubcategoryId { get; init; }
+        public List<int>? CategoryIds { get; init; } 
+        public List<int>? SubcategoryIds { get; init; } 
+        public List<string>? Conditions { get; init; } 
         public string? TitleContains { get; init; }
-        public string? Condition { get; init; }
         public bool? IsSold { get; init; }
+        public decimal? MinPrice { get; init; }
+        public decimal? MaxPrice { get; init; }
+
+        public string? SortBy { get; init; }
+        public string? SortOrder { get; init; } 
     }
 }

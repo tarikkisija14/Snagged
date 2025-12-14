@@ -50,7 +50,7 @@ namespace Snagged.Application.Catalog.ItemImages.Commands.UploadImage
                     var img = new ItemImage
                     {
                         ItemId = request.ItemId,
-                        ImageUrl = $"/images/items/{fileName}"  // URL za frontend
+                        ImageUrl = $"/images/items/{fileName}"  
                     };
 
                     _ctx.ItemImages.Add(img);
