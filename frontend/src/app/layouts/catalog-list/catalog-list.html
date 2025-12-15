@@ -72,7 +72,7 @@
     <!-- Products -->
     <main class="products">
       <div class="products-header">
-        <h2>Featured Items</h2>
+        <h2>{{ mode === 'shop' ? ' All Products' : 'Featured Items' }}</h2>
         <div class="sort-options">
           <select (change)="onSortChange($event)">
             <option value="newest">Newest</option>
