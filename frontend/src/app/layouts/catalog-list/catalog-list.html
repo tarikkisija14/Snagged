@@ -1,9 +1,7 @@
 <div class="container">
   <div class="main-content">
 
-    <!-- Filters -->
     <aside class="filters">
-      <!-- Categories Filter -->
       <div class="filter-section">
         <h3>Categories <span (click)="clearFilters()">Clear</span></h3>
         <div class="filter-options">
@@ -17,7 +15,6 @@
         </div>
       </div>
 
-      <!-- Subcategories Filter -->
       <div class="filter-section" *ngIf="subcategories.length > 0">
         <h3>Subcategories <span (click)="selectedSubcategoryIds=[]; loadItems()">Clear</span></h3>
         <div class="filter-options">
@@ -52,7 +49,6 @@
         </div>
       </div>
 
-      <!-- Condition Filter -->
       <div class="filter-section">
         <h3>Condition <span (click)="clearCondition()">Clear</span></h3>
         <div class="filter-options">

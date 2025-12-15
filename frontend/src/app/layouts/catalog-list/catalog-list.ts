@@ -12,7 +12,7 @@ import {PageResult} from '../../shared/models/page-result';
   selector: 'app-catalog-list',
   standalone: false,
   templateUrl: './catalog-list.html',
-  styleUrl: './catalog-list.css',
+  styleUrl: './catalog-list.scss',
 })
 export class CatalogList implements OnInit {
 
