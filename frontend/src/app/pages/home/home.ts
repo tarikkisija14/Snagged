@@ -5,7 +5,7 @@ import {Router} from '@angular/router';
   selector: 'app-home',
   standalone: false,
   templateUrl: './home.html',
-  styleUrl: './home.css',
+  styleUrl: './home.scss',
 })
 export class Home {
   constructor(private router: Router) {}

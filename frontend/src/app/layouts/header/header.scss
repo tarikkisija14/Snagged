@@ -2,14 +2,13 @@
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 1rem 0;
   box-shadow: 0 8px 30px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
   z-index: 100;
   transition: var(--transition);
   background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+  border-radius: 0 0 20px 20px;
 }
 .container {
   max-width: 1400px;
