@@ -7,20 +7,24 @@ import { App } from './app';
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { Header } from './layouts/header/header';
 import { Home } from './pages/home/home';
-import { CatalogList } from './pages/catalog-list/catalog-list';
+import { CatalogList } from './layouts/catalog-list/catalog-list';
 import {FormsModule} from "@angular/forms";
+import { Shop } from './pages/shop/shop';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
     App,
     Header,
     Home,
-    CatalogList
+    CatalogList,
+    Shop
   ],
     imports: [
         BrowserModule,
         AppRoutingModule,
-        FormsModule
+        FormsModule,
+      RouterModule
     ],
   providers: [
     provideBrowserGlobalErrorListeners(),

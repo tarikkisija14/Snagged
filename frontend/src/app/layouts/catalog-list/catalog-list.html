@@ -112,6 +112,21 @@
           </div>
         </div>
       </div>
+
+
+      <!-- Pagination (samo za Shop) -->
+      <div class="pagination" *ngIf="mode === 'shop' && totalPages > 1">
+        <button (click)="prevPage()" [disabled]="page === 1">&laquo; <</button>
+
+        <button *ngFor="let p of [].constructor(totalPages); let i = index"
+                [class.active]="page === (i+1)"
+                (click)="goToPage(i+1)">
+          {{ i+1 }}
+        </button>
+
+        <button (click)="nextPage()" [disabled]="page === totalPages">> &raquo;</button>
+      </div>
+
     </main>
 
   </div>

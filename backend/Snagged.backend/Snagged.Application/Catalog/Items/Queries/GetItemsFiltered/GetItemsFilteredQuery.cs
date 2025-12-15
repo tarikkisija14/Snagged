@@ -18,6 +18,8 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
         public decimal? MinPrice { get; init; }
         public decimal? MaxPrice { get; init; }
 
+        public bool? LoadAllItems { get; set; }
+
         public string? SortBy { get; init; }
         public string? SortOrder { get; init; } 
     }
