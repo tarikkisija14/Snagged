@@ -1,0 +1,83 @@
+.shop-page {
+  padding: 0 20px;
+  margin-top: 30px;
+}
+
+
+.page-header {
+  background: var(--gradient);
+  color: var(--white);
+  padding: 80px 30px;
+  border-radius: var(--radius);
+  margin-bottom: 60px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+
+.page-header h1 {
+  font-size: 3.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.page-header p {
+  font-size: 1.25rem;
+  max-width: 700px;
+  margin: 0 auto;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+
+.page-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: var(--reverse-gradient);
+  opacity: 0.05;
+  transform: skewX(-20deg);
+  pointer-events: none;
+  transition: var(--transition);
+}
+
+.page-header:hover::after {
+  opacity: 0.1;
+}
+
+
+.main-content {
+  margin-top: 40px;
+}
+
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 60px 20px;
+  }
+  .page-header h1 {
+    font-size: 2.5rem;
+  }
+  .page-header p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 40px 15px;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+  }
+  .page-header p {
+    font-size: 1rem;
+  }
+}

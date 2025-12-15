@@ -307,3 +307,91 @@
   font-weight: bold !important;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+  gap: 10px;
+}
+
+.page-btn {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  color: var(--text);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.page-btn:hover {
+  background: var(--primary);
+  color: var(--white);
+  transform: translateY(-3px);
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.page-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Filters sitno uljepšavanje */
+.filters {
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.filter-option input {
+  accent-color: var(--primary);
+  transition: var(--transition);
+}
+
+.filter-option label:hover {
+  color: var(--primary-dark);
+}
+
+/* Price inputs */
+.price-inputs input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(138, 79, 255, 0.15);
+}
+
+/* Products sitno uljepšavanje */
+.product-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.product-action-btn {
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.product-action-btn:hover {
+  transform: scale(1.1);
+  background: var(--primary);
+  color: var(--white);
+}
+
+.add-to-cart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(138, 79, 255, 0.2);
+}
+
+.view-details:hover {
+  background: var(--primary);
+  color: var(--white);
+}
+
