@@ -9,4 +9,6 @@ export interface CartItem {
   item?: Item;
   quantity: number;
   addedAt: Date | string;
+  price: number;
+  imageUrl: string;
 }

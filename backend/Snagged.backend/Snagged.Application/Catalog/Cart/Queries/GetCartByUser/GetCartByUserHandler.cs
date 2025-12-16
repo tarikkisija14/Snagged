@@ -16,6 +16,7 @@ namespace Snagged.Application.Catalog.Cart.Queries.GetCartByUser
             var cart = await ctx.Carts
                  .Include(c => c.CartItems)
                      .ThenInclude(ci => ci.Item)
+                     .ThenInclude(i => i.Images)
                  .FirstOrDefaultAsync(c => c.UserId == request.UserId && !c.IsSavedForLater, ct);
 
             if (cart == null)
@@ -32,6 +33,9 @@ namespace Snagged.Application.Catalog.Cart.Queries.GetCartByUser
                     Id = ci.Id,
                     ItemId = ci.ItemId,
                     ItemName = ci.Item.Title,
+                    ImageUrl = ci.Item.Images.FirstOrDefault()?.ImageUrl,
+                    
+                    Price = ci.Item.Price,
                     Quantity = ci.Quantity,
                     AddedAt = ci.AddedAt
                 }).ToList()

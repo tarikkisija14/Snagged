@@ -102,7 +102,11 @@
               <span>(0)</span>
             </div>
             <div class="product-footer">
-              <button class="add-to-cart">Add to Cart</button>
+              <button class="add-to-cart"
+                      (click)="addToCart(item)"
+                      [class.clicked]="addedItemIds.has(item.id)">
+                <span>{{ addedItemIds.has(item.id) ? '✓ Added!' : 'Add to Cart' }}</span>
+              </button>
               <button class="view-details">Details</button>
             </div>
           </div>

@@ -29,4 +29,5 @@ export interface Item {
   conversations: Conversation[];
   cartItems: CartItem[];
   imageUrls:string;
+
 }

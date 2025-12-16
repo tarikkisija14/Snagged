@@ -14,13 +14,20 @@ namespace Snagged.Application.Catalog.Cart.Commands.AddCartItem
     {
         public async Task<int> Handle(AddCartItemCommand request, CancellationToken ct)
         {
+
+            var user = await ctx.Users.FindAsync(new object[] { request.UserId }, ct);
+            if (user == null)
+            {
+                throw new Exception($"User with Id {request.UserId} does not exist");
+            }
+
             var cart = await ctx.Carts
                 .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.UserId == request.UserId, ct);
+                .FirstOrDefaultAsync(c => c.UserId == user.Id, ct);
 
             if (cart == null)
             {
-                cart = new Snagged.Domain.Entities.Cart  { UserId = request.UserId };
+                cart = new Snagged.Domain.Entities.Cart  { UserId = user.Id};
                 ctx.Carts.Add(cart);
                 await ctx.SaveChangesAsync(ct);
             }

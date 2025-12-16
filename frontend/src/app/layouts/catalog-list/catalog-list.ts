@@ -6,6 +6,7 @@ import {ItemService} from '../../shared/services/item-service';
 import {CategoryService} from '../../shared/services/category-service';
 import {SubcategoryService} from '../../shared/services/subcategory-service';
 import {PageResult} from '../../shared/models/page-result';
+import{CartService} from '../../shared/services/cart-service';
 
 
 @Component({
@@ -42,12 +43,14 @@ export class CatalogList implements OnInit {
   selectedSortOrder: string = 'desc';
 
   isLoading: boolean = false;
+  addedItemIds: Set<number> = new Set<number>();
 
   constructor(
     private itemService: ItemService,
     private categoryService: CategoryService,
     private subcategoryService: SubcategoryService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private cartService: CartService
   ) { }
 
   ngOnInit(): void {
@@ -345,6 +348,30 @@ export class CatalogList implements OnInit {
     }
     return `${baseUrl}/images/items/placeholder.png`;
   }
+
+  addToCart(item: Item) {
+
+    this.addedItemIds.add(item.id);
+
+    this.cartService.addCartItem(1, item.id, 1).subscribe({
+      next: () => {
+        console.log(`${item.title} added to cart`);
+
+
+        setTimeout(() => {
+          this.addedItemIds.delete(item.id);
+          this.cdr.detectChanges();
+        }, 1000);
+      },
+      error: (err) => {
+        console.error('Error adding item to cart:', err);
+        this.addedItemIds.delete(item.id);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+
 
 
 }
