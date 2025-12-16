@@ -1,0 +1,79 @@
+<div id="cart-page" class="page-content" *ngIf="cart && cart.cartItems.length > 0; else emptyCart">
+  <div class="container">
+    <div class="page-header">
+      <h1>Your Shopping Cart</h1>
+      <p>Review your items and proceed to checkout</p>
+    </div>
+
+    <div class="cart-container">
+      <!-- Cart Items -->
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let cartItem of cart.cartItems">
+          <div class="cart-item-image"
+               [style.backgroundImage]="'url(' + getItemImage(cartItem.item) + ')'">
+          </div>
+          <div class="cart-item-details">
+            <h4>{{ cartItem.item?.title }}</h4>
+            <p>{{ cartItem.item?.condition }}</p>
+            <div class="quantity-controls">
+              <button class="quantity-btn" (click)="decreaseQuantity(cartItem)">-</button>
+              <span class="quantity">{{ cartItem.quantity }}</span>
+              <button class="quantity-btn" (click)="increaseQuantity(cartItem)">+</button>
+            </div>
+          </div>
+          <div class="cart-item-price">
+            ${{ ((cartItem.item?.price ?? 0) * cartItem.quantity) | number:'1.2-2' }}
+          </div>
+          <button class="remove-item" (click)="removeItem(cartItem)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="cart-summary">
+        <h3>Order Summary</h3>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>${{ getSubtotal() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span>${{ getShipping() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax</span>
+          <span>${{ getTax() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Total</span>
+          <span>${{ getTotal() | number:'1.2-2' }}</span>
+        </div>
+
+        <button class="btn" style="width: 100%; margin-top: 30px; padding: 18px;">
+          <i class="fas fa-lock"></i> Proceed to Checkout
+        </button>
+
+        <div style="margin-top: 20px; text-align: center;">
+          <a routerLink="/shop" style="color: var(--primary); font-weight: 500;">Continue Shopping</a>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: var(--light); border-radius: var(--radius);">
+          <h4 style="margin-bottom: 10px; font-size: 1rem;">Sustainability Impact</h4>
+          <p style="font-size: 0.9rem; color: var(--text-light);">
+            By purchasing these items, you've saved approximately <strong>15kg of clothing</strong> from landfill and reduced <strong>45kg of CO2 emissions</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #emptyCart>
+  <div class="empty-cart">
+    <i class="fas fa-shopping-cart"></i>
+    <h3>Your cart is empty</h3>
+    <p>Add items to your cart to see them here.</p>
+    <a routerLink="/shop" class="btn">Go to Shop</a>
+  </div>
+</ng-template>

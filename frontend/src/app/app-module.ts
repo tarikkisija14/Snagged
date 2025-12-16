@@ -11,6 +11,8 @@ import { CatalogList } from './layouts/catalog-list/catalog-list';
 import {FormsModule} from "@angular/forms";
 import { Shop } from './pages/shop/shop';
 import { RouterModule } from '@angular/router';
+import { Cart } from './pages/cart/cart';
+
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { RouterModule } from '@angular/router';
     Header,
     Home,
     CatalogList,
-    Shop
+    Shop,
+    Cart,
+
   ],
     imports: [
         BrowserModule,

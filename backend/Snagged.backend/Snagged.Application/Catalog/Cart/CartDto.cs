@@ -14,6 +14,7 @@ namespace Snagged.Application.Catalog.Cart
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
+
         
         public List<CartItemDto> Items { get; set; }
        
