@@ -1,0 +1,18 @@
+<div class="login-container" >
+  <div class="overlay"  (click)="goHome()">
+  <div class="login-card" (click)="$event.stopPropagation()">
+    <div class="tab-navigation" [class.register-active] = "isRegister()">
+
+      <a [routerLink]="['./login']" routerLinkActive="active" class="tab-button">
+        Login
+      </a>
+
+      <a [routerLink]="['./register']" routerLinkActive="active" class="tab-button">
+        Register
+      </a>
+
+    </div>
+    <router-outlet></router-outlet>
+  </div>
+</div>
+</div>

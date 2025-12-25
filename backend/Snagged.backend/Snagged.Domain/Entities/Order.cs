@@ -11,10 +11,10 @@ namespace Snagged.Domain.Entities
         public int Id { get; set; }
         public int BuyerId { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public int? PaymentId { get; set; }
+        public Payment? Payment { get; set; }
         public User Buyer { get; set; }
-        public Payment Payment { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public string? StripePaymentIntentId { get; set; }
 

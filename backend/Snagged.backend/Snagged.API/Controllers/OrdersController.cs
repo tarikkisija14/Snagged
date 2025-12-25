@@ -7,7 +7,7 @@ using Snagged.Application.Catalog.Orders.Commands.UpdateOrder;
 using Snagged.Application.Catalog.Orders.Queries.GetOrders;
 using Snagged.Application.Catalog.Orders.Queries.GetOrdersById;
 using Snagged.Application.Catalog.Orders.Queries.GetOrdersPaged;
-using Snagged.Application.Commom.Paging;
+using Snagged.Application.Common.Paging;
 
 namespace Snagged.API.Controllers
 {

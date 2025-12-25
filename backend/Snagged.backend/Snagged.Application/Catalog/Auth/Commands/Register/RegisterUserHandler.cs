@@ -1,41 +1,52 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
+using Snagged.Application.Common.Exceptions;
 using Snagged.Domain.Entities;
 
 namespace Snagged.Application.Catalog.Auth.Commands.Register
 {
-    public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, int>
+    public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, string>
     {
         private readonly IAppDbContext _context;
+        private readonly IJwtService _jwtService;
 
-        public RegisterUserHandler(IAppDbContext context)
+        public RegisterUserHandler(IAppDbContext context, IJwtService jwtService)
         {
             _context = context;
+            _jwtService = jwtService;
         }
 
-        public async Task<int> Handle(RegisterUserCommand request, CancellationToken ctk)
+        public async Task<string> Handle(RegisterUserCommand request, CancellationToken ct)
         {
-            //check if user with the same email already exists
             var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == request.User.Email, ctk);
+                .FirstOrDefaultAsync(u => u.Email == request.Email, ct);
 
             if (existingUser != null)
-                throw new InvalidOperationException("Email already registered.");
+                throw new SnaggedConflictException ("Email already registered.");
 
-            //hash the password
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.User.Password);
+            var defaultRole = await _context.Roles
+                 .FirstOrDefaultAsync(r => r.RoleName == "User", ct); //TODO: seed roles once and user constant Role IDs
+
+            if (defaultRole == null)
+                throw new Exception("Default role not found.");
 
             var user = new User
             {
-                Email = request.User.Email,
-                Password = hashedPassword
+                Email = request.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                CreatedAt = DateTime.UtcNow,
+                RoleId = defaultRole.Id
             };
 
             _context.Users.Add(user);
-            await _context.SaveChangesAsync(ctk);
+            await _context.SaveChangesAsync(ct);
 
-            return user.Id;
+            var token = _jwtService.GenerateToken(user);
+            return token;
         }
     }
 }

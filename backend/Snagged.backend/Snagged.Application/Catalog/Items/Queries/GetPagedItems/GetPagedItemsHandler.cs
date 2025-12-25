@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
-using Snagged.Application.Commom.Paging;
+using Snagged.Application.Common.Paging;
 using System;
 using System.Collections.Generic;
 using System.Linq;

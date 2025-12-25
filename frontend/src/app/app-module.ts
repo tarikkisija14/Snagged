@@ -12,6 +12,7 @@ import {FormsModule} from "@angular/forms";
 import { Shop } from './pages/shop/shop';
 import { RouterModule } from '@angular/router';
 import { Cart } from './pages/cart/cart';
+import {MatIcon} from '@angular/material/icon';
 
 
 @NgModule({
@@ -22,14 +23,14 @@ import { Cart } from './pages/cart/cart';
     CatalogList,
     Shop,
     Cart,
-
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        FormsModule,
-      RouterModule
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    RouterModule,
+    MatIcon
+  ],
   providers: [
     provideBrowserGlobalErrorListeners(),
 

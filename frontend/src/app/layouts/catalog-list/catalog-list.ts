@@ -8,7 +8,6 @@ import {SubcategoryService} from '../../shared/services/subcategory-service';
 import {PageResult} from '../../shared/models/page-result';
 import{CartService} from '../../shared/services/cart-service';
 
-
 @Component({
   selector: 'app-catalog-list',
   standalone: false,

@@ -8,7 +8,7 @@ namespace Snagged.Domain.Entities
 {
     public class Favorite
     {
-        public int FavoriteId { get; set; }
+        public int Id { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
         public int ItemId { get; set; }

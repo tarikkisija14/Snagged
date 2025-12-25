@@ -1,10 +1,44 @@
+
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$magenta-palette,
+      tertiary: mat.$violet-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
 @import "tailwindcss";
 
 /* src/styles.scss */
 
-/* Colors */
 :root {
-  --primary: #8a4fff;
+  --primary: rgba(138, 79, 255, 0.96);
   --primary-light: #b18aff;
   --primary-dark: #6a2fd4;
   --secondary: #ff6bcb;
@@ -14,11 +48,11 @@
   --gray: #e2d9ff;
   --text: #333333;
   --text-light: #666666;
-  --white: #ffffff;
+  --white: rgb(255, 255, 255);
   --shadow: 0 8px 30px rgba(138, 79, 255, 0.15);
   --shadow-hover: 0 15px 40px rgba(138, 79, 255, 0.25);
   --radius: 16px;
-  --transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
   --reverse-gradient: linear-gradient(135deg, var(--secondary), var(--primary));
 
@@ -29,7 +63,6 @@
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-/* Global Reset */
 * {
   margin: 0;
   padding: 0;
@@ -37,7 +70,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* Body Styles */
 body {
   background-color: var(--light);
   color: var(--text);
@@ -45,7 +77,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Container - Used throughout the app */
 .container {
   width: 100%;
   max-width: 1400px;
@@ -53,7 +84,6 @@ body {
   padding: 0 20px;
 }
 
-/* Button Styles */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -87,3 +117,8 @@ body {
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
   margin-left: 15px;
 }
+
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

@@ -1,5 +1,5 @@
 ﻿using Snagged.Application.Catalog.Orders.Commands;
-using Snagged.Application.Commom.Paging;
+using Snagged.Application.Common.Paging;
 using System;
 using System.Collections.Generic;
 using System.Linq;

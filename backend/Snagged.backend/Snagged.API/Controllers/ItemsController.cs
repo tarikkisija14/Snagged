@@ -7,7 +7,7 @@ using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Catalog.Items.Queries.GetItemsById;
 using Snagged.Application.Catalog.Items.Queries.GetItemsFiltered;
 using Snagged.Application.Catalog.Items.Queries.GetPagedItems;
-using Snagged.Application.Commom.Paging;
+using Snagged.Application.Common.Paging;
 using System.Runtime.CompilerServices;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 

@@ -11,10 +11,14 @@ namespace Snagged.Domain.Entities
         public int Id { get; set; }
         public int ReporterId { get; set; }
         public User? Reporter { get; set; }
+
+        //nullable jer ILI je user reportan ili item
         public int? ReportedItemId { get; set; }
         public Item? ReportedItem { get; set; }
+
         public int? ReportedUserId { get; set; }
         public User? ReportedUser { get; set; }
+
         public string Reason { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string Status { get; set; } = string.Empty;

@@ -2,8 +2,5 @@
 
 namespace Snagged.Application.Catalog.Auth.Commands.Login
 {
-    public class LoginUserCommand : IRequest<string>
-    {
-       public LoginDto User {  get; set; }
-    }
+    public record LoginUserCommand(string email, string password) : IRequest<string>;
 }

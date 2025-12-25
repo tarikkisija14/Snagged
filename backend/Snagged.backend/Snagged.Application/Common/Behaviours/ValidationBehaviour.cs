@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Commom.Behaviours
+namespace Snagged.Application.Common.Behaviours
 {
-    public sealed class ValidationBehavior<TRequest, TResponse>
+    public sealed class ValidationBehaviour<TRequest, TResponse>
      : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
-        public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators) => _validators = validators;
+        public ValidationBehaviour(IEnumerable<IValidator<TRequest>> validators) => _validators = validators;
 
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
         {

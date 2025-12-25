@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Commom.Paging
+namespace Snagged.Application.Common.Paging
 {
     public class PageRequest
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Commom.Exceptions
+namespace Snagged.Application.Common.Exceptions
 {
     public class SnaggedBusinessRuleException:Exception
     {

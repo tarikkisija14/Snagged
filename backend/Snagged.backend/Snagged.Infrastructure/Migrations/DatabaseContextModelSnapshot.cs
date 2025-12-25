@@ -34,16 +34,17 @@ namespace Snagged.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Lat")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
 
                     b.Property<decimal?>("Lng")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
 
                     b.Property<string>("Street")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -54,7 +55,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Cart", b =>
@@ -66,13 +67,17 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsSavedForLater")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -82,7 +87,7 @@ namespace Snagged.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.CartItem", b =>
@@ -94,7 +99,9 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AddedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("CartId")
                         .HasColumnType("int");
@@ -111,7 +118,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Category", b =>
@@ -124,11 +131,12 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.City", b =>
@@ -144,13 +152,14 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Cities");
+                    b.ToTable("Cities", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Conversation", b =>
@@ -165,11 +174,16 @@ namespace Snagged.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Active");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -180,7 +194,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Country", b =>
@@ -193,23 +207,26 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries");
+                    b.ToTable("Countries", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Favorite", b =>
                 {
-                    b.Property<int>("FavoriteId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FavoriteId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AddedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
@@ -217,13 +234,14 @@ namespace Snagged.Infrastructure.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("FavoriteId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ItemId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ItemId")
+                        .IsUnique();
 
-                    b.ToTable("Favorites");
+                    b.ToTable("Favorites", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Item", b =>
@@ -239,14 +257,18 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Condition")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<bool>("IsSold")
                         .HasColumnType("bit");
@@ -260,7 +282,8 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -269,11 +292,15 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("SubcategoryId");
+
+                    b.HasIndex("Title");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Items");
+                    b.ToTable("Items", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.ItemImage", b =>
@@ -286,7 +313,8 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsMain")
                         .HasColumnType("bit");
@@ -298,7 +326,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("ItemImages");
+                    b.ToTable("ItemImages", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Message", b =>
@@ -311,7 +339,8 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("ConversationId")
                         .HasColumnType("int");
@@ -323,7 +352,9 @@ namespace Snagged.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.HasKey("Id");
 
@@ -331,7 +362,9 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.HasIndex("SentAt");
+
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Notification", b =>
@@ -343,18 +376,22 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("NotificationType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -363,7 +400,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Order", b =>
@@ -378,25 +415,31 @@ namespace Snagged.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("StripePaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BuyerId");
 
-                    b.HasIndex("PaymentId");
+                    b.HasIndex("OrderDate");
 
-                    b.ToTable("Orders");
+                    b.HasIndex("Status");
+
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.OrderItem", b =>
@@ -426,7 +469,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Payment", b =>
@@ -437,25 +480,43 @@ namespace Snagged.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal?>("PaidAmount")
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PaidAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("PaymentDate")
+                    b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("StripeChargeId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("StripePaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Payments");
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("StripeChargeId")
+                        .IsUnique()
+                        .HasFilter("[StripeChargeId] IS NOT NULL");
+
+                    b.HasIndex("StripePaymentIntentId")
+                        .IsUnique();
+
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Profile", b =>
@@ -467,19 +528,22 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AverageRating")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(3, 2)
+                        .HasColumnType("decimal(3,2)");
 
                     b.Property<string>("Bio")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("ProfileImageUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("ReviewCount")
                         .HasColumnType("int");
@@ -489,14 +553,18 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Profiles");
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Report", b =>
@@ -508,11 +576,14 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int?>("ReportedItemId")
                         .HasColumnType("int");
@@ -525,7 +596,10 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
 
                     b.HasKey("Id");
 
@@ -535,7 +609,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("ReporterId");
 
-                    b.ToTable("Reports");
+                    b.ToTable("Reports", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Review", b =>
@@ -548,10 +622,13 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -568,7 +645,7 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Role", b =>
@@ -580,15 +657,17 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("RoleDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Subcategory", b =>
@@ -603,13 +682,15 @@ namespace Snagged.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Subcategories");
+                    b.ToTable("Subcategories", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.User", b =>
@@ -621,22 +702,41 @@ namespace Snagged.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("RoleId")
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("RoleId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Address", b =>
@@ -809,13 +909,7 @@ namespace Snagged.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Snagged.Domain.Entities.Payment", "Payment")
-                        .WithMany("Orders")
-                        .HasForeignKey("PaymentId");
-
                     b.Navigation("Buyer");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.OrderItem", b =>
@@ -833,6 +927,17 @@ namespace Snagged.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Item");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Snagged.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("Snagged.Domain.Entities.Order", "Order")
+                        .WithOne("Payment")
+                        .HasForeignKey("Snagged.Domain.Entities.Payment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Order");
                 });
@@ -906,7 +1011,8 @@ namespace Snagged.Infrastructure.Migrations
                     b.HasOne("Snagged.Domain.Entities.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("Role");
                 });
@@ -956,11 +1062,8 @@ namespace Snagged.Infrastructure.Migrations
             modelBuilder.Entity("Snagged.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
-                });
 
-            modelBuilder.Entity("Snagged.Domain.Entities.Payment", b =>
-                {
-                    b.Navigation("Orders");
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Role", b =>

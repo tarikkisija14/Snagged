@@ -1,0 +1,110 @@
+
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  //backdrop-filter: blur(1px);
+  background: rgba(35, 34, 34, 0.62);
+  animation: ease-in 0.1s ease-in-out;
+}
+.overlay{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin:0;
+}
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  animation: slideIn 0.1s ease-out;
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 440px;
+  overflow: scroll;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.tab-navigation {
+  display: flex;
+  border-bottom: 1px solid var(--white);
+  position: relative;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 18px 24px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b7280;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.tab-button:hover {
+  color: var(--primary);
+}
+
+.tab-button.active {
+  color: var(--primary);
+  background: rgba(128, 128, 128, 0.27);
+}
+
+.tab-navigation::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background: var(--gradient);
+  transition: transform 0.2s ease-in-out;
+}
+
+.tab-navigation.register-active::after {
+  transform: translateX(100%);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (max-width: 480px) {
+
+  .login-card {
+    max-height: 95vh;
+  }
+}
