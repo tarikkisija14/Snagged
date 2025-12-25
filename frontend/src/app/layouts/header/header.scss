@@ -1,29 +1,22 @@
+$desktop: 1200px;
+$tablet: 992px;
+$mobile: 576px;
 .header {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-  position: sticky;
   top: 0;
   z-index: 100;
-  transition: var(--transition);
-  background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+  background: linear-gradient(rgba(255, 255, 255, 0.39), rgba(160, 84, 242, 0.06));
   border-radius: 0 0 20px 20px;
 }
 .container {
   max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0.3rem 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   gap: 2rem;
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
   cursor: pointer;
 }
 
@@ -31,10 +24,6 @@
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: 0.02em;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
 }
 
 .nav {
@@ -49,10 +38,9 @@
 
 .nav-link {
   text-decoration: none;
-  color: var(--text-light);
+  color: var(--text);
   position: relative;
   padding: 0.5rem;
-  /*font-weight: 500;*/
   transition: var(--transition);
   cursor: pointer;
 }
@@ -79,7 +67,6 @@
 .cart-link {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
 }
 
 .badge {
@@ -128,10 +115,12 @@
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  color: var(--primary);
+  color: var(--text);
   cursor: pointer;
 }
-
+.search-icon:hover{
+  color: var(--primary);
+}
 .icon-btn {
   background: none;
   border: none;
@@ -147,9 +136,8 @@
   transform:translate(-2px);
 }
 
-.icon-btn svg {
-  width: 24px;
-  height: 24px;
+.icon-btn  {
+  justify-content: center;
 }
 
 .mobile-menu {
@@ -160,26 +148,39 @@
   background: none;
   border: none;
 }
-
-@media (max-width: 768px) {
-  .container {
-    flex-wrap: wrap;
-  }
-
+@media (max-width: $tablet) {
   .nav {
-    order: 3;
-    width: 100%;
-    margin-top: 20px;
-    display: none;
-    flex-direction: column;
-    gap: 10px;
+    gap: 1.5rem;
+    font-size: 1rem;
   }
 
-  .nav.active {
-    display: flex;
+    .search-wrapper {
+      .search-bar {
+        width: 180px;
+      }
+    }
   }
 
-  .mobile-menu {
-    display: block;
+
+@media (max-width: $mobile) {
+  .header {
+    border-radius: 0;
+
+    .container {
+      padding: 0.5rem 1rem;
+      justify-content: space-evenly;
+    }
+
+    .nav {
+      display: none;
+    }
+
+    .mobile-menu {
+      display: block;
+    }
+
+    .logo-text {
+      display: none;
+    }
   }
 }

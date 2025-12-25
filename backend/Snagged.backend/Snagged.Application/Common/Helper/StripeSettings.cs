@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snagged.Application.Commom.Helper
+namespace Snagged.Application.Common.Helper
 {
     public class StripeSettings
     {

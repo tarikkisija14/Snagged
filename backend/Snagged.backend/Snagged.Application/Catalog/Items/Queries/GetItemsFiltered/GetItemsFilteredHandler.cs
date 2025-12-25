@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using Snagged.Application.Commom.Paging;
+using Snagged.Application.Common.Paging;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

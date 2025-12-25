@@ -1,0 +1,129 @@
+<div class="register-content">
+  <h1 class="welcome-title">Create an Account</h1>
+  <p class="welcome-subtitle">Join our sustainable fashion community</p>
+
+  <form
+    class="register-form"
+    [formGroup]="registerForm"
+    (ngSubmit)="onSubmit()"
+  >
+
+    <div class="form-group">
+      <label class="form-label">First Name</label>
+      <input
+        type="text"
+        class="form-input"
+        placeholder="Enter your first name"
+        formControlName="firstName"
+        [class.error]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+      />
+      <span class="error-message"
+            *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+        First name is required
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Last Name</label>
+      <input
+        type="text"
+        class="form-input"
+        placeholder="Enter your last name"
+        formControlName="lastName"
+        [class.error]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
+      />
+      <span class="error-message"
+            *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+        Last name is required
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input
+        type="email"
+        class="form-input"
+        placeholder="Enter your email"
+        formControlName="email"
+        [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+      />
+      <span class="error-message"
+            *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+        Please enter a valid email
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input
+        type="password"
+        class="form-input"
+        placeholder="Create a password"
+        formControlName="password"
+        [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+      />
+      <span class="error-message"
+            *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+        Password must be at least 6 characters
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Confirm Password</label>
+      <input
+        type="password"
+        class="form-input"
+        placeholder="Confirm your password"
+        formControlName="confirmPassword"
+        [class.error]="passwordMismatch"
+      />
+      <span class="error-message" *ngIf="passwordMismatch">
+        Passwords do not match
+      </span>
+    </div>
+
+    <div class="form-options">
+      <label class="checkbox-container">
+        <input type="checkbox" formControlName="agreeToTerms" />
+        <span class="checkbox-label">
+          I agree to the
+          <a href="#" class="link">Terms & Conditions</a>
+          and
+          <a href="#" class="link">Privacy Policy</a>
+        </span>
+      </label>
+    </div>
+
+    <p class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </p>
+
+    <button
+      type="submit"
+      class="register-button"
+      [disabled]="registerForm.invalid"
+    >
+      Create Account
+    </button>
+
+    <div class="divider">
+      <span class="divider-text">Or sign up with</span>
+    </div>
+
+    <div class="social-buttons">
+      <button type="button" class="social-button google-button">
+        Google
+      </button>
+
+      <button type="button" class="social-button facebook-button">
+        Facebook
+      </button>
+    </div>
+
+    <p class="signup-text">
+      Already have an account?
+      <a routerLink="/auth/login" class="signup-link">Sign In</a>
+    </p>
+
+  </form>
+</div>

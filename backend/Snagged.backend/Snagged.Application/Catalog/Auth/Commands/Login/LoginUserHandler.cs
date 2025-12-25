@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
+using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Catalog.Auth.Commands.Login;
 
 namespace Snagged.Application.Catalog.Auth.Commands.Login
 {
@@ -9,30 +11,25 @@ namespace Snagged.Application.Catalog.Auth.Commands.Login
         private readonly IAppDbContext _context;
         private readonly IJwtService _jwtService;
 
-        public LoginUserHandler(IAppDbContext context, IJwtService jwtService )
+        public LoginUserHandler(IAppDbContext context, IJwtService jwtService)
         {
             _context = context;
             _jwtService = jwtService;
         }
 
-        public async Task<string> Handle(LoginUserCommand request, CancellationToken ctk)
+        public async Task<string> Handle(LoginUserCommand request, CancellationToken ct)
         {
-            //Find user by email
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == request.User.Email, ctk);
+           var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == request.email, ct);
 
-            if (user == null)
-                throw new Exception("Invalid email or password.");
+            if (user == null ||
+            !BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
+            {
+                throw new InvalidCredentialsException();
+            }
 
-            //Password verification
-            bool valid = BCrypt.Net.BCrypt.Verify(request.User.Password, user.Password);
-            if (!valid)
-                throw new Exception("Invalid email or password.");
-
-            //Generating a token
-            var token = _jwtService.GenerateToken(user);
-            return token;
-
+            return _jwtService.GenerateToken(user);
         }
     }
 }

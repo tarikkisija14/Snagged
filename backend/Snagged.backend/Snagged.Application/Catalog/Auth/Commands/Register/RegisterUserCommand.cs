@@ -2,8 +2,10 @@
 
 namespace Snagged.Application.Catalog.Auth.Commands.Register
 {
-    public class RegisterUserCommand : IRequest<int>
-    {
-       public RegisterDto User { get; set; }
-    }
+    public record RegisterUserCommand(
+          string Email,
+          string Password,
+          string FirstName,
+          string LastName
+      ) : IRequest<string>;
 }

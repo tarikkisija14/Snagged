@@ -1,64 +1,108 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
-using Snagged.Application.Abstractions; // for IJwtService
-using Snagged.Application.Catalog.Cities.Commands.AddCity;
+using Microsoft.IdentityModel.Tokens;
+using Snagged.Application.Abstractions;
+using Snagged.Application.Catalog.Auth.Commands.Register;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
-using Snagged.Application.Commom.Behaviours;
-using Snagged.Application.Commom.Helper;
+using Snagged.Application.Common.Behaviours;
+using Snagged.Application.Common.Behaviours;
+using Snagged.Application.Common.Helper;
+using Snagged.Infrastructure;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
-using Snagged.Infrastructure.Services; //  for JwtService
+using Snagged.Infrastructure.Services;
 using Stripe;
 using System.Reflection;
+using System.Text;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext and connect to SQL Server
+// =======================
+// DATABASE
+// =======================
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.MigrationsAssembly("Snagged.Infrastructure") // migrations go here
+        sqlOptions => sqlOptions.MigrationsAssembly("Snagged.Infrastructure")
     )
 );
 
-//Register IAppDbContext so DI can resolve it in handlers
-builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<DatabaseContext>());
+builder.Services.AddScoped<IAppDbContext>(provider =>
+    provider.GetRequiredService<DatabaseContext>());
 
-//Register JwtService for IJwtService
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// =======================
+// MEDIATR
+// =======================
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<GetItemsQueryHandler>();
+    cfg.RegisterServicesFromAssemblies(
+        typeof(Program).Assembly,                      
+        typeof(RegisterUserCommand).Assembly,          
+        typeof(RegisterUserHandler).Assembly);
 });
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// =======================
+// AUTHENTICATION (JWT)
+// =======================
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+
+// =======================
+// RATE LIMITING
+// =======================
 builder.Services.AddRateLimiter(options =>
 {
-
-options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-{
-    
-    var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
-    return RateLimitPartition.GetSlidingWindowLimiter(
-        partitionKey: ip,
-        factory: _ => new SlidingWindowRateLimiterOptions
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        // CHANGED THIS: Allow CORS preflight requests to pass through
+        if (HttpMethods.IsOptions(context.Request.Method))
         {
-            PermitLimit = 100, 
-            Window = TimeSpan.FromMinutes(1), 
-            SegmentsPerWindow = 5, 
-            QueueLimit = 0,
-            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
-        });
-});
+            return RateLimitPartition.GetNoLimiter("cors-preflight");
+        }
+
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: ip,
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 5,
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            });
+    });
 
     options.OnRejected = async (context, token) =>
     {
@@ -68,62 +112,64 @@ options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(conte
         await context.HttpContext.Response.WriteAsJsonAsync(new
         {
             error = "TooManyRequests",
-            message = "Previ�e zahtjeva, poku�ajte kasnije.",
+            message = "Previše zahtjeva, pokušajte kasnije.",
             timestamp = DateTime.UtcNow
         }, cancellationToken: token);
     };
 });
 
-//cors
+// =======================
+// CORS
+// =======================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular",
-        policy =>
-        {
-            policy.WithOrigins(
-                      "http://localhost:4200",   // Angular HTTP
-                      "https://localhost:4200"   // Just in case
-                  )
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        });
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:4200",
+                "https://localhost:4200"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        
+    });
 });
-// Add services to the container
+
+// =======================
+// CONTROLLERS + VALIDATION
+// =======================
 builder.Services.AddControllers();
 
 builder.Services
-    .AddFluentValidationAutoValidation()      
+    .AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddValidatorsFromAssembly(Assembly.Load("Snagged.Application"));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
-
+// =======================
+// SWAGGER
+// =======================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//stripe
+// =======================
+// STRIPE
+// =======================
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-
-// register services
 builder.Services.AddScoped<IStripeService, StripeService>();
-
-
-
-
 
 var app = builder.Build();
 
-
-//var projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-//var imagesFolder = Path.Combine(projectRoot, builder.Configuration["ImageSettings:ItemsPath"]);//after pulishing, app will be placed in /publish/, theres no parent folder, so this would break 
-
-//static files
-var imagesFolder = Path.Combine(app.Environment.ContentRootPath, builder.Configuration["ImageSettings:ItemsPath"] ?? "");
-
+// =======================
+// STATIC FILES
+// =======================
+var imagesFolder = Path.Combine(
+    app.Environment.ContentRootPath,
+    builder.Configuration["ImageSettings:ItemsPath"] ?? ""
+);
 
 if (!Directory.Exists(imagesFolder))
     Directory.CreateDirectory(imagesFolder);
@@ -134,18 +180,22 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images/items"
 });
 
-// Configure the HTTP request pipeline
+// =======================
+// PIPELINE
+// =======================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-    app.UseHttpsRedirection();
-app.UseCors("AllowAngular");
+app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular");      
+
 app.UseRateLimiter();
 
-//app.UseAuthentication(); ill add after adding authenticaiton
+app.UseAuthentication();        // added
 app.UseAuthorization();
 
 app.MapControllers();

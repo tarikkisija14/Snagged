@@ -15,11 +15,11 @@ namespace Snagged.Domain.Entities
         public int CategoryId { get; set; }
         public Category Category { get; set; }
         public int? SubcategoryId { get; set; }
-        public Subcategory Subcategory { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public Subcategory? Subcategory { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
-        public string Condition { get; set; }
+        public string Condition { get; set; } = string.Empty;
         public bool IsSold { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public ICollection<ItemImage> Images { get; set; } = new List<ItemImage>();
