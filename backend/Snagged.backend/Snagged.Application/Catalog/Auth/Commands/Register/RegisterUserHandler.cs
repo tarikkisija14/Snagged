@@ -45,6 +45,18 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
             _context.Users.Add(user);
             await _context.SaveChangesAsync(ct);
 
+            var cart = new Snagged.Domain.Entities.Cart
+            {
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsSavedForLater = false
+            };
+
+            _context.Carts.Add(cart);
+            await _context.SaveChangesAsync(ct);
+
+
             var token = _jwtService.GenerateToken(user);
             return token;
         }

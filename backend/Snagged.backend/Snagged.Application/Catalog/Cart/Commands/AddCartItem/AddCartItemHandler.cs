@@ -27,9 +27,17 @@ namespace Snagged.Application.Catalog.Cart.Commands.AddCartItem
 
             if (cart == null)
             {
-                cart = new Snagged.Domain.Entities.Cart  { UserId = user.Id};
+                cart = new Snagged.Domain.Entities.Cart { UserId = user.Id,
+                    CartItems = new List<CartItem>()
+                };
+                
                 ctx.Carts.Add(cart);
                 await ctx.SaveChangesAsync(ct);
+            }
+
+            if (cart.CartItems == null)
+            {
+                cart.CartItems = new List<CartItem>();
             }
 
             var existingItem = cart.CartItems.FirstOrDefault(i => i.ItemId == request.ItemId);

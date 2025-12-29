@@ -12,7 +12,7 @@ namespace Snagged.Domain.Entities
         public string PaymentMethod { get; set; } = string.Empty;
         public decimal PaidAmount { get; set; }
         public DateTime PaymentDate { get; set; }
-        public int OrderId { get; set; } //popravljeno ovo, narudzba i payment trebaju biti 1:1
+        public int OrderId { get; set; } 
         public Order? Order { get; set; }
         public string StripePaymentIntentId { get; set; } = string.Empty;
         public string? StripeChargeId { get; set; }

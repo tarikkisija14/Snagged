@@ -1,7 +1,11 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import { Cart as CartModel } from '../../shared/models/cart';
 import { CartItem } from '../../shared/models/cart-item';
 import { CartService } from '../../shared/services/cart-service';
+import{AuthService} from '../../core/services/auth-service/AuthService';
+import {Router} from '@angular/router';
+import {Subscription,BehaviorSubject,Observable,tap} from 'rxjs';
+
 
 
 @Component({
@@ -10,25 +14,45 @@ import { CartService } from '../../shared/services/cart-service';
   styleUrls: ['./cart.scss'],
   standalone:false
 })
-export class Cart implements OnInit {
+export class Cart implements OnInit,OnDestroy {
   cart: CartModel | null = null;
-  userId: number = 1;
+  userId:number|null = null;
+  private authSub: Subscription | null = null;
+
   isLoading = false;
 
   constructor(private cartService: CartService,
-              private cdr: ChangeDetectorRef) {
+              private cdr: ChangeDetectorRef,
+              private authService:AuthService,
+              private router:Router) {
 
   }
 
   ngOnInit(): void {
-    this.loadCart();
+    this.authSub = this.authService.currentUser$.subscribe(userId => {
+      if (!userId) {
+
+        this.router.navigate(['/home/auth/login']);
+        this.cart = null;
+        return;
+      }
+
+      if (userId !== this.userId) {
+        this.userId = userId;
+        this.loadCart(this.userId);
+      }
+    });
   }
 
-  loadCart() {
+  ngOnDestroy(): void {
+    if (this.authSub) this.authSub.unsubscribe();
+  }
+
+  loadCart(userId:number) {
     this.isLoading = true;
 
 
-    this.cartService.getCartByUser(this.userId).subscribe({
+    this.cartService.getCartByUser().subscribe({
       next: (cartDto: any) => {
 
 
@@ -53,7 +77,7 @@ export class Cart implements OnInit {
         };
 
 
-
+        this.cartService.setCart(this.cart);
         this.isLoading = false;
 
 
@@ -156,6 +180,40 @@ export class Cart implements OnInit {
 
     return `${baseUrl}/images/items/placeholder.png`;
   }
+
+  proceedToCheckout() {
+    console.log('--- Proceed to Checkout clicked ---');
+
+    if (!this.cart || this.cart.cartItems.length === 0) {
+      console.warn('Cart je prazan ili undefined!');
+      return;
+    }
+
+    console.log('Cart items:', this.cart.cartItems);
+
+    // Dohvati userId iz observable
+    this.authService.currentUser$.subscribe(userId => {
+      if (!userId) {
+        console.warn('User nije ulogovan!');
+        return;
+      }
+
+      console.log('Current userId:', userId);
+
+      this.cartService.checkout().subscribe({
+        next: (orderId) => {
+          console.log('Backend returned orderId:', orderId);
+          this.router.navigate(['/payment', orderId]);
+
+        },
+        error: (err) => {
+          console.error('Checkout failed, backend error:', err);
+        }
+      });
+    });
+  }
+
+
 
 
 

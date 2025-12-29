@@ -7,6 +7,7 @@ import {CategoryService} from '../../shared/services/category-service';
 import {SubcategoryService} from '../../shared/services/subcategory-service';
 import {PageResult} from '../../shared/models/page-result';
 import{CartService} from '../../shared/services/cart-service';
+import{AuthService} from '../../core/services/auth-service/AuthService';
 
 @Component({
   selector: 'app-catalog-list',
@@ -49,7 +50,8 @@ export class CatalogList implements OnInit {
     private categoryService: CategoryService,
     private subcategoryService: SubcategoryService,
     private cdr: ChangeDetectorRef,
-    private cartService: CartService
+    private cartService: CartService,
+    private AuthService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -349,28 +351,29 @@ export class CatalogList implements OnInit {
   }
 
   addToCart(item: Item) {
+    const quantity = 1;
 
-    this.addedItemIds.add(item.id);
-
-    this.cartService.addCartItem(1, item.id, 1).subscribe({
+    this.cartService.addCartItem(item.id, quantity).subscribe({
       next: () => {
-        console.log(`${item.title} added to cart`);
 
+        this.addedItemIds = new Set(this.addedItemIds).add(item.id);
+        this.cdr.detectChanges();
 
         setTimeout(() => {
-          this.addedItemIds.delete(item.id);
+          const newSet = new Set(this.addedItemIds);
+          newSet.delete(item.id);
+          this.addedItemIds = newSet;
           this.cdr.detectChanges();
         }, 1000);
       },
       error: (err) => {
         console.error('Error adding item to cart:', err);
-        this.addedItemIds.delete(item.id);
+        const newSet = new Set(this.addedItemIds);
+        newSet.delete(item.id);
+        this.addedItemIds = newSet;
         this.cdr.detectChanges();
       }
     });
   }
-
-
-
 
 }

@@ -11,8 +11,7 @@ namespace Snagged.Application.Catalog.Cart.Commands.AddCartItem
     {
         public AddCartItemCommandValidator()
         {
-            RuleFor(x => x.UserId)
-                .GreaterThan(0).WithMessage("UserId must be greater than 0.");
+            
 
             RuleFor(x => x.ItemId)
                 .GreaterThan(0).WithMessage("ItemId must be greater than 0.");
