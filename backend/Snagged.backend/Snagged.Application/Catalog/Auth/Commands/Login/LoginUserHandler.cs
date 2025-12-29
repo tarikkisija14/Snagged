@@ -29,6 +29,23 @@ namespace Snagged.Application.Catalog.Auth.Commands.Login
                 throw new InvalidCredentialsException();
             }
 
+            var existingCart = await _context.Carts
+            .FirstOrDefaultAsync(c => c.UserId == user.Id && !c.IsSavedForLater, ct);
+
+            if (existingCart == null)
+            {
+                var cart = new Snagged.Domain.Entities.Cart
+                {
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsSavedForLater = false
+                };
+
+                _context.Carts.Add(cart);
+                await _context.SaveChangesAsync(ct);
+            }
+
             return _jwtService.GenerateToken(user);
         }
     }

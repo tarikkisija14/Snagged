@@ -23,15 +23,15 @@ namespace Snagged.API.Controllers
             Console.WriteLine($"Implements IRequest<string>: {command is IRequest<string>}");
             Console.WriteLine($"Assembly: {command.GetType().Assembly.FullName}");
 
-            var result = await _mediator.Send(command);
-            return Ok(new { result });
+            var token = await _mediator.Send(command);
+            return Ok(new { token });
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
         {
-            var result = await _mediator.Send(command);
-            return Ok(new { result });
+            var token = await _mediator.Send(command);
+            return Ok(new { token });
         }
     }
 }

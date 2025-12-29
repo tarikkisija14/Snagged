@@ -44,7 +44,7 @@ namespace Snagged.API.Controllers
                     break;
 
                 case "payment_intent.payment_failed":
-                    // Ako želiš, dodati logiku
+                    
                     break;
             }
 
@@ -64,7 +64,7 @@ namespace Snagged.API.Controllers
                 {
                     order = _ctx.Orders.FirstOrDefault(o => o.Id == orderId);
 
-                    // Ako nađeš order po metadata, spremi StripePaymentIntentId za budućnost
+                    
                     if (order != null)
                     {
                         order.StripePaymentIntentId = paymentIntent.Id;
@@ -86,7 +86,8 @@ namespace Snagged.API.Controllers
                 StripeChargeId = paymentIntent.LatestChargeId,
                 PaidAmount = paidAmount,
                 PaymentMethod = paymentIntent.PaymentMethodTypes?.FirstOrDefault(),
-                PaymentDate = DateTime.UtcNow
+                PaymentDate = DateTime.UtcNow,
+                OrderId = order.Id
             };
 
             _ctx.Payments.Add(payment);

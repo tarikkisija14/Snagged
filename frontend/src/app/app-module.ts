@@ -13,6 +13,8 @@ import { Shop } from './pages/shop/shop';
 import { RouterModule } from '@angular/router';
 import { Cart } from './pages/cart/cart';
 import {MatIcon} from '@angular/material/icon';
+import { Payment } from './pages/payment/payment';
+import { PaymentSuccess } from './layouts/payment-success/payment-success';
 
 
 @NgModule({
@@ -23,6 +25,8 @@ import {MatIcon} from '@angular/material/icon';
     CatalogList,
     Shop,
     Cart,
+    Payment,
+    PaymentSuccess,
   ],
   imports: [
     BrowserModule,

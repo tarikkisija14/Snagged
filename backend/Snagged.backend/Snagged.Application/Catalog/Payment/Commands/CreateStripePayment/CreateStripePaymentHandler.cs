@@ -34,11 +34,11 @@ namespace Snagged.Application.Catalog.Payment.Commands.CreateStripePayment
                ct, 
                metadata);
 
-            // save the stripe paymentIntent id to order so that webhook can map it
+            
             order.StripePaymentIntentId = intent.Id;
             await ctx.SaveChangesAsync(ct);
 
-            return intent.ClientSecret; // frontend will use this to confirm card
+            return intent.ClientSecret; 
         }
     }
 }

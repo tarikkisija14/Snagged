@@ -10,22 +10,32 @@ import{MatSnackBar} from '@angular/material/snack-bar';
   styleUrls: ['./login.scss']
 })
 export class Login {
-  email='';
-  password='';
+  email = '';
+  password = '';
   errorMessage = '';
   successMessage = '';
 
-  constructor(private authService:AuthService, private router: Router, private snackBar: MatSnackBar) {}
+  constructor(private authService: AuthService, private router: Router, private snackBar: MatSnackBar) {
+  }
 
   login() {
-    this.authService.login({email: this.email, password: this.password}).subscribe(res => {
-      localStorage.setItem('token', res.token);
-      this.snackBar.open('Login successful', 'OK', {
-        duration: 2000,
-      });
-      this.router.navigate(['/']);
-    }, err => {
-      console.error(err)
-    })
+    console.log('Login attempt with:', this.email, this.password);
+    this.authService.login({email: this.email, password: this.password}).subscribe({
+      next: res => {
+        localStorage.setItem('token', res.token);
+        const userId = this.authService.getUserId();
+        console.log('UserId after login:', userId);
+
+
+
+
+        this.snackBar.open('Login successful', 'OK', {duration: 2000});
+        this.router.navigate(['/']);
+      },
+      error: err => {
+        console.error('Login error:', err);
+        this.snackBar.open('Login failed', 'OK', {duration: 2000});
+      }
+    });
   }
 }
