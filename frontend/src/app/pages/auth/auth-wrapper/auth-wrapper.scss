@@ -1,4 +1,3 @@
-
 :host {
   position: fixed;
   top: 0;
@@ -9,7 +8,6 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  //backdrop-filter: blur(1px);
   background: rgba(35, 34, 34, 0.62);
   animation: ease-in 0.1s ease-in-out;
 }
@@ -31,7 +29,7 @@
 }
 
 .login-card {
-  background: var(--white);
+  background: white;
   border-radius: 10px;
   width: 100%;
   max-width: 440px;
