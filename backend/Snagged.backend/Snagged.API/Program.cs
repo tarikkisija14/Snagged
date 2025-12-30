@@ -195,9 +195,13 @@ app.UseCors("AllowAngular");
 
 app.UseRateLimiter();
 
+
 app.UseAuthentication();        // added
 app.UseAuthorization();
 
 app.MapControllers();
+
+await app.Services.InitializeDatabaseAsync(app.Environment);
+
 
 app.Run();
