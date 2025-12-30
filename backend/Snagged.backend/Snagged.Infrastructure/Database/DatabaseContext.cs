@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Snagged.Domain.Entities;
 using Snagged.Application.Abstractions;
+using Snagged.Domain.Entities;
+
+
 
 namespace Snagged.Infrastructure.Database
 {
@@ -419,6 +421,8 @@ namespace Snagged.Infrastructure.Database
                 .HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId);
+
+          
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
