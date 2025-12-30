@@ -1,81 +1,45 @@
-
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
-
-html {
-  @include mat.theme((
-    color: (
-      primary: mat.$magenta-palette,
-      tertiary: mat.$violet-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
-}
-
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
-}
-@import "tailwindcss";
-
-/* src/styles.scss */
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap');
 :root {
-  --primary: rgba(138, 79, 255, 0.96);
-  --primary-light: #b18aff;
-  --primary-dark: #6a2fd4;
-  --secondary: #ff6bcb;
-  --accent: #6ef2ff;
-  --light: #f8f5ff;
-  --dark: #2d1b69;
-  --gray: #e2d9ff;
+  --primary: #d1c2e9;
+  --secondary: rgba(156, 99, 206, 0.63);
+  --accent: #bc92bd;
   --text: #333333;
-  --text-light: #666666;
-  --white: rgb(255, 255, 255);
+  --white: rgba(255, 255, 255, 0.32);
+
+  --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+  --reverse-gradient: linear-gradient(135deg, var(--secondary), var(--primary));
   --shadow: 0 8px 30px rgba(138, 79, 255, 0.15);
   --shadow-hover: 0 15px 40px rgba(138, 79, 255, 0.25);
   --radius: 16px;
   --transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
-  --reverse-gradient: linear-gradient(135deg, var(--secondary), var(--primary));
 
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--white);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Montserrat', sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+}
+
+html, body {
+  height: 100%;
 }
 
 body {
-  background-color: var(--light);
+  font-family:'Montserrat', sans-serif;
+  background-color: var(--white);
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
 }
+
+h1, h2, h3{
+  font-family: 'Playfair Display', serif;
+}
+
 
 .container {
   width: 100%;
@@ -84,41 +48,17 @@ body {
   padding: 0 20px;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--gradient);
-  color: var(--white);
-  padding: 15px 35px;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: var(--transition);
-  border: none;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
+.cdk-overlay-pane .mobile-menu {
+  background-color: #fff !important;
+  border-radius: 8px;
+  min-width: 200px;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  background: rgba(255,255,255,0.25);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+.cdk-overlay-pane .mobile-menu .mat-menu-item {
+  color: #333 !important;
+  font-weight: bold;
 }
 
-.btn:hover:before {
-  left: 100%;
+::ng-deep .cdk-overlay-pane .mobile-menu .mat-menu-item:hover {
+  background-color: #f0f0f0 !important;
 }
-.btn-outline {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--white);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  margin-left: 15px;
-}
-
-
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

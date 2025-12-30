@@ -8,14 +8,20 @@ import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/c
 import { Header } from './layouts/header/header';
 import { Home } from './pages/home/home';
 import { CatalogList } from './layouts/catalog-list/catalog-list';
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from '@angular/forms';
 import { Shop } from './pages/shop/shop';
 import { RouterModule } from '@angular/router';
 import { Cart } from './pages/cart/cart';
-import {MatIcon} from '@angular/material/icon';
 import { Payment } from './pages/payment/payment';
 import { PaymentSuccess } from './layouts/payment-success/payment-success';
 
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
+
+import { LayoutModule } from '@angular/cdk/layout';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 @NgModule({
   declarations: [
@@ -33,12 +39,19 @@ import { PaymentSuccess } from './layouts/payment-success/payment-success';
     AppRoutingModule,
     FormsModule,
     RouterModule,
-    MatIcon
+
+    // Angular Material
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatDividerModule,
+
+    // CDK
+    LayoutModule,
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-
-    //replacement for deprecated HttpClientModule
+    provideAnimationsAsync(),
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi()
@@ -46,4 +59,4 @@ import { PaymentSuccess } from './layouts/payment-success/payment-success';
   ],
   bootstrap: [App]
 })
-export class AppModule { }
+export class AppModule {}

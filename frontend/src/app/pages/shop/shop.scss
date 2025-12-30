@@ -10,7 +10,6 @@
   border-radius: var(--radius);
   margin-bottom: 60px;
   text-align: center;
-  box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
   transition: var(--transition);
@@ -64,7 +63,6 @@
   border-radius: var(--radius);
   padding: 25px;
   margin-bottom: 40px;
-  box-shadow: 0 4px 20px rgba(138, 79, 255, 0.08);
 }
 
 .filter-header {
@@ -131,7 +129,7 @@
   box-shadow: 0 0 0 3px rgba(138, 79, 255, 0.1);
 }
 
-/* Products Grid */
+
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

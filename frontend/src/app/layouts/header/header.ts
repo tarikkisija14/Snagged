@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import {AuthService} from '../../core/services/auth-service/AuthService';
 import {Router} from '@angular/router';
 
@@ -9,7 +10,21 @@ import {Router} from '@angular/router';
   styleUrl: './header.scss',
 })
 export class Header {
-    constructor(public authService: AuthService, private router: Router) {}
+  isMobile = false;
+
+  constructor(
+    private breakpointObserver: BreakpointObserver,
+    public authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.breakpointObserver
+      .observe([Breakpoints.Handset, Breakpoints.Tablet])
+      .subscribe(result => {
+        this.isMobile = result.matches;
+      });
+  }
 
   openLogin(): void {
       this.router.navigate(['home/auth/login']);

@@ -1,44 +1,27 @@
-<section class="hero">
+<section class="hero-container" [class.is-mobile]="isHandset$ | async">
+  <div class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Rediscover style.<br>
+        <span class="highlight">Reduce waste.</span>
+      </h1>
 
-  <div class="hero-content">
-    <h1 class="hero-title">
-      <br> Rediscover style.<br>
-      <span class="highlight">Reduce waste.</span>
-    </h1>
+      <div class="hero-subtitle">
+        <p>One style. Every piece. Unlimited life.</p>
+      </div>
 
-    <div class="hero-subtitle">
-      <h2>Where pre-loved fashion finds new life</h2>
-      <p>
-        Welcome to the ultimate destination for sustainable style.
-        Discover unique vintage pieces, give clothes a second chance,
-        and join a community that cares about fashion with a conscience.
-      </p>
-    </div>
+      <div class="hero-actions" [class.stacked]="isHandset$ | async">
+        <button mat-flat-button
+                class="m3-pill-button primary"
+                (click)="goToShop()">
+          Shop Now
+        </button>
 
-    <div class="hero-actions">
-      <button class="btn btn-primary" (click)="goToShop()">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
-          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"
-                stroke="currentColor" stroke-width="2"/>
-          <line x1="3" y1="6" x2="21" y2="6"
-                stroke="currentColor" stroke-width="2"/>
-          <path d="M16 10a4 4 0 0 1-8 0"
-                stroke="currentColor" stroke-width="2"/>
-        </svg>
-        Shop Now
-      </button>
-
-      <button class="btn btn-secondary">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L2 7L12 12L22 7L12 2Z"
-                stroke="currentColor" stroke-width="2"/>
-          <path d="M2 17L12 22L22 17"
-                stroke="currentColor" stroke-width="2"/>
-          <path d="M2 12L12 17L22 12"
-                stroke="currentColor" stroke-width="2"/>
-        </svg>
-        Sell Items
-      </button>
+        <button mat-flat-button
+                class="m3-pill-button secondary">
+          Sell Items
+        </button>
+      </div>
     </div>
   </div>
 </section>

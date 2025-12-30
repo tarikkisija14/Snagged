@@ -1,39 +1,78 @@
 <header class="header">
   <div class="container">
 
+    <button
+      mat-icon-button
+      class="mobile-menu-btn"
+      *ngIf="isMobile"
+      [matMenuTriggerFor]="mobileMenu"
+      aria-label="Open menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
     <a routerLink="/" class="logo">
       <h1 class="logo-text">Snagged</h1>
     </a>
 
     <nav class="nav">
-      <a routerLink="/shop" class="nav-link">Shop</a>
-      <a routerLink="/new-arrivals" class="nav-link">New Arrivals</a>
-      <a routerLink="/sell" class="nav-link">Sell</a>
+      <a routerLink="/shop" class="nav-link" routerLinkActive="active">Shop</a>
+      <a routerLink="/new-arrivals" class="nav-link" routerLinkActive="active">New Arrivals</a>
+      <a routerLink="/sell" class="nav-link" routerLinkActive="active">Sell</a>
     </nav>
 
     <div class="header-actions">
 
       <div class="search-wrapper">
-        <input type="search" placeholder="Search for items..." class="search-bar" />
+        <input
+          type="search"
+          placeholder="Search for items..."
+          class="search-bar"
+        />
         <mat-icon class="search-icon">search</mat-icon>
       </div>
 
-      <button class="icon-btn" aria-label="Wishlist">
+      <button
+        class="icon-btn"
+        aria-label="Wishlist"
+      >
         <mat-icon>favorite_border</mat-icon>
       </button>
 
-      <button class="icon-btn cart-btn" aria-label="Cart" routerLink="/cart">
+      <button
+        class="icon-btn cart-btn"
+        aria-label="Cart"
+        routerLink="/cart"
+      >
         <mat-icon>shopping_cart</mat-icon>
       </button>
 
-      <button class="icon-btn" aria-label="Account" [routerLink]="['/home/auth/login']">
+      <button
+        class="icon-btn"
+        aria-label="Account"
+        routerLink="/home/auth/login"
+      >
         <mat-icon>person_outline</mat-icon>
-      </button>
-
-      <button class="mobile-menu" aria-label="Menu">
-        <mat-icon>menu</mat-icon>
       </button>
 
     </div>
   </div>
+
+  <mat-menu #mobileMenu="matMenu" class="mobileMenu">
+    <button mat-menu-item routerLink="/shop">
+      <mat-icon>storefront</mat-icon>
+      <span>Shop</span>
+    </button>
+
+    <button mat-menu-item routerLink="/new-arrivals">
+      <mat-icon>new_releases</mat-icon>
+      <span>New Arrivals</span>
+    </button>
+
+    <button mat-menu-item routerLink="/sell">
+      <mat-icon>sell</mat-icon>
+      <span>Sell</span>
+    </button>
+
+  </mat-menu>
 </header>
