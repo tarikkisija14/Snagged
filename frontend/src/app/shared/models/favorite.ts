@@ -1,11 +1,11 @@
 import { User } from './user';
-import { Item } from './item';
+import { ItemModel } from './item.model';
 
 export interface Favorite {
   favoriteId: number;
   userId: number;
   user?: User;
   itemId: number;
-  item?: Item;
+  item?: ItemModel;
   addedAt: Date | string;
 }

@@ -1,0 +1,90 @@
+<section class="profile-page" *ngIf="!isLoading; else loading">
+
+  <div class="profile-layout" *ngIf="profile; else noProfile">
+
+    <mat-card class="profile-header-card">
+      <div class="profile-header-content">
+
+        <img
+          class="avatar"
+          [src]="profile.profileImageUrl || 'assets/default-avatar.png'"
+          alt="Profile avatar"
+        />
+
+        <div class="profile-meta">
+          <h1>{{ profile.username }}</h1>
+
+          <mat-chip color="primary" selected>
+            ⭐ {{ profile.averageRating }} ({{ profile.reviewCount }})
+          </mat-chip>
+
+          <p class="bio">
+            {{ profile.bio || 'No bio yet.' }}
+          </p>
+
+          <div class="actions">
+            <button mat-raised-button color="primary">
+              Edit profile
+            </button>
+            <button mat-stroked-button color="warn" (click)="onLogout()">
+              Logout
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </mat-card>
+
+    <section class="items-section">
+      <h2>My items ({{ items.length }})</h2>
+
+      <div class="items-grid" *ngIf="items.length; else null">
+        <mat-card
+          class="item-card"
+          *ngFor="let item of items"
+        >
+
+          <div class="item-image">
+            <img
+              [src]="item.images[0]?.imageUrl || 'assets/item-placeholder.png'"
+              alt="Item image"
+            />
+
+            <span class="likes">❤️ {{ item.likesCount }}</span>
+
+            <div class="sold" *ngIf="item.isSold">
+              SOLD
+            </div>
+          </div>
+
+          <mat-card-content>
+            <p class="price">{{ item.price }} KM</p>
+            <p class="title">{{ item.title }}</p>
+          </mat-card-content>
+
+        </mat-card>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<ng-template #noProfile>
+  <div class="center-state">
+    <mat-card>
+      <h2>Profile not ready</h2>
+      <p>Please refresh or log in again.</p>
+
+      <button mat-raised-button color="primary" (click)="ngOnInit()">
+        Refresh
+      </button>
+    </mat-card>
+  </div>
+</ng-template>
+
+<!-- LOADING -->
+<ng-template #loading>
+  <div class="center-state">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</ng-template>

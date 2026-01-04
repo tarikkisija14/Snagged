@@ -1,5 +1,5 @@
 import {Component, OnInit, ChangeDetectorRef, Input} from '@angular/core';
-import {Item} from '../../shared/models/item';
+import {ItemModel} from '../../shared/models/item.model';
 import {Category} from '../../shared/models/category';
 import {Subcategory} from '../../shared/models/subcategory';
 import {ItemService} from '../../shared/services/item-service';
@@ -17,7 +17,7 @@ import{AuthService} from '../../core/services/auth-service/AuthService';
 })
 export class CatalogList implements OnInit {
 
-  items: Item[] = [];
+  items: ItemModel[] = [];
   categories: Category[] = [];
   subcategories: Subcategory[] = [];
   allConditions: string[] = ['New', 'Excellent', 'Good', 'Fair'];
@@ -124,7 +124,7 @@ export class CatalogList implements OnInit {
 
 
     this.itemService.getFilteredItems(filter).subscribe({
-      next: (res: PageResult<Item>) => {
+      next: (res: PageResult<ItemModel>) => {
 
         this.items = (this.mode === 'home') ? res.items?.slice(0, 9) || [] : res.items || [];
 
@@ -342,15 +342,15 @@ export class CatalogList implements OnInit {
     this.loadItems();
   }
 
-  getItemImage(item: Item): string {
+  getItemImage(item: ItemModel): string {
     const baseUrl = 'https://localhost:7163';
-    if (item.imageUrls && item.imageUrls.length > 0) {
-      return `${baseUrl}${item.imageUrls[0]}`;
+    if (item.images && item.images.length > 0) {
+      return `${baseUrl}${item.images[0]}`;
     }
     return `${baseUrl}/images/items/placeholder.png`;
   }
 
-  addToCart(item: Item) {
+  addToCart(item: ItemModel) {
     const quantity = 1;
 
     this.cartService.addCartItem(item.id, quantity).subscribe({

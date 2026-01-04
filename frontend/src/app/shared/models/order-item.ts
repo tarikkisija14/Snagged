@@ -1,12 +1,12 @@
 import { Order } from './order';
-import { Item } from './item';
+import { ItemModel } from './item.model';
 
 export interface OrderItem {
   id: number;
   orderId: number;
   order?: Order;
   itemId: number;
-  item?: Item;
+  item?: ItemModel;
   quantity: number;
   price: number;
 }

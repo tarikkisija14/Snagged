@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth-service/AuthService';
-import{MatSnackBar} from '@angular/material/snack-bar';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-register',
@@ -62,8 +61,7 @@ export class Register {
         password,
       })
       .subscribe({
-        next: (response) => {
-          localStorage.setItem('token', response.token);
+        next: () => {
           this.snackBar.open('Account created!', 'OK', {
             duration: 2000,
           });

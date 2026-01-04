@@ -1,39 +1,48 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Snagged.Infrastructure.Database.Seeders;
-using System.Threading.Tasks;
 
 namespace Snagged.Infrastructure.Database
 {
     public static class DatabaseInitializer
     {
-        /// <summary>
-        /// Apply migrations and seed data for Snagged project.
-        /// </summary>
         public static async Task InitializeDatabaseAsync(this IServiceProvider services, IHostEnvironment env)
         {
             await using var scope = services.CreateAsyncScope();
             var ctx = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<DatabaseContext>>();
 
-            if (env.IsEnvironment("Test"))
+            try
             {
-                
-                await ctx.Database.EnsureDeletedAsync();
-                await ctx.Database.EnsureCreatedAsync();
+                if (env.IsEnvironment("Test"))
+                {
+                    logger.LogInformation("Refreshing database for Test environment...");
+                    await ctx.Database.EnsureDeletedAsync();
+                    await ctx.Database.EnsureCreatedAsync();
 
-               
-                await DynamicDataSeeder.SeedAsync(ctx);
-                return;
+                    await StaticDataSeeder.SeedAsync(ctx);
+                    await DynamicDataSeeder.SeedAsync(ctx);
+                    return;
+                }
+
+                logger.LogInformation("Applying migrations...");
+                await ctx.Database.MigrateAsync();
+
+                if (env.IsDevelopment())
+                {
+                    logger.LogInformation("Seeding data for Development...");
+                    await StaticDataSeeder.SeedAsync(ctx);
+                    await DynamicDataSeeder.SeedAsync(ctx);
+                }
+
+                logger.LogInformation("Database initialization completed successfully.");
             }
-
-            // Apply any pending migrations (SQL Server / Dev environment)
-            await ctx.Database.MigrateAsync();
-
-            if (env.IsDevelopment())
+            catch (Exception ex)
             {
-                await StaticDataSeeder.SeedAsync(ctx);  // <-- ovo je ispravno
-                await DynamicDataSeeder.SeedAsync(ctx);
+                logger.LogError(ex, "An error occurred during database initialization.");
+                throw; 
             }
         }
     }

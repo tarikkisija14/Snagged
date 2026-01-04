@@ -1,12 +1,12 @@
 import { User } from './user';
-import { Item } from './item';
+import { ItemModel } from './item.model';
 
 export interface Report {
   id: number;
   reporterId: number;
   reporter?: User;
   reportedItemId?: number;
-  reportedItem?: Item;
+  reportedItem?: ItemModel;
   reportedUserId?: number;
   reportedUser?: User;
   reason: string;

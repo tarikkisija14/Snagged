@@ -1,9 +1,7 @@
 .container{
   padding: 1px !important;
 }
-/* catalog.scss - Primijenjeni stilovi iz styles.scss */
 
-/* Main Content */
 .main-content {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -12,13 +10,12 @@
 }
 
 .filters {
-  background: var(--white);
+  background: white;
   padding: 30px;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
   height: fit-content;
   position: sticky;
-  top: 100px;
+  //top: 100px;
   border: 1px solid rgba(138, 79, 255, 0.1);
   transition: var(--transition);
 }
@@ -140,7 +137,6 @@
   background: var(--primary);
   cursor: pointer;
   border: 2px solid var(--white);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .price-inputs {
@@ -177,7 +173,6 @@
 
 .price-inputs input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(138, 79, 255, 0.15);
   outline: none;
 }
 
@@ -186,7 +181,7 @@
   width: 100%;
   margin-top: 20px;
   padding: 14px;
-  background: var(--gradient);
+  background: var(--primary);
   color: var(--white);
   border: none;
   border-radius: var(--radius);
@@ -213,7 +208,7 @@
   padding: 25px;
   background: var(--white);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(128, 128, 128, 0.1);
 }
 
 .products-header h2 {

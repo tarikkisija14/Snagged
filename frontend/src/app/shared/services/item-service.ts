@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {environment} from '../../../environments/development';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Item} from '../models/item';
+import {ItemModel} from '../models/item.model';
 import {PageResult} from '../models/page-result';
 
 @Injectable({
@@ -13,39 +13,39 @@ export class ItemService {
 
   constructor(private http: HttpClient) { }
 
-  getItems(search?: string): Observable<Item[]> {
+  getItems(search?: string): Observable<ItemModel[]> {
     let params = new HttpParams();
     if (search) {
       params = params.set('search', search);
     }
-    return this.http.get<Item[]>(this.apiUrl, { params });
+    return this.http.get<ItemModel[]>(this.apiUrl, { params });
   }
 
-  getItemById(id: number):Observable<Item>{
-    return this.http.get<Item>(`${this.apiUrl}/${id}`);
+  getItemById(id: number):Observable<ItemModel>{
+    return this.http.get<ItemModel>(`${this.apiUrl}/${id}`);
   }
 
-  addItem(item: Partial<Item>): Observable<number> {
+  addItem(item: Partial<ItemModel>): Observable<number> {
     return this.http.post<number>(this.apiUrl, item);
   }
 
-  getPagedItems(page: number = 1, pageSize: number = 10): Observable<PageResult<Item>> {
+  getPagedItems(page: number = 1, pageSize: number = 10): Observable<PageResult<ItemModel>> {
     const params = new HttpParams()
       .set('page', page)
       .set('pageSize', pageSize);
-    return this.http.get<PageResult<Item>>(`${this.apiUrl}/paged`, { params });
+    return this.http.get<PageResult<ItemModel>>(`${this.apiUrl}/paged`, { params });
   }
 
   deleteItem(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  updateItem(id: number, item: Partial<Item>): Observable<void> {
+  updateItem(id: number, item: Partial<ItemModel>): Observable<void> {
 
     return this.http.put<void>(`${this.apiUrl}/${id}`, item);
   }
 
-  getFilteredItems(filter: any): Observable<PageResult<Item>>
+  getFilteredItems(filter: any): Observable<PageResult<ItemModel>>
   {
     let params = new HttpParams();
 
@@ -66,7 +66,7 @@ export class ItemService {
     });
 
     console.log('Params being sent:', params.toString());
-    return this.http.get<PageResult<Item>>(`${this.apiUrl}/filtered`, { params });
+    return this.http.get<PageResult<ItemModel>>(`${this.apiUrl}/filtered`, { params });
   }
 
 }

@@ -1,0 +1,141 @@
+.profile-page {
+  min-height: 100vh;
+  background: #fafafa;
+  padding: 32px;
+}
+
+.profile-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 48px;
+}
+
+.profile-header-card {
+  padding: 32px;
+}
+
+.profile-header-content {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-meta {
+  flex: 1;
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .bio {
+    margin: 16px 0;
+    color: #666;
+    max-width: 600px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+}
+
+.items-section {
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.item-card {
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.item-image {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: #eee;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .likes {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+  }
+
+  .sold {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.1em;
+  }
+}
+
+.price {
+  font-weight: 700;
+  margin: 12px 0 4px;
+}
+
+.title {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.center-state {
+  min-height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .profile-header-content {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}

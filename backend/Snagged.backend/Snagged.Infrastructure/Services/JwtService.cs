@@ -22,7 +22,8 @@ namespace Snagged.Infrastructure.Services
             // Claims - pieces of info embedded inside the JWT
             var claims = new[]
              {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),          // user ID
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()), //user id
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),          // email
                 new Claim(ClaimTypes.Role, user.Role?.RoleName ?? "User"),           // role name (default to "User")
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),  // unique token ID
@@ -30,7 +31,7 @@ namespace Snagged.Infrastructure.Services
 
             //Create the signing key
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]) // secret key from appsettings
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]) //  key from appsettings
             );
 
             //Create signing credentials

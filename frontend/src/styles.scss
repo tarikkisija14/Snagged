@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap');
 :root {
   --primary: #d1c2e9;
-  --secondary: rgba(156, 99, 206, 0.63);
+  --secondary: rgb(81, 41, 126);
   --accent: #bc92bd;
   --text: #333333;
   --white: rgba(255, 255, 255, 0.32);
@@ -12,7 +12,7 @@
   --shadow: 0 8px 30px rgba(138, 79, 255, 0.15);
   --shadow-hover: 0 15px 40px rgba(138, 79, 255, 0.25);
   --radius: 16px;
-  --transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition: 0.01s ease-in-out;
 
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Montserrat', sans-serif;

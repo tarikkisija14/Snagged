@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Snagged.Application.Catalog.Items.Commands.AddItem;
 using Snagged.Application.Catalog.Items.Commands.DeleteItem;
@@ -6,10 +7,12 @@ using Snagged.Application.Catalog.Items.Commands.UpdateItem;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Catalog.Items.Queries.GetItemsById;
 using Snagged.Application.Catalog.Items.Queries.GetItemsFiltered;
+using Snagged.Application.Catalog.Items.Queries.GetMyItems;
 using Snagged.Application.Catalog.Items.Queries.GetPagedItems;
 using Snagged.Application.Common.Paging;
 using System.Runtime.CompilerServices;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
 
 namespace Snagged.API.Controllers
 {
@@ -91,6 +94,14 @@ namespace Snagged.API.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        public async Task<IActionResult> GetMyItems()
+        {
+            var result = await _mediator.Send(new GetMyItemsQuery());
+            return Ok(result);
         }
 
     }

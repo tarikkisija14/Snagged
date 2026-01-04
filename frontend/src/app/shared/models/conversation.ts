@@ -1,5 +1,5 @@
 import { User } from './user';
-import { Item } from './item';
+import { ItemModel } from './item.model';
 import { Message } from './message';
 
 export interface Conversation {
@@ -7,7 +7,7 @@ export interface Conversation {
   userId: number;
   user?: User;
   itemId?: number;
-  item?: Item;
+  item?: ItemModel;
   startedAt: Date | string;
   status: string;
   messages: Message[];
