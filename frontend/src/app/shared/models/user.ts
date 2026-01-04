@@ -1,8 +1,8 @@
 import { Role } from './role';
-import { Profile } from './profile';
+import { ProfileModel } from './profile.model';
 import { Cart } from './cart';
 import { Address } from './address';
-import { Item } from './item';
+import { ItemModel } from './item.model';
 import { Order } from './order';
 import { Favorite } from './favorite';
 import { Review } from './review';
@@ -18,10 +18,10 @@ export interface User {
   createdAt: Date | string;
   roleId?: number;
   role?: Role;
-  profile?: Profile;
+  profile?: ProfileModel;
   cart?: Cart;
   addresses: Address[];
-  items: Item[];
+  items: ItemModel[];
   orders: Order[];
   favorites: Favorite[];
   reviewsGiven: Review[];

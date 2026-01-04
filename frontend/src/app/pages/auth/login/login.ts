@@ -19,23 +19,12 @@ export class Login {
   }
 
   login() {
-    console.log('Login attempt with:', this.email, this.password);
     this.authService.login({email: this.email, password: this.password}).subscribe({
-      next: res => {
-        localStorage.setItem('token', res.token);
-        const userId = this.authService.getUserId();
-        console.log('UserId after login:', userId);
-
-
-
-
+      next: () => {
         this.snackBar.open('Login successful', 'OK', {duration: 2000});
         this.router.navigate(['/']);
       },
-      error: err => {
-        console.error('Login error:', err);
-        this.snackBar.open('Login failed', 'OK', {duration: 2000});
-      }
+      error: () => this.snackBar.open('Login failed', 'OK', {duration: 2000})
     });
   }
 }

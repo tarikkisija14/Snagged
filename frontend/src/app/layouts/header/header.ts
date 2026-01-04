@@ -29,9 +29,15 @@ export class Header {
   openLogin(): void {
       this.router.navigate(['home/auth/login']);
   }
-  goToProfile(): void {
+
+  onUserIconClick() {
+    if (this.authService.isLoggedIn()) {
       this.router.navigate(['/profile']);
+    } else {
+      this.router.navigate(['/home/auth/login']);
+    }
   }
+
   logout(): void {
       this.authService.logout();
       this.router.navigate(['/']);

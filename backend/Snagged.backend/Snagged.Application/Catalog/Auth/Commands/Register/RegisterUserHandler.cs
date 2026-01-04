@@ -24,10 +24,10 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
                 .FirstOrDefaultAsync(u => u.Email == request.Email, ct);
 
             if (existingUser != null)
-                throw new SnaggedConflictException ("Email already registered.");
+                throw new SnaggedConflictException("Email already registered.");
 
             var defaultRole = await _context.Roles
-                 .FirstOrDefaultAsync(r => r.RoleName == "User", ct); //TODO: seed roles once and user constant Role IDs
+                 .FirstOrDefaultAsync(r => r.RoleName == "User", ct);
 
             if (defaultRole == null)
                 throw new Exception("Default role not found.");
@@ -42,20 +42,29 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
                 RoleId = defaultRole.Id
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync(ct);
-
             var cart = new Snagged.Domain.Entities.Cart
             {
-                UserId = user.Id,
+                User = user, // EF handles the ID assignment for you!
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 IsSavedForLater = false
             };
 
-            _context.Carts.Add(cart);
-            await _context.SaveChangesAsync(ct);
+            var profile = new Profile
+            {
+                User = user, 
+                Username = $"{user.FirstName}{user.LastName}",
+                PhoneNumber = "",
+                Bio = "",
+                AverageRating = 0,
+                ReviewCount = 0
+            };
 
+            _context.Users.Add(user);
+            _context.Carts.Add(cart);
+            _context.Profiles.Add(profile);
+
+            await _context.SaveChangesAsync(ct);
 
             var token = _jwtService.GenerateToken(user);
             return token;

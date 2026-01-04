@@ -1,11 +1,7 @@
 import { User } from './user';
-
-export interface Profile {
-  id: number;
-  userId: number;
-  user?: User;
+export interface ProfileModel {
   username: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   profileImageUrl?: string;
   bio: string;
   averageRating: number;

@@ -1,9 +1,9 @@
-import { Item } from './item';
+import { ItemModel } from './item.model';
 
 export interface ItemImage {
   id: number;
   itemId: number;
-  item?: Item;
+  item?: ItemModel;
   imageUrl: string;
   isMain: boolean;
 }

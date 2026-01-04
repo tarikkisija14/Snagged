@@ -22,8 +22,11 @@ namespace Snagged.Infrastructure.Database.Seeders
         {
             if (await context.Set<User>().AnyAsync()) return;
 
-            var adminRole = await context.Set<Role>().SingleAsync(r => r.RoleName == "Admin");
-            var userRole = await context.Set<Role>().SingleAsync(r => r.RoleName == "User");
+            var adminRole = await context.Set<Role>().SingleOrDefaultAsync(r => r.RoleName == "Admin");
+            var userRole = await context.Set<Role>().SingleOrDefaultAsync(r => r.RoleName == "User");
+
+            if (adminRole == null || userRole == null)
+                throw new InvalidOperationException("Roles must exist before seeding users.");
 
             var users = new List<User>
             {
@@ -32,36 +35,21 @@ namespace Snagged.Infrastructure.Database.Seeders
                     Email = "admin@snagged.com",
                     PasswordHash = Hasher.HashPassword(null!, "Admin123!"),
                     RoleId = adminRole.Id,
-                    Profile = new Profile
-                    {
-                        Username = "admin",
-                        PhoneNumber = "000-000-000",
-                        Bio = "Administrator account"
-                    }
+                    Profile = new Profile { Username = "admin", PhoneNumber = "000-000-000", Bio = "Administrator" }
                 },
                 new User
                 {
-                    Email = "prodavac@snagged.com",
-                    PasswordHash = Hasher.HashPassword(null!, "Prodavac123!"),
+                    Email = "user1@snagged.com",
+                    PasswordHash = Hasher.HashPassword(null!, "User123!"),
                     RoleId = userRole.Id,
-                    Profile = new Profile
-                    {
-                        Username = "prodavac",
-                        PhoneNumber = "111-111-111",
-                        Bio = "Seller account"
-                    }
+                    Profile = new Profile { Username = "user1", PhoneNumber = "111-111-111", Bio = "Thrift shop enthusiast" }
                 },
                 new User
                 {
-                    Email = "kupac@snagged.com",
-                    PasswordHash = Hasher.HashPassword(null!, "Kupac123!"),
+                    Email = "user2@snagged.com",
+                    PasswordHash = Hasher.HashPassword(null!, "User123!"),
                     RoleId = userRole.Id,
-                    Profile = new Profile
-                    {
-                        Username = "kupac",
-                        PhoneNumber = "222-222-222",
-                        Bio = "Buyer account"
-                    }
+                    Profile = new Profile { Username = "user2", PhoneNumber = "222-222-222", Bio = "Loves buying and selling" }
                 }
             };
 
@@ -73,7 +61,9 @@ namespace Snagged.Infrastructure.Database.Seeders
         {
             if (await context.Set<Address>().AnyAsync()) return;
 
-            var city = await context.Set<City>().FirstAsync();
+            var city = await context.Set<City>().FirstOrDefaultAsync();
+            if (city == null) return;
+
             var users = await context.Set<User>().ToListAsync();
 
             foreach (var u in users)
@@ -82,7 +72,7 @@ namespace Snagged.Infrastructure.Database.Seeders
                 {
                     UserId = u.Id,
                     CityId = city.Id,
-                    Street = "Some street 123",
+                    Street = "Main St 1",
                     Lat = 43.85m,
                     Lng = 18.38m
                 });
@@ -95,21 +85,23 @@ namespace Snagged.Infrastructure.Database.Seeders
         {
             if (await context.Set<Item>().AnyAsync()) return;
 
-            var seller = await context.Set<User>().SingleAsync(u => u.Email == "prodavac@snagged.com");
+            var seller = await context.Set<User>().FirstOrDefaultAsync(u => u.Email == "user1@snagged.com");
+            if (seller == null) return;
+
             var subcategories = await context.Set<Subcategory>().ToListAsync();
 
             var seeds = new[]
             {
-                new { Title="Vintage Denim Jacket", Sub="Men's Clothing", Desc="Classic 90s style.", Price=45m, Cond="Excellent" },
-                new { Title="Summer Floral Dress", Sub="Women's Clothing", Desc="Light summer dress.", Price=30m, Cond="Like New" },
-                new { Title="Used Sneakers", Sub="Sneakers", Desc="Cleaned, good condition.", Price=60m, Cond="Good" },
-                new { Title="Leather Shoulder Bag", Sub="Bags", Desc="Genuine leather bag.", Price=80m, Cond="Very Good" },
-                new { Title="Winter Boots", Sub="Boots", Desc="Warm and durable.", Price=70m, Cond="Good" }
+                new { Title="Vintage Denim Jacket", Sub="Coats", Price=45m, Cond="Excellent" },
+                new { Title="Summer Floral Dress", Sub="Dresses", Price=30m, Cond="Like New" },
+                new { Title="Used Sneakers", Sub="Sneakers", Price=60m, Cond="Good" },
+                new { Title="Leather Bag", Sub="Bags", Price=80m, Cond="Very Good" }
             };
 
             foreach (var s in seeds)
             {
-                var sub = subcategories.Single(sc => sc.Name == s.Sub);
+                var sub = subcategories.FirstOrDefault(sc => sc.Name == s.Sub);
+                if (sub == null) continue;
 
                 context.Add(new Item
                 {
@@ -117,7 +109,7 @@ namespace Snagged.Infrastructure.Database.Seeders
                     CategoryId = sub.CategoryId,
                     SubcategoryId = sub.Id,
                     Title = s.Title,
-                    Description = s.Desc,
+                    Description = "Seeded item description",
                     Price = s.Price,
                     Condition = s.Cond,
                     IsSold = false
@@ -129,35 +121,29 @@ namespace Snagged.Infrastructure.Database.Seeders
 
         private static async Task SeedCartsOrdersFavoritesReviewsReportsAsync(DatabaseContext context)
         {
-            var buyer = await context.Set<User>().SingleAsync(u => u.Email == "kupac@snagged.com");
-            var seller = await context.Set<User>().SingleAsync(u => u.Email == "prodavac@snagged.com");
-            var items = await context.Set<Item>().Take(3).ToListAsync();
+            if (await context.Set<Favorite>().AnyAsync()) return;
 
-            // Favorites
+            var buyer = await context.Set<User>().FirstOrDefaultAsync(u => u.Email == "user2@snagged.com");
+            var seller = await context.Set<User>().FirstOrDefaultAsync(u => u.Email == "user1@snagged.com");
+            if (buyer == null || seller == null) return;
+
+            var items = await context.Set<Item>().Take(2).ToListAsync();
             foreach (var item in items)
-            {
-                if (!await context.Set<Favorite>().AnyAsync(f => f.UserId == buyer.Id && f.ItemId == item.Id))
-                    context.Add(new Favorite { UserId = buyer.Id, ItemId = item.Id });
-            }
+                context.Add(new Favorite { UserId = buyer.Id, ItemId = item.Id });
 
-            // Reviews
-            if (!await context.Set<Review>().AnyAsync(r => r.ReviewerId == buyer.Id && r.ReviewedUserId == seller.Id))
+            context.Add(new Review
             {
-                context.Add(new Review
-                {
-                    ReviewerId = buyer.Id,
-                    ReviewedUserId = seller.Id,
-                    Rating = 5,
-                    Comment = "Fast and efficient cooperation!"
-                });
-            }
+                ReviewerId = buyer.Id,
+                ReviewedUserId = seller.Id,
+                Rating = 5,
+                Comment = "Great seller!"
+            });
 
-            // Reports (dummy example)
             context.Add(new Report
             {
                 ReporterId = buyer.Id,
                 ReportedItemId = items.First().Id,
-                Reason = "Test report",
+                Reason = "Test Report",
                 Status = "Open"
             });
 
@@ -166,49 +152,42 @@ namespace Snagged.Infrastructure.Database.Seeders
 
         private static async Task SeedConversationsAndMessagesAsync(DatabaseContext context)
         {
-            var buyer = await context.Set<User>().SingleAsync(u => u.Email == "kupac@snagged.com");
-            var seller = await context.Set<User>().SingleAsync(u => u.Email == "prodavac@snagged.com");
-            var item = await context.Set<Item>().FirstAsync();
+            if (await context.Set<Conversation>().AnyAsync()) return;
 
-            var conv = new Conversation
-            {
-                UserId = buyer.Id,
-                ItemId = item.Id,
-                Status = "Open"
-            };
+            var buyer = await context.Set<User>().FirstOrDefaultAsync(u => u.Email == "user2@snagged.com");
+            var seller = await context.Set<User>().FirstOrDefaultAsync(u => u.Email == "user1@snagged.com");
+            var item = await context.Set<Item>().FirstOrDefaultAsync();
+
+            if (buyer == null || seller == null || item == null) return;
+
+            var conv = new Conversation { UserId = buyer.Id, ItemId = item.Id, Status = "Open" };
             context.Add(conv);
             await context.SaveChangesAsync();
 
-            context.Add(new Message
-            {
-                ConversationId = conv.Id,
-                SenderId = buyer.Id,
-                Content = "Hello, interested in this item.",
-                IsRead = false
-            });
-
-            context.Add(new Message
-            {
-                ConversationId = conv.Id,
-                SenderId = seller.Id,
-                Content = "Hi! Yes, it's available.",
-                IsRead = false
-            });
+            context.AddRange(
+                new Message { ConversationId = conv.Id, SenderId = buyer.Id, Content = "Is this available?", IsRead = false },
+                new Message { ConversationId = conv.Id, SenderId = seller.Id, Content = "Yes it is!", IsRead = false }
+            );
 
             await context.SaveChangesAsync();
         }
 
         private static async Task SeedNotificationsAsync(DatabaseContext context)
         {
-            var buyer = await context.Set<User>().SingleAsync(u => u.Email == "kupac@snagged.com");
+            if (await context.Set<Notification>().AnyAsync()) return;
 
-            context.Add(new Notification
+            var users = await context.Set<User>().ToListAsync();
+
+            foreach (var user in users)
             {
-                UserId = buyer.Id,
-                Message = "Welcome to Snagged!",
-                NotificationType = "Info",
-                IsRead = false
-            });
+                context.Add(new Notification
+                {
+                    UserId = user.Id,
+                    Message = "Welcome to Snagged!",
+                    NotificationType = "Info",
+                    IsRead = false
+                });
+            }
 
             await context.SaveChangesAsync();
         }

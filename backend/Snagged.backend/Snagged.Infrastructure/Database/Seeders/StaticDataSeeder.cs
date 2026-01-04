@@ -19,7 +19,7 @@ namespace Snagged.Infrastructure.Database.Seeders
             var roles = new List<Role>
             {
                 new Role { RoleName = "Admin", RoleDescription = "Administrator" },
-                new Role { RoleName = "User", RoleDescription = "Standard User" }
+                new Role { RoleName = "User", RoleDescription = "Standard user" },
             };
 
             context.AddRange(roles);
@@ -49,34 +49,23 @@ namespace Snagged.Infrastructure.Database.Seeders
         {
             if (await context.Set<Category>().AnyAsync()) return;
 
-            // Prave kategorije
             var men = new Category { Name = "Men" };
             var women = new Category { Name = "Women" };
             var kids = new Category { Name = "Kids" };
+            var accessories = new Category { Name = "Accessories" }; // Added for completeness
 
-            context.AddRange(men, women, kids);
+            context.AddRange(men, women, kids, accessories);
             await context.SaveChangesAsync();
 
-            // Subcategories
             var subcategories = new List<Subcategory>
             {
-                // Men
                 new Subcategory { Name = "Shirts", CategoryId = men.Id },
-                new Subcategory { Name = "Sweaters", CategoryId = men.Id },
-                new Subcategory { Name = "Coats", CategoryId = men.Id },
                 new Subcategory { Name = "Pants", CategoryId = men.Id },
-
-                // Women
-                new Subcategory { Name = "Blouses", CategoryId = women.Id },
+                new Subcategory { Name = "Coats", CategoryId = men.Id },
                 new Subcategory { Name = "Dresses", CategoryId = women.Id },
                 new Subcategory { Name = "Skirts", CategoryId = women.Id },
-                new Subcategory { Name = "Jackets", CategoryId = women.Id },
-
-                // Kids
-                new Subcategory { Name = "T-Shirts", CategoryId = kids.Id },
-                new Subcategory { Name = "Shorts", CategoryId = kids.Id },
-                new Subcategory { Name = "Sweaters", CategoryId = kids.Id },
-                new Subcategory { Name = "Coats", CategoryId = kids.Id }
+                new Subcategory { Name = "Sneakers", CategoryId = accessories.Id }, 
+                new Subcategory { Name = "Bags", CategoryId = accessories.Id }      
             };
 
             context.AddRange(subcategories);
