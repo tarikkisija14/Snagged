@@ -27,6 +27,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    if (!this.authService.isLoggedIn()) {
+      console.log('User not authenticated, redirecting to login');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.loadProfile();
     this.loadMyItems();
   }

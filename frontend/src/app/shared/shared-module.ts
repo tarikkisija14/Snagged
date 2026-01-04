@@ -8,6 +8,9 @@ import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
     LazyLoadImageDirective,
     ProductCardComponent
   ],
+  imports: [
+    CommonModule
+  ],
   exports: [
     LazyLoadImageDirective,
     ProductCardComponent,
