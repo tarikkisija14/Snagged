@@ -1,5 +1,6 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -28,6 +29,7 @@ import { ProfileComponent } from './pages/profile/profile.component';
 
 import {authInterceptor} from './core/interceptors/auth-interceptor';
 import {SharedModule} from './shared/shared-module';
+import {ProductCardComponent} from './shared/components/product-card.component/product-card.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +42,8 @@ import {SharedModule} from './shared/shared-module';
     Payment,
     PaymentSuccess,
     ProfileComponent,
+
+
   ],
   imports: [
     BrowserModule,
@@ -47,6 +51,8 @@ import {SharedModule} from './shared/shared-module';
     FormsModule,
     RouterModule,
     MatProgressSpinnerModule,
+    CommonModule,
+
 
     // Angular Material
     MatIconModule,
