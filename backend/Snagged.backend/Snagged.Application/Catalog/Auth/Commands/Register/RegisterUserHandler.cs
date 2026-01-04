@@ -44,7 +44,7 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
 
             var cart = new Snagged.Domain.Entities.Cart
             {
-                User = user, // EF handles the ID assignment for you!
+                User = user, 
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 IsSavedForLater = false

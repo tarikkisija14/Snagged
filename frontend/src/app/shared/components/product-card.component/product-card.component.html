@@ -1,0 +1,55 @@
+<div class="product-card">
+  <!-- Use img tag instead of background-image -->
+  <div class="product-image-wrapper">
+    <img
+      [appLazyLoad]="getItemImage()"
+      [alt]="item?.title || 'Product image'"
+      class="product-image"
+      [placeholder]="'assets/images/placeholder.jpg'"
+      [errorImage]="'assets/images/error.jpg'"
+    />
+
+    <div class="product-badge" *ngIf="showBadge && item?.condition === 'New'">
+      New
+    </div>
+
+    <div class="product-actions" *ngIf="showActions">
+      <button class="product-action-btn">
+        <i class="far fa-heart"></i>
+      </button>
+      <button class="product-action-btn">
+        <i class="fas fa-expand"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <span class="product-category">{{ item?.category?.name }}</span>
+    <h3 class="product-title">{{ item?.title }}</h3>
+    <div class="product-price">${{ item?.price }}</div>
+
+    <div class="product-rating" *ngIf="showRating">
+      <i class="fas fa-star"></i>
+      <i class="fas fa-star"></i>
+      <i class="fas fa-star"></i>
+      <i class="fas fa-star"></i>
+      <i class="far fa-star"></i>
+      <span>(0)</span>
+    </div>
+
+    <div class="product-footer">
+      <button
+        class="add-to-cart"
+        (click)="onAddToCart()"
+        [class.clicked]="addedToCart">
+        <span>{{ addedToCart ? '✓ Added!' : 'Add to Cart' }}</span>
+      </button>
+      <button
+        class="view-details"
+        *ngIf="showDetails"
+        (click)="onViewDetails()">
+        Details
+      </button>
+    </div>
+  </div>
+</div>

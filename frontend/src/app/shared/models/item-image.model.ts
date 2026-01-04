@@ -1,6 +1,6 @@
 import { ItemModel } from './item.model';
 
-export interface ItemImage {
+export interface ItemImageModel {
   id: number;
   itemId: number;
   item?: ItemModel;
