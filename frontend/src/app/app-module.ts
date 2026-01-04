@@ -22,12 +22,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { LayoutModule } from '@angular/cdk/layout';
 import { ProfileComponent } from './pages/profile/profile.component';
 
 import {authInterceptor} from './core/interceptors/auth-interceptor';
+import {SharedModule} from './shared/shared-module';
 
 @NgModule({
   declarations: [
@@ -59,6 +59,7 @@ import {authInterceptor} from './core/interceptors/auth-interceptor';
 
     // CDK
     LayoutModule,
+    SharedModule,
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

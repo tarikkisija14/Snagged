@@ -1,11 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-
+import { ProductCardComponent } from './components/product-card.component/product-card.component';
+import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
 
 @NgModule({
-  declarations: [],
-  imports: [
+  declarations: [
+    LazyLoadImageDirective,
+    ProductCardComponent
+  ],
+  exports: [
+    LazyLoadImageDirective,
+    ProductCardComponent,
     CommonModule
   ]
 })

@@ -58,7 +58,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.authService.logout();
     this.router.navigate(['/']);
   }
+  onEditItem(item: ItemModel) {
+    // TODO
+    console.log('Edit item:', item);
+  }
 
+  onViewItem(item: ItemModel) {
+    // TODO
+    console.log('View item:', item);
+  }
   loadMyItems(): void {
     this.profileService.getMyItems()
       .pipe(takeUntil(this.destroy$))

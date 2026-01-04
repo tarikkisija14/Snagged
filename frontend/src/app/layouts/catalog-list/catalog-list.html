@@ -80,37 +80,11 @@
       </div>
 
       <div class="products-grid">
-        <div class="product-card" *ngFor="let item of items">
-          <div class="product-image"
-               [style.backgroundImage]="'url(' + getItemImage(item) + ')'">
-            <div class="product-badge" *ngIf="item.condition === 'New'">New</div>
-            <div class="product-actions">
-              <button class="product-action-btn"><i class="far fa-heart"></i></button>
-              <button class="product-action-btn"><i class="fas fa-expand"></i></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <span class="product-category">{{item.category?.name}}</span>
-            <h3 class="product-title">{{item.title}}</h3>
-            <div class="product-price">${{item.price}}</div>
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="far fa-star"></i>
-              <span>(0)</span>
-            </div>
-            <div class="product-footer">
-              <button class="add-to-cart"
-                      (click)="addToCart(item)"
-                      [class.clicked]="addedItemIds.has(item.id)">
-                <span>{{ addedItemIds.has(item.id) ? '✓ Added!' : 'Add to Cart' }}</span>
-              </button>
-              <button class="view-details">Details</button>
-            </div>
-          </div>
-        </div>
+        <app-product-card
+          *ngFor="let item of items"
+          [item]="item"
+          (addToCartClick)="addToCart($event)">
+        </app-product-card>
       </div>
 
 

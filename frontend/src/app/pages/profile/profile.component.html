@@ -7,7 +7,7 @@
 
         <img
           class="avatar"
-          [src]="profile.profileImageUrl || 'assets/default-avatar.png'"
+          [appLazyLoad]="profile.profileImageUrl || 'assets/default-avatar.png'"
           alt="Profile avatar"
         />
 
@@ -38,32 +38,24 @@
     <section class="items-section">
       <h2>My items ({{ items.length }})</h2>
 
-      <div class="items-grid" *ngIf="items.length; else null">
-        <mat-card
-          class="item-card"
+      <div class="items-grid" *ngIf="items.length; else noItems">
+        <app-product-card
           *ngFor="let item of items"
-        >
-
-          <div class="item-image">
-            <img
-              [src]="item.images[0]?.imageUrl || 'assets/item-placeholder.png'"
-              alt="Item image"
-            />
-
-            <span class="likes">❤️ {{ item.likesCount }}</span>
-
-            <div class="sold" *ngIf="item.isSold">
-              SOLD
-            </div>
-          </div>
-
-          <mat-card-content>
-            <p class="price">{{ item.price }} KM</p>
-            <p class="title">{{ item.title }}</p>
-          </mat-card-content>
-
-        </mat-card>
+          [item]="item"
+          [showActions]="false"
+          [showRating]="false"
+          [showDetails]="true"
+          (addToCartClick)="onEditItem($event)"
+          (viewDetailsClick)="onViewItem($event)">
+        </app-product-card>
       </div>
+
+      <ng-template #noItems>
+        <div class="empty-state">
+          <p>You haven't listed any items yet.</p>
+          <button mat-raised-button color="primary">Add your first item</button>
+        </div>
+      </ng-template>
     </section>
 
   </div>
@@ -82,7 +74,6 @@
   </div>
 </ng-template>
 
-<!-- LOADING -->
 <ng-template #loading>
   <div class="center-state">
     <mat-spinner diameter="40"></mat-spinner>

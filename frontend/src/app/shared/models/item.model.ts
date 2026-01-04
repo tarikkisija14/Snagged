@@ -1,7 +1,7 @@
 import { User } from './user';
 import { Category } from './category';
 import { Subcategory } from './subcategory';
-import { ItemImage } from './item-image';
+import { ItemImageModel } from './item-image.model';
 import { OrderItem } from './order-item';
 import { Favorite } from './favorite';
 import { Report } from './report';
@@ -19,7 +19,7 @@ export interface ItemModel {
 
   likesCount: number;
 
-  images: ItemImage[];
+  images: ItemImageModel[];
 
   user?: User;
   categoryId?: number;
