@@ -1,0 +1,8 @@
+<button
+  mat-flat-button
+  [type]="type"
+  [disabled]="disabled"
+  [class]="'app-button ' + variant + ' ' + className"
+  (click)="handleClick($event)">
+  {{ label }}
+</button>

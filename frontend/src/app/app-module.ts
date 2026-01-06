@@ -1,6 +1,7 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
+import{CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -31,6 +32,9 @@ import {authInterceptor} from './core/interceptors/auth-interceptor';
 import {SharedModule} from './shared/shared-module';
 import {ProductCardComponent} from './shared/components/product-card.component/product-card.component';
 
+import{register} from 'swiper/element/bundle';
+
+
 @NgModule({
   declarations: [
     App,
@@ -53,7 +57,6 @@ import {ProductCardComponent} from './shared/components/product-card.component/p
     MatProgressSpinnerModule,
     CommonModule,
 
-
     // Angular Material
     MatIconModule,
     MatButtonModule,
@@ -73,6 +76,7 @@ import {ProductCardComponent} from './shared/components/product-card.component/p
       withInterceptors([authInterceptor]) //pozvace authInterceptor na svaki http request od httpclienta
     )
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [App]
 })
 export class AppModule {}

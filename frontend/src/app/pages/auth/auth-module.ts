@@ -13,6 +13,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { AuthWrapper } from './auth-wrapper/auth-wrapper';
+import {SharedModule} from '../../shared/shared-module';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { AuthWrapper } from './auth-wrapper/auth-wrapper';
     MatInputModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatIconModule
+    MatIconModule,
+    SharedModule
   ]
 })
 export class AuthModule { }

@@ -1,28 +1,37 @@
 <section class="hero-container" [class.is-mobile]="isHandset$ | async">
-  <div class="hero">
-    <div class="hero-content">
-      <h1 class="hero-title">
-        Rediscover style.<br>
-        <span class="highlight">Reduce waste.</span>
-      </h1>
+  <div class="hero-swiper swiper">
+    <div class="swiper-wrapper">
 
-      <div class="hero-subtitle">
-        <p>One style. Every piece. Unlimited life.</p>
+      <div class="swiper-slide">
+        <div class="hero hero-buy">
+          <div class="hero-content">
+            <h1 class="hero-title">Rediscover style</h1>
+            <p class="hero-subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. <br> Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+              <br> quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <app-button  class="btn" label="Shop Now" (click)="goToShop()">
+            </app-button>
+          </div>
+        </div>
       </div>
 
-      <div class="hero-actions" [class.stacked]="isHandset$ | async">
-        <button mat-flat-button
-                class="m3-pill-button primary"
-                (click)="goToShop()">
-          Shop Now
-        </button>
-
-        <button mat-flat-button
-                class="m3-pill-button secondary">
-          Sell Items
-        </button>
+      <div class="swiper-slide">
+        <div class="hero hero-sell">
+          <div class="hero-content">
+            <h1 class="hero-title">Reduce waste</h1>
+            <p class="hero-subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. <br> Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+              <br> quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <app-button class="btn" label="Sell Now">
+            </app-button>
+          </div>
+        </div>
       </div>
+
     </div>
+
+
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+    <div class="swiper-pagination"></div>
   </div>
 </section>
 

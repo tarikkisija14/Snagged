@@ -17,12 +17,8 @@ namespace Snagged.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
+        public async Task<IActionResult> Register([FromBody] RegisterUserCommand command) //Deserialize the JSON request body into a LoginUserCommand object
         {
-            Console.WriteLine($"Command type: {command.GetType().FullName}");
-            Console.WriteLine($"Implements IRequest<string>: {command is IRequest<string>}");
-            Console.WriteLine($"Assembly: {command.GetType().Assembly.FullName}");
-
             var token = await _mediator.Send(command);
             return Ok(new { token });
         }
