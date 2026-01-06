@@ -12,8 +12,6 @@ import{MatSnackBar} from '@angular/material/snack-bar';
 export class Login {
   email = '';
   password = '';
-  errorMessage = '';
-  successMessage = '';
 
   constructor(private authService: AuthService, private router: Router, private snackBar: MatSnackBar) {
   }

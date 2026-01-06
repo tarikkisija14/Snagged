@@ -2,11 +2,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductCardComponent } from './components/product-card.component/product-card.component';
 import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
+import { ButtonComponent } from './components/button.component/button.component';
 
 @NgModule({
   declarations: [
     LazyLoadImageDirective,
-    ProductCardComponent
+    ProductCardComponent,
+    ButtonComponent
   ],
   imports: [
     CommonModule
@@ -14,7 +16,8 @@ import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
   exports: [
     LazyLoadImageDirective,
     ProductCardComponent,
-    CommonModule
+    CommonModule,
+    ButtonComponent
   ]
 })
 export class SharedModule { }

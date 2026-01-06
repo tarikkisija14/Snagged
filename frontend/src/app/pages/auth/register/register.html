@@ -98,13 +98,14 @@
       {{ errorMessage }}
     </p>
 
-    <button
+
+    <app-button
       type="submit"
-      class="lr-button"
-      [disabled]="registerForm.invalid"
-    >
-      Create Account
-    </button>
+      label="Register"
+      variant="primary"
+      className="lr-button"
+      [disabled]="registerForm.invalid || !registerForm.get('agreeToTerms')?.value">
+    </app-button>
 
     <div class="divider">
       <span class="divider-text">Or sign up with</span>
