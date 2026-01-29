@@ -6,7 +6,8 @@ using Snagged.Application.Common.Paging;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Snagged.Application.Catalog.Items.Queries.GetItems; // Dodano za ItemDto
+using Snagged.Application.Catalog.Items.Dto;
+using Snagged.Application.Catalog.Items;
 
 namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
 {
@@ -17,13 +18,14 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
             var query = ctx.Items
                .AsNoTracking()
                .Include(x => x.User)
+                   .ThenInclude(u => u.Profile)  
                .Include(x => x.Category)
                .Include(x => x.Subcategory)
                .Include(x => x.Images)
+               .Include(x => x.Favorites)  
                .AsQueryable();
 
-           
-
+         
             if (request.CategoryIds != null && request.CategoryIds.Any())
             {
                 query = query.Where(x => request.CategoryIds.Contains(x.CategoryId));
@@ -60,8 +62,7 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
                 query = query.Where(x => x.Price <= request.MaxPrice.Value);
             }
 
-            
-
+      
             IOrderedQueryable<Domain.Entities.Item> orderedQuery;
 
             switch (request.SortBy?.ToLower())
@@ -86,7 +87,7 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
                     break;
             }
 
-           
+        
             var dtoQuery = orderedQuery.Select(x => new ItemDto
             {
                 Id = x.Id,
@@ -95,24 +96,29 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
                 Price = x.Price,
                 Condition = x.Condition,
                 IsSold = x.IsSold,
+                CreatedAt = x.CreatedAt,
+                CategoryId = x.CategoryId,
+                SubcategoryId = x.SubcategoryId,
+                LikesCount = x.Favorites.Count,
                 CategoryName = x.Category.Name,
                 SubcategoryName = x.Subcategory != null ? x.Subcategory.Name : null,
-                SellerUsername = x.User.Email,
-                ImageUrls = x.Images.Select(i => i.ImageUrl).ToList()
+                SellerUsername = x.User.Profile != null ? x.User.Profile.Username : x.User.Email,
+                Images = x.Images.Select(i => new ItemImageDto 
+                {
+                    Id = i.Id,
+                    ImageUrl = i.ImageUrl,
+                    IsMain = i.IsMain
+                }).ToList()
             }).AsQueryable();
 
-            
-
+           
             var paging = request.Paging ?? new PageRequest { Page = 1, PageSize = 12 };
 
-            
             if (request.LoadAllItems.HasValue && request.LoadAllItems.Value)
             {
-              
                 paging = new PageRequest { Page = 1, PageSize = int.MaxValue };
             }
 
-           
             return await PageResult<ItemDto>.FromQueryableAsync(dtoQuery, paging, ct);
         }
     }

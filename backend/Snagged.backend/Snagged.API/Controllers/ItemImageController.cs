@@ -51,13 +51,12 @@ namespace Snagged.API.Controllers
         }
 
         [HttpPost("add-url")]
-        public async Task<IActionResult> AddImage(int itemId, AddItemImageCommand command)
+        public async Task<IActionResult> AddImage([FromBody] AddItemImageCommand command)
         {
             try
             {
-                command.ItemId = itemId;
                 var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetImages), new { itemId }, null);
+                return CreatedAtAction(nameof(GetImages), new { itemId = command.ItemId }, new { id });
             }
             catch (Exception ex)
             {

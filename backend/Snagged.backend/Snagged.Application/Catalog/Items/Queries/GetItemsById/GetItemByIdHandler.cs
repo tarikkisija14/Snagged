@@ -1,7 +1,8 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using Snagged.Application.Catalog.Items.Queries.GetItems;
+using Snagged.Application.Catalog.Items.Dto;
+using Snagged.Application.Catalog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,21 +11,22 @@ using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Items.Queries.GetItemsById
 {
-    public class GetItemByIdHandler(IAppDbContext ctx) :IRequestHandler<GetItemByIdQuery,ItemDto>
+    public class GetItemByIdHandler(IAppDbContext ctx) : IRequestHandler<GetItemByIdQuery, ItemDto>
     {
-        public async Task<ItemDto> Handle(GetItemByIdQuery query,CancellationToken ct)
+        public async Task<ItemDto> Handle(GetItemByIdQuery query, CancellationToken ct)
         {
-            var item = await ctx.Items.Include(i => i.Category)
+            var item = await ctx.Items
+                .Include(i => i.Category)
                 .Include(i => i.Subcategory)
-                .Include(i => i.User).ThenInclude(u => u.Profile)
+                .Include(i => i.User)
+                    .ThenInclude(u => u.Profile)
                 .Include(i => i.Images)
+                .Include(i => i.Favorites)  // ← Add this for LikesCount
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Id == query.Id, ct);
 
-
             if (item == null)
                 return null;
-
 
             return new ItemDto
             {
@@ -35,12 +37,16 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsById
                 Condition = item.Condition,
                 IsSold = item.IsSold,
                 CreatedAt = item.CreatedAt,
-                CategoryName = item.Category.Name,
-                SubcategoryName = item.Subcategory != null ? item.Subcategory.Name : null,
-                SellerUsername = item.User.Profile != null ? item.User.Profile.Username : item.User.Email,
-                ImageUrls = item.Images.Select(img => img.ImageUrl).ToList()
+                CategoryId = item.CategoryId,                  
+                SubcategoryId = item.SubcategoryId,             
+                LikesCount = item.Favorites.Count,            
+                Images = item.Images.Select(img => new ItemImageDto  
+                {
+                    Id = img.Id,
+                    ImageUrl = img.ImageUrl,
+                    IsMain = img.IsMain
+                }).ToList()
             };
-
         }
     }
 }

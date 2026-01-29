@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Snagged.Application.Catalog.Items.Commands.AddItem;
 using Snagged.Application.Catalog.Items.Commands.DeleteItem;
 using Snagged.Application.Catalog.Items.Commands.UpdateItem;
+using Snagged.Application.Catalog.Items.Dto;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Catalog.Items.Queries.GetItemsById;
 using Snagged.Application.Catalog.Items.Queries.GetItemsFiltered;

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Snagged.Application.Catalog.Items.Dto;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using System;
 using System.Collections.Generic;

@@ -1,7 +1,8 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using Snagged.Application.Abstractions;
+using Snagged.Application.Catalog.Items.Dto;  
+using Snagged.Application.Catalog.Items;     
 
 namespace Snagged.Application.Catalog.Items.Queries.GetItems
 {
@@ -31,10 +32,15 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItems
                     Condition = i.Condition,
                     IsSold = i.IsSold,
                     CreatedAt = i.CreatedAt,
-                    CategoryName = i.Category.Name,
-                    SubcategoryName = i.Subcategory != null ? i.Subcategory.Name : null,
-                    SellerUsername = i.User.Profile != null ? i.User.Profile.Username : i.User.Email,
-                    ImageUrls = i.Images.Select(img => img.ImageUrl).ToList()
+                    CategoryId = i.CategoryId,
+                    SubcategoryId = i.SubcategoryId,
+                    LikesCount = i.Favorites.Count,  
+                    Images = i.Images.Select(img => new ItemImageDto
+                    {
+                        Id = img.Id,
+                        ImageUrl = img.ImageUrl,
+                        IsMain = img.IsMain
+                    }).ToList()
                 });
 
             return await projectedQuery.ToListAsync(ct);

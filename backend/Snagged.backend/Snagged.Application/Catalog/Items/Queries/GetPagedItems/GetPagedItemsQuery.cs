@@ -1,4 +1,5 @@
-﻿using Snagged.Application.Catalog.Items.Queries.GetItems;
+﻿using Snagged.Application.Catalog.Items.Dto;
+using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Common.Paging;
 using System;
 using System.Collections.Generic;
