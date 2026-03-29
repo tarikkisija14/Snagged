@@ -1,134 +1,91 @@
-import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { loadStripe, Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
 import { CartService } from '../../shared/services/cart-service';
+import { SHIPPING_COST, TAX_RATE } from '../../shared/constants/order-total.constants';
 
 @Component({
   selector: 'app-payment',
   templateUrl: './payment.html',
   styleUrls: ['./payment.scss'],
-  standalone:false
+  standalone: false
 })
 export class Payment implements OnInit {
   orderId!: number;
   stripe!: Stripe | null;
   elements!: StripeElements;
   cardElement!: StripeCardElement;
-  message = '';
-  loading = false;
-  totalAmount: number = 0;
+  message      = '';
   errorMessage = '';
+  loading      = false;
+
+
+  totalAmount: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private cartService: CartService,
-    private router:Router,
+    private router: Router,
     private cd: ChangeDetectorRef
-
   ) {}
 
-  async ngOnInit() {
-    console.log('[1] Payment component INIT');
-
+  async ngOnInit(): Promise<void> {
     this.orderId = Number(this.route.snapshot.paramMap.get('orderId'));
-    console.log('[2] OrderId from route:', this.orderId);
-
-    console.log('[3] Loading Stripe with key:', environment.stripePublicKey);
-    this.stripe = await loadStripe(environment.stripePublicKey);
-
-    console.log('[4] Stripe loaded:', this.stripe);
+    this.stripe  = await loadStripe(environment.stripePublicKey);
 
     if (this.stripe) {
-      this.elements = this.stripe.elements();
-      console.log('[5] Stripe elements created:', this.elements);
-
+      this.elements    = this.stripe.elements();
       this.cardElement = this.elements.create('card');
-      console.log('[6] Card element created:', this.cardElement);
-
       this.cardElement.mount('#card-element');
-      console.log('[7] Card element mounted');
     }
 
-    const cart = this.cartService.getCartValue();
-    console.log('[8] Cart value:', cart);
 
-    if (cart) {
-      const subtotal = cart.cartItems.reduce(
-        (sum, ci) => sum + ci.item!.price * ci.quantity,
-        0
-      );
-
-      const shipping = 5.99;
-      const tax = subtotal * 0.08;
-
-      this.totalAmount = +(subtotal + shipping + tax).toFixed(2);
-
-      console.log('[9] Calculated totals:', {
-        subtotal,
-        shipping,
-        tax,
-        total: this.totalAmount
-      });
-    }
+    this.totalAmount = this.calculateTotal();
   }
 
+  async pay(): Promise<void> {
+    if (!this.stripe || !this.cardElement) return;
 
-  async pay() {
+    this.loading      = true;
+    this.errorMessage = '';
+    this.message      = '';
 
+    this.cartService.createStripePaymentIntent(this.orderId).subscribe({
+      next: async ({ clientSecret }) => {
+        const result = await this.stripe!.confirmCardPayment(clientSecret, {
+          payment_method: { card: this.cardElement }
+        });
 
-    if (!this.stripe || !this.cardElement) {
+        this.loading = false;
 
-      return;
-    }
-
-    this.loading = true;
-    console.log('[12] Creating PaymentIntent for orderId:', this.orderId);
-
-    this.cartService.createStripePaymentIntent(this.orderId)
-      .subscribe({
-        next: async (res: { clientSecret: string }) => {
-
-
-
-
-          const result = await this.stripe!.confirmCardPayment(
-            res.clientSecret,
-            {
-              payment_method: {
-                card: this.cardElement
-              }
-            }
-          );
-
-
-
-          this.loading = false;
-
-          if (result.error) {
-            this.message = '';
-            this.errorMessage = result.error.message ?? 'Payment failed';
-            this.cd.detectChanges();
-          }
-          else if (result.paymentIntent) {
-            console.log('[17] PaymentIntent status:', result.paymentIntent.status);
-
-            if (result.paymentIntent.status === 'succeeded') {
-
-              this.message = 'Payment successful! Redirecting to confirmation page...';
-
-
-              this.router.navigate(['/payment-success'], { queryParams: { orderId: this.orderId } });
-            }
-          }
-        },
-        error: err => {
-          this.loading = false;
-          this.message = '';
-          this.errorMessage = 'Payment failed due to server error';
-          this.cd.detectChanges();
+        if (result.error) {
+          this.errorMessage = result.error.message ?? 'Payment failed.';
+        } else if (result.paymentIntent?.status === 'succeeded') {
+          this.message = 'Payment successful! Redirecting...';
+          this.router.navigate(['/payment-success'], {
+            queryParams: { orderId: this.orderId }
+          });
         }
-      });
+
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.loading      = false;
+        this.errorMessage = 'Payment failed due to a server error.';
+        this.cd.detectChanges();
+      }
+    });
   }
 
+
+  private calculateTotal(): number | null {
+    const cart = this.cartService.getCart();
+    if (!cart) return null;
+
+    const subtotal = cart.cartItems.reduce(
+      (sum, ci) => sum + ci.item!.price * ci.quantity, 0
+    );
+    return +(subtotal + SHIPPING_COST + subtotal * TAX_RATE).toFixed(2);
+  }
 }

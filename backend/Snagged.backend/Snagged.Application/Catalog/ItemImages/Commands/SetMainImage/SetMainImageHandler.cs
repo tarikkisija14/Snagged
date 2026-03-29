@@ -1,11 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.ItemImages.Commands.SetMainImage
 {
@@ -20,16 +15,16 @@ namespace Snagged.Application.Catalog.ItemImages.Commands.SetMainImage
                 return false;
 
             
-            var others = ctx.ItemImages
-                .Where(x => x.ItemId == image.ItemId && x.Id != image.Id);
+            var siblings = await ctx.ItemImages
+                .Where(x => x.ItemId == image.ItemId && x.Id != image.Id)
+                .ToListAsync(ct);
 
-            foreach (var img in others)
+            foreach (var img in siblings)
                 img.IsMain = false;
 
-            
             image.IsMain = true;
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(ct);
             return true;
         }
     }

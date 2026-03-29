@@ -1,11 +1,6 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
 {
@@ -13,14 +8,11 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
     {
         public async Task<Unit> Handle(UpdateItemCommand request, CancellationToken ct)
         {
-            var item = await ctx.Items
-                .Where(x => x.Id == request.Id)
-                .FirstOrDefaultAsync(ct);
+            var item = await ctx.Items.FindAsync(new object[] { request.Id }, ct);
 
-            if (item == null)
-                throw new KeyNotFoundException($"Item with id {request.Id} not found.");
+            if (item is null)
+                throw new SnaggedNotFoundException($"Item with id {request.Id} was not found.");
 
-            
             item.Title = request.Title;
             item.Description = request.Description;
             item.Price = request.Price;
@@ -33,5 +25,4 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
             return Unit.Value;
         }
     }
-
 }

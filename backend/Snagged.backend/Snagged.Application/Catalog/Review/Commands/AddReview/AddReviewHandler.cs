@@ -1,20 +1,17 @@
 ﻿using MediatR;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snagged.Application.Common.Interfaces;
 
 namespace Snagged.Application.Catalog.Review.Commands.AddReview
 {
-    public class AddReviewHandler(IAppDbContext ctx) : IRequestHandler<AddReviewCommand, int>
+    public class AddReviewHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+        : IRequestHandler<AddReviewCommand, int>
     {
         public async Task<int> Handle(AddReviewCommand request, CancellationToken cancellationToken)
         {
             var review = new Snagged.Domain.Entities.Review
             {
-                ReviewerId = request.ReviewerId,
+                ReviewerId = currentUser.UserId,
                 ReviewedUserId = request.ReviewedUserId,
                 Rating = request.Rating,
                 Comment = request.Comment

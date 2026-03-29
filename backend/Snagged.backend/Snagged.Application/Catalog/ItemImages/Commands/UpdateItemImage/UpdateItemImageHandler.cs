@@ -1,11 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.ItemImages.Commands.UpdateItemImage
 {
@@ -21,7 +16,7 @@ namespace Snagged.Application.Catalog.ItemImages.Commands.UpdateItemImage
 
             image.ImageUrl = request.ImageUrl;
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(ct);
             return true;
         }
     }

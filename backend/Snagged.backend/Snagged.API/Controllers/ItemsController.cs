@@ -8,102 +8,105 @@ using Snagged.Application.Catalog.Items.Dto;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Catalog.Items.Queries.GetItemsById;
 using Snagged.Application.Catalog.Items.Queries.GetItemsFiltered;
+using Snagged.Application.Catalog.Items.Queries.GetItemSuggestions;
 using Snagged.Application.Catalog.Items.Queries.GetMyItems;
 using Snagged.Application.Catalog.Items.Queries.GetPagedItems;
+using Snagged.Application.Common.Exceptions;
 using Snagged.Application.Common.Paging;
-using System.Runtime.CompilerServices;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-
 
 namespace Snagged.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ItemsController : ControllerBase
+    public class ItemsController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public ItemsController(IMediator mediator)
-        {
-            _mediator=mediator;
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetItems([FromQuery] GetItemsQuery query)
         {
-            var items = await _mediator.Send(query);
+            var items = await mediator.Send(query);
             return Ok(items);
         }
-        
-        [HttpGet("{id}")]
+
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ItemDto>> GetItemById(int id)
         {
-            var item =await _mediator.Send(new GetItemByIdQuery(id));
-
-            if(item == null) 
-                return NotFound();
-
-            return Ok(item);
-
+            try
+            {
+                var item = await mediator.Send(new GetItemByIdQuery(id));
+                return Ok(item);
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Add([FromBody] AddItemCommand command)
+        [Authorize]
+        public async Task<ActionResult<int>> AddItem([FromBody] AddItemCommand command)
         {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetItemById), new { id }, id);
+            var id = await mediator.Send(command);
+            return CreatedAtAction(nameof(GetItemById), new { id }, new { id });
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateItemCommand command)
+        [HttpPut("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateItem(int id, [FromBody] UpdateItemCommand command)
         {
-            command.Id = id; 
-            await _mediator.Send(command);
-            return NoContent();
+            command.Id = id;
+            try
+            {
+                await mediator.Send(command);
+                return NoContent();
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteItem(int id)
         {
-            await _mediator.Send(new DeleteItemCommand { Id = id });
-            return NoContent();
+            try
+            {
+                await mediator.Send(new DeleteItemCommand { Id = id });
+                return NoContent();
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         [HttpGet("paged")]
         public async Task<ActionResult<PageResult<ItemDto>>> GetPagedItems([FromQuery] GetPagedItemsQuery query)
         {
-            var result = await _mediator.Send(query);
+            var result = await mediator.Send(query);
             return Ok(result);
         }
 
         [HttpGet("filtered")]
-        public async Task<ActionResult<List<ItemDto>>> GetFilteredItems([FromQuery] GetItemsFilteredQuery query)
+        public async Task<ActionResult<PageResult<ItemDto>>> GetFilteredItems([FromQuery] GetItemsFilteredQuery query)
         {
-            var result = await _mediator.Send(query);
+            var result = await mediator.Send(query);
             return Ok(result);
-        }
-
-        [HttpPost("filter-multiple")]
-        public async Task<IActionResult> GetFilteredMultiple([FromBody] GetItemsFilteredQuery query)
-        {
-            try
-            {
-                var result = await _mediator.Send(query);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         [HttpGet("my")]
         [Authorize]
         public async Task<IActionResult> GetMyItems()
         {
-            var result = await _mediator.Send(new GetMyItemsQuery());
+            var result = await mediator.Send(new GetMyItemsQuery());
             return Ok(result);
         }
 
+        [HttpGet("suggestions")]
+        public async Task<IActionResult> GetSuggestions([FromQuery] GetItemSuggestionsQuery query)
+        {
+            var result = await mediator.Send(query);
+            return Ok(result);
+        }
     }
 }

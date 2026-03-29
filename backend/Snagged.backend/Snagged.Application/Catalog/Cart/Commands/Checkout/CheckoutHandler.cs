@@ -1,32 +1,47 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
+using Snagged.Application.Catalog.Payment;
+using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Common.Interfaces;
 using Snagged.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Cart.Commands.Checkout
 {
-    public class CheckoutHandler(IAppDbContext ctx) : IRequestHandler<CheckoutCommand, int>
+    public class CheckoutHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+        : IRequestHandler<CheckoutCommand, int>
     {
         public async Task<int> Handle(CheckoutCommand request, CancellationToken ct)
         {
+            
+            var userId = currentUser.UserId;
+
             var cart = await ctx.Carts
                 .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.Item)
-                .FirstOrDefaultAsync(c => c.UserId == request.UserId, ct);
+                    .ThenInclude(ci => ci.Item)
+                
+                .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsSavedForLater, ct);
 
-            if (cart == null || !cart.CartItems.Any())
-                throw new KeyNotFoundException("Cart is empty.");
+            if (cart is null || !cart.CartItems.Any())
+                throw new SnaggedNotFoundException("Cart is empty or does not exist.");
+
+            
+            var soldItems = cart.CartItems.Where(ci => ci.Item.IsSold).ToList();
+            if (soldItems.Any())
+            {
+                var soldTitles = string.Join(", ", soldItems.Select(ci => ci.Item.Title));
+               
+                throw new SnaggedBusinessRuleException(
+                    "ITEMS_UNAVAILABLE",
+                    $"The following items are no longer available: {soldTitles}.");
+            }
 
             var order = new Order
             {
-                BuyerId = request.UserId,
-                OrderDate = DateTime.Now,
-                Status = "Pending"
+                BuyerId = userId,
+                
+                OrderDate = DateTime.UtcNow,
+                Status = PaymentStatus.Pending
             };
 
             foreach (var cartItem in cart.CartItems)
@@ -40,21 +55,10 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
             }
 
             ctx.Orders.Add(order);
-            if (request.AddressId.HasValue)
-            {
-                var address = await ctx.Addresses.FindAsync(new object[] { request.AddressId.Value }, ct);
-                if (address != null)
-                {
-                    
-                }
-            }
-
             ctx.CartItems.RemoveRange(cart.CartItems);
-
             await ctx.SaveChangesAsync(ct);
 
             return order.Id;
-
         }
     }
 }

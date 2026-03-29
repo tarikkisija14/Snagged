@@ -1,50 +1,54 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Snagged.Application.Catalog.Payment;
 using Snagged.Application.Catalog.Payment.Commands.CreatePayment;
 using Snagged.Application.Catalog.Payment.Commands.CreateStripePayment;
 using Snagged.Application.Catalog.Payment.Queries.GetAllPayments;
 using Snagged.Application.Catalog.Payment.Queries.GetAllPaymentsByUser;
+using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PaymentController : ControllerBase
+    [Authorize]
+    public class PaymentController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public PaymentController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         [HttpGet]
         public async Task<ActionResult<List<PaymentDto>>> GetAllPayments()
         {
-            var result = await _mediator.Send(new GetAllPaymentsQuery());
+            var result = await mediator.Send(new GetAllPaymentsQuery());
             return Ok(result);
         }
 
-        [HttpGet("user/{userId}")]
+        [HttpGet("user/{userId:int}")]
         public async Task<ActionResult<List<PaymentDto>>> GetPaymentsByUser(int userId)
         {
-            var result = await _mediator.Send(new GetPaymentsByUserQuery { UserId = userId });
+            var result = await mediator.Send(new GetPaymentsByUserQuery { UserId = userId });
             return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult<int>> CreatePayment([FromBody] CreatePaymentCommand command)
         {
-            var paymentId = await _mediator.Send(command);
-            return Ok(paymentId);
+            try
+            {
+                var paymentId = await mediator.Send(command);
+                return Ok(new { paymentId });
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
-        [HttpPost("stripe/create-intent/{orderId}")]
+
+        [HttpPost("stripe/create-intent/{orderId:int}")]
         public async Task<ActionResult> CreateStripePaymentIntent(int orderId)
         {
             try
             {
-                var clientSecret = await _mediator.Send(new CreateStripePaymentCommand
+                var clientSecret = await mediator.Send(new CreateStripePaymentCommand
                 {
                     OrderId = orderId,
                     Currency = "usd"
@@ -52,7 +56,7 @@ namespace Snagged.API.Controllers
 
                 return Ok(new { clientSecret });
             }
-            catch (KeyNotFoundException ex)
+            catch (SnaggedNotFoundException ex)
             {
                 return NotFound(new { error = ex.Message });
             }
@@ -61,8 +65,5 @@ namespace Snagged.API.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-
-
     }
 }
