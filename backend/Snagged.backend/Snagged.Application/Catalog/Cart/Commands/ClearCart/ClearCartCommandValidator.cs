@@ -11,8 +11,7 @@ namespace Snagged.Application.Catalog.Cart.Commands.ClearCart
     {
         public ClearCartCommandValidator()
         {
-            RuleFor(x => x.UserId)
-                .GreaterThan(0).WithMessage("UserId must be greater than 0.");
+            
         }
     }
 }

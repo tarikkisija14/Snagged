@@ -1,64 +1,54 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
+using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Common.Interfaces;
 using Snagged.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Cart.Commands.AddCartItem
 {
-    public class AddCartItemHandler(IAppDbContext ctx) : IRequestHandler<AddCartItemCommand, int>
+    public class AddCartItemHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+        : IRequestHandler<AddCartItemCommand, int>
     {
         public async Task<int> Handle(AddCartItemCommand request, CancellationToken ct)
         {
+            
+            var userId = currentUser.UserId;
 
-            var user = await ctx.Users.FindAsync(new object[] { request.UserId }, ct);
-            if (user == null)
-            {
-                throw new Exception($"User with Id {request.UserId} does not exist");
-            }
+            var itemExists = await ctx.Items.AnyAsync(i => i.Id == request.ItemId && !i.IsSold, ct);
+            if (!itemExists)
+                throw new SnaggedNotFoundException(
+                    $"Item with id {request.ItemId} was not found or is already sold.");
 
             var cart = await ctx.Carts
                 .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.UserId == user.Id, ct);
+               
+                .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsSavedForLater, ct);
 
-            if (cart == null)
+            if (cart is null)
             {
-                cart = new Snagged.Domain.Entities.Cart { UserId = user.Id,
-                    CartItems = new List<CartItem>()
-                };
-                
+                cart = new Snagged.Domain.Entities.Cart { UserId = userId };
                 ctx.Carts.Add(cart);
                 await ctx.SaveChangesAsync(ct);
             }
 
-            if (cart.CartItems == null)
-            {
-                cart.CartItems = new List<CartItem>();
-            }
-
             var existingItem = cart.CartItems.FirstOrDefault(i => i.ItemId == request.ItemId);
-            if (existingItem != null)
+            if (existingItem is not null)
             {
                 existingItem.Quantity += request.Quantity;
             }
             else
             {
-                var cartItem = new CartItem
+                ctx.CartItems.Add(new CartItem
                 {
                     CartId = cart.Id,
                     ItemId = request.ItemId,
                     Quantity = request.Quantity
-                };
-                ctx.CartItems.Add(cartItem);
+                });
             }
 
             await ctx.SaveChangesAsync(ct);
             return cart.Id;
-
         }
     }
 }

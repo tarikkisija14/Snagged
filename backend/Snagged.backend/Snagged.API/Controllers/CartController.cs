@@ -1,80 +1,132 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Snagged.Application.Catalog.Cart;
 using Snagged.Application.Catalog.Cart.Commands.AddCartItem;
 using Snagged.Application.Catalog.Cart.Commands.Checkout;
 using Snagged.Application.Catalog.Cart.Commands.ClearCart;
 using Snagged.Application.Catalog.Cart.Commands.DeleteCartItem;
+using Snagged.Application.Catalog.Cart.Commands.MoveToCart;
+using Snagged.Application.Catalog.Cart.Commands.SaveForLater;
 using Snagged.Application.Catalog.Cart.Commands.UpdateCartItem;
 using Snagged.Application.Catalog.Cart.Queries.GetAllCarts;
 using Snagged.Application.Catalog.Cart.Queries.GetCartByUser;
+using Snagged.Application.Catalog.Cart.Queries.GetSavedCartByUser;
+using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CartController : ControllerBase
+    [Authorize]
+    public class CartController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public CartController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAllCarts()
         {
-            var result = await _mediator.Send(new GetAllCartsQuery());
+            var result = await mediator.Send(new GetAllCartsQuery());
             return Ok(result);
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetCartByUserId(int userId)
+        [HttpGet]
+        public async Task<IActionResult> GetMyCart()
         {
-            var result = await _mediator.Send(new GetCartByUserQuery { UserId = userId });
-            if (result == null)
+            var result = await mediator.Send(new GetCartByUserQuery());
+            if (result is null)
                 return NotFound();
 
+            return Ok(result);
+        }
+
+        [HttpGet("saved")]
+        public async Task<IActionResult> GetSavedCart()
+        {
+            var result = await mediator.Send(new GetSavedCartByUserQuery());
             return Ok(result);
         }
 
         [HttpPost("item")]
         public async Task<IActionResult> AddCartItem([FromBody] AddCartItemCommand command)
         {
-            var cartId = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetCartByUserId), new { userId = command.UserId }, cartId);
+            try
+            {
+                var cartId = await mediator.Send(command);
+                return CreatedAtAction(nameof(GetMyCart), new { }, new { cartId });
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
-        [HttpPut("item/{cartItemId}")]
-        public async Task<IActionResult> UpdateCartItem(int cartItemId, [FromBody] UpdateCartitemCommand command)
+        [HttpPut("item/{cartItemId:int}")]
+        public async Task<IActionResult> UpdateCartItem(
+            int cartItemId, [FromBody] UpdateCartitemCommand command)
         {
             if (cartItemId != command.CartItemId)
-                return BadRequest("CartItemId mismatch");
+                return BadRequest(new { error = "CartItemId in URL does not match the request body." });
 
-            await _mediator.Send(command);
-            return NoContent();
+            try
+            {
+                await mediator.Send(command);
+                return NoContent();
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
-        [HttpDelete("item/{cartItemId}")]
+        [HttpDelete("item/{cartItemId:int}")]
         public async Task<IActionResult> DeleteCartItem(int cartItemId)
         {
-            await _mediator.Send(new DeleteCartItemCommand { CartItemId = cartItemId });
+            try
+            {
+                await mediator.Send(new DeleteCartItemCommand { CartItemId = cartItemId });
+                return NoContent();
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("clear")]
+        public async Task<IActionResult> ClearCart()
+        {
+            await mediator.Send(new ClearCartCommand());
             return NoContent();
         }
 
-        [HttpDelete("user/{userId}/clear")]
-        public async Task<IActionResult> ClearCart(int userId)
+        [HttpPut("save-for-later/{cartId:int}")]
+        public async Task<IActionResult> SaveForLater(int cartId)
         {
-            await _mediator.Send(new ClearCartCommand { UserId = userId });
+            await mediator.Send(new SaveForLaterCommand { CartId = cartId });
+            return NoContent();
+        }
+
+        [HttpPut("move-to-cart/{cartId:int}")]
+        public async Task<IActionResult> MoveToCart(int cartId)
+        {
+            await mediator.Send(new MoveToCartCommand { CartId = cartId });
             return NoContent();
         }
 
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout([FromBody] CheckoutCommand command)
         {
-            var orderId = await _mediator.Send(command);
-            return Ok(orderId);
+            try
+            {
+                var orderId = await mediator.Send(command);
+                return Ok(new { orderId });
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (SnaggedBusinessRuleException ex)
+            {
+                return Conflict(new { error = ex.Message });
+            }
         }
     }
 }

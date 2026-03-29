@@ -1,11 +1,6 @@
 ﻿using MediatR;
-using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Snagged.Application.Abstractions;
 
 namespace Snagged.Application.Catalog.Payment.Queries.GetAllPayments
 {
@@ -14,6 +9,7 @@ namespace Snagged.Application.Catalog.Payment.Queries.GetAllPayments
         public async Task<List<PaymentDto>> Handle(GetAllPaymentsQuery request, CancellationToken ct)
         {
             return await ctx.Payments
+                .AsNoTracking()
                 .Select(p => new PaymentDto
                 {
                     Id = p.Id,

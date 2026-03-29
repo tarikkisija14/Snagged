@@ -1,50 +1,44 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.Application.Catalog.Payment.Commands.CreatePayment
 {
+    
     public class CreatePaymentHandler(IAppDbContext ctx) : IRequestHandler<CreatePaymentCommand, int>
     {
         public async Task<int> Handle(CreatePaymentCommand request, CancellationToken ct)
         {
-
             var order = await ctx.Orders
-            .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.Item)
-            .FirstOrDefaultAsync(o => o.Id == request.OrderId, ct);
-            
-            if (order == null)
-                throw new KeyNotFoundException($"Order {request.OrderId} not found.");
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                .FirstOrDefaultAsync(o => o.Id == request.OrderId, ct);
+
+            if (order is null)
+                throw new SnaggedNotFoundException($"Order with id {request.OrderId} was not found.");
 
             
-            var payment = new Snagged.Domain.Entities.Payment
+            if (order.PaymentId.HasValue)
+                throw new SnaggedConflictException($"Order {request.OrderId} has already been paid.");
+
+            var payment = new Domain.Entities.Payment
             {
                 PaymentMethod = request.PaymentMethod,
                 PaidAmount = request.Amount,
-                PaymentDate = DateTime.Now,
+                PaymentDate = DateTime.UtcNow,
                 OrderId = order.Id,
                 StripePaymentIntentId = request.StripePaymentIntentId
-            }; ;
+            };
 
             ctx.Payments.Add(payment);
             order.Payment = payment;
-            order.Status = "Paid";
+            order.Status = PaymentStatus.Paid;
 
             foreach (var orderItem in order.OrderItems)
-            {
                 orderItem.Item.IsSold = true;
-            }
-
-
 
             await ctx.SaveChangesAsync(ct);
-
             return payment.Id;
         }
     }

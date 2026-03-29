@@ -13,149 +13,84 @@ namespace Snagged.API.Controllers
 {
     [ApiController]
     [Route("api/items")]
-    public class ItemImageController : ControllerBase
+    public class ItemImageController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public ItemImageController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         [HttpGet("images/all-list")]
         public async Task<IActionResult> GetAllImages()
         {
-            try
-            {
-                var result = await _mediator.Send(new GetAllImagesQuery());
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var result = await mediator.Send(new GetAllImagesQuery());
+            return Ok(result);
         }
 
-        [HttpGet("{itemId}/images")]
+        [HttpGet("{itemId:int}/images")]
         public async Task<IActionResult> GetImages(int itemId)
         {
-            try
-            {
-                var result = await _mediator.Send(new GetItemImagesQuery { ItemId = itemId });
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var result = await mediator.Send(new GetItemImagesQuery { ItemId = itemId });
+            return Ok(result);
         }
 
         [HttpPost("add-url")]
         public async Task<IActionResult> AddImage([FromBody] AddItemImageCommand command)
         {
-            try
-            {
-                var id = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetImages), new { itemId = command.ItemId }, new { id });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var id = await mediator.Send(command);
+            return CreatedAtAction(nameof(GetImages), new { itemId = command.ItemId }, new { id });
         }
 
-        [HttpPut("images/{imageId}/set-main")]
+        [HttpPut("images/{imageId:int}/set-main")]
         public async Task<IActionResult> SetMainImage(int imageId)
         {
-            try
-            {
-                var ok = await _mediator.Send(new SetMainImageCommand { ImageId = imageId });
-                if (!ok) return NotFound(new { message = "Image not found" });
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var ok = await mediator.Send(new SetMainImageCommand { ImageId = imageId });
+            if (!ok) return NotFound(new { message = "Image not found" });
+            return NoContent();
         }
 
-        [HttpPut("images/{imageId}/update")]
-        public async Task<IActionResult> UpdateImage(int imageId, UpdateItemImageCommand cmd)
+        [HttpPut("images/{imageId:int}/update")]
+        public async Task<IActionResult> UpdateImage(int imageId, [FromBody] UpdateItemImageCommand command)
         {
-            try
-            {
-                cmd.Id = imageId;
-                var ok = await _mediator.Send(cmd);
-                if (!ok) return NotFound(new { message = "Image not found" });
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            command.Id = imageId;
+            var ok = await mediator.Send(command);
+            if (!ok) return NotFound(new { message = "Image not found" });
+            return NoContent();
         }
 
         [HttpPost("upload")]
-         public async Task<IActionResult> UploadImage(int itemId, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> UploadImage(int itemId, [FromForm] List<IFormFile> files)
         {
-            if (files == null || files.Count == 0)
-                return BadRequest(new { message = "No files provided" });
+            if (files is null || files.Count == 0)
+                return BadRequest(new { message = "No files provided." });
 
-            try
+            var command = new UploadImageCommand
             {
-                var command = new UploadImageCommand
-                {
-                    ItemId = itemId,
-                    FilesBytes = new List<byte[]>(),
-                    FileNames = new List<string>()
-                };
+                ItemId = itemId,
+                FilesBytes = new List<byte[]>(),
+                FileNames = new List<string>()
+            };
 
-                foreach (var file in files)
-                {
-                    using var ms = new MemoryStream();
-                    await file.CopyToAsync(ms);
-                    command.FilesBytes.Add(ms.ToArray());
-                    command.FileNames.Add(file.FileName);
-                }
-
-                var results = await _mediator.Send(command);
-                return Ok(results);
-            }
-            catch (Exception ex)
+            foreach (var file in files)
             {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms);
+                command.FilesBytes.Add(ms.ToArray());
+                command.FileNames.Add(file.FileName);
             }
+
+            var results = await mediator.Send(command);
+            return Ok(results);
         }
 
-
-        [HttpDelete("images/{imageId}")]
+        [HttpDelete("images/{imageId:int}")]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
-            try
-            {
-                var result = await _mediator.Send(new DeleteItemImageCommand { Id = imageId });
-                if (!result) return NotFound(new { message = "Image not found" });
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var deleted = await mediator.Send(new DeleteItemImageCommand { Id = imageId });
+            if (!deleted) return NotFound(new { message = "Image not found" });
+            return NoContent();
         }
 
-        [HttpDelete("{itemId}/images/delete-all")]
-        public async Task<IActionResult> DeleteAll(int itemId)
+        [HttpDelete("{itemId:int}/images/delete-all")]
+        public async Task<IActionResult> DeleteAllImages(int itemId)
         {
-            try
-            {
-                var count = await _mediator.Send(new DeleteAllItemImagesCommand { ItemId = itemId });
-                return Ok(new { deleted = count });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var count = await mediator.Send(new DeleteAllItemImagesCommand { ItemId = itemId });
+            return Ok(new { deleted = count });
         }
-
     }
 }

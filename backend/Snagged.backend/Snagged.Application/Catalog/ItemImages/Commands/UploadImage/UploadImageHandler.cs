@@ -1,79 +1,63 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Snagged.Application.Abstractions;
+using Snagged.Application.Catalog.ItemImages;
+using Snagged.Application.Common.Exceptions;
 using Snagged.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.ItemImages.Commands.UploadImage
 {
     public class UploadImageHandler : IRequestHandler<UploadImageCommand, List<ItemImageDto>>
     {
-
         private readonly IAppDbContext _ctx;
         private readonly string _itemsFolder;
 
-        public UploadImageHandler(IAppDbContext ctx, IConfiguration config)
+        public UploadImageHandler(IAppDbContext ctx, IWebHostEnvironment env)
         {
             _ctx = ctx;
-
-            
-            var projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-            _itemsFolder = Path.Combine(projectRoot, config["ImageSettings:ItemsPath"]);
+            _itemsFolder = Path.Combine(env.ContentRootPath, "images", "items");
 
             if (!Directory.Exists(_itemsFolder))
                 Directory.CreateDirectory(_itemsFolder);
         }
 
-        public async Task<List<ItemImageDto>> Handle(UploadImageCommand request, CancellationToken cancellationToken)
+        public async Task<List<ItemImageDto>> Handle(UploadImageCommand request, CancellationToken ct)
         {
-            var result = new List<ItemImageDto>();
-            var itemExists = await _ctx.Items.AnyAsync(x => x.Id == request.ItemId, cancellationToken);
+            var itemExists = await _ctx.Items.AnyAsync(x => x.Id == request.ItemId, ct);
             if (!itemExists)
-                throw new Exception($"Item with Id {request.ItemId} does not exist. Cannot upload image.");
+                throw new SnaggedNotFoundException($"Item with id {request.ItemId} was not found.");
+
+            var newImages = new List<ItemImage>();
 
             for (int i = 0; i < request.FilesBytes.Count; i++)
             {
-                string extension = Path.GetExtension(request.FileNames[i]);
-                string fileName = $"{Guid.NewGuid()}{extension}";
-                string filePath = Path.Combine(_itemsFolder, fileName);
+                var extension = Path.GetExtension(request.FileNames[i]);
+                var fileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(_itemsFolder, fileName);
 
-                try
+                
+                await File.WriteAllBytesAsync(filePath, request.FilesBytes[i], ct);
+
+                var img = new ItemImage
                 {
-                    await File.WriteAllBytesAsync(filePath, request.FilesBytes[i], cancellationToken);
+                    ItemId = request.ItemId,
+                    ImageUrl = $"/images/items/{fileName}"
+                };
 
-                    var img = new ItemImage
-                    {
-                        ItemId = request.ItemId,
-                        ImageUrl = $"/images/items/{fileName}"  
-                    };
-
-                    _ctx.ItemImages.Add(img);
-                    await _ctx.SaveChangesAsync(cancellationToken);
-
-                    result.Add(new ItemImageDto
-                    {
-                        Id = img.Id,
-                        ItemId = img.ItemId,
-                        ImageUrl = img.ImageUrl
-                    });
-                }
-                catch (Exception ex)
-                {
-                    
-                    throw new Exception($"Error saving file {fileName}: {ex.Message} | Inner: {ex.InnerException?.Message}");
-                }
+                _ctx.ItemImages.Add(img);
+                newImages.Add(img);
             }
 
-            return result;
+            
+            await _ctx.SaveChangesAsync(ct);
+
+            return newImages.Select(img => new ItemImageDto
+            {
+                Id = img.Id,
+                ItemId = img.ItemId,
+                ImageUrl = img.ImageUrl
+            }).ToList();
         }
-
     }
-
-    
 }

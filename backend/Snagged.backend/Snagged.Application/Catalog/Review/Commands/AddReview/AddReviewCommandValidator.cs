@@ -11,8 +11,7 @@ namespace Snagged.Application.Catalog.Review.Commands.AddReview
     {
         public AddReviewCommandValidator()
         {
-            RuleFor(x => x.ReviewerId)
-                .GreaterThan(0).WithMessage("ReviewerId must be greater than 0.");
+            
 
             RuleFor(x => x.ReviewedUserId)
                 .GreaterThan(0).WithMessage("ReviewedUserId must be greater than 0.");

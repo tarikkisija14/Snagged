@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Snagged.Application.Catalog.Payment
+﻿namespace Snagged.Application.Catalog.Payment
 {
-    public class PaymentStatus
+    public static class PaymentStatus
     {
-        public const string Pending = "pending";
-        public const string Processing = "processing";
-        public const string Paid = "paid";
-        public const string Failed = "failed";
-        public const string Refunded = "refunded";
-
+        public const string Pending = "Pending";
+        public const string Processing = "Processing";
+        public const string Paid = "Paid";
+        public const string Failed = "Failed";
+        public const string Refunded = "Refunded";
     }
 }

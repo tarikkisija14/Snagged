@@ -1,10 +1,6 @@
 ﻿using MediatR;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.Application.Catalog.Cart.Commands.UpdateCartItem
 {
@@ -13,8 +9,9 @@ namespace Snagged.Application.Catalog.Cart.Commands.UpdateCartItem
         public async Task<Unit> Handle(UpdateCartitemCommand request, CancellationToken ct)
         {
             var cartItem = await ctx.CartItems.FindAsync(new object[] { request.CartItemId }, ct);
-            if (cartItem == null)
-                throw new KeyNotFoundException($"CartItem with Id {request.CartItemId} not found.");
+
+            if (cartItem is null)
+                throw new SnaggedNotFoundException($"Cart item with id {request.CartItemId} was not found.");
 
             cartItem.Quantity = request.Quantity;
             await ctx.SaveChangesAsync(ct);

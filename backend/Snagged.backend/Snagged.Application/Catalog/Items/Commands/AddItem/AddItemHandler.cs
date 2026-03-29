@@ -1,17 +1,14 @@
 ﻿using MediatR;
 using Snagged.Application.Abstractions;
+using Snagged.Application.Common.Interfaces;
 using Snagged.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Items.Commands.AddItem
 {
-    public class AddItemHandler(IAppDbContext ctx) :IRequestHandler<AddItemCommand,int>
+    public class AddItemHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+        : IRequestHandler<AddItemCommand, int>
     {
-        public async Task<int>Handle(AddItemCommand request,CancellationToken ct)
+        public async Task<int> Handle(AddItemCommand request, CancellationToken ct)
         {
             var item = new Item
             {
@@ -21,21 +18,25 @@ namespace Snagged.Application.Catalog.Items.Commands.AddItem
                 Condition = request.Condition,
                 CategoryId = request.CategoryId,
                 SubcategoryId = request.SubcategoryId,
-                UserId = request.UserId,
+               
+                UserId = currentUser.UserId,
                 IsSold = false,
                 CreatedAt = DateTime.UtcNow
             };
 
-            foreach (var url in request.ImageUrls)
+            for (int i = 0; i < request.ImageUrls.Count; i++)
             {
-                item.Images.Add(new ItemImage { ImageUrl = url });
+                item.Images.Add(new ItemImage
+                {
+                    ImageUrl = request.ImageUrls[i],
+                    IsMain = i == 0
+                });
             }
-            
+
             ctx.Items.Add(item);
             await ctx.SaveChangesAsync(ct);
 
             return item.Id;
-
         }
     }
 }
