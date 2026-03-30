@@ -1,17 +1,22 @@
+<!-- ── Active cart ────────────────────────────────────────────────────── -->
 <div id="cart-page" class="page-content" *ngIf="cart && cart.cartItems.length > 0; else emptyCart">
   <div class="container">
+
     <div class="page-header">
       <h1>Your Shopping Cart</h1>
       <p>Review your items and proceed to checkout</p>
     </div>
 
     <div class="cart-container">
+
       <!-- Cart Items -->
       <div class="cart-items">
         <div class="cart-item" *ngFor="let cartItem of cart.cartItems">
+
           <div class="cart-item-image"
                [style.backgroundImage]="'url(' + getItemImage(cartItem.item) + ')'">
           </div>
+
           <div class="cart-item-details">
             <h4>{{ cartItem.item?.title }}</h4>
             <p>{{ cartItem.item?.condition }}</p>
@@ -20,17 +25,26 @@
               <span class="quantity">{{ cartItem.quantity }}</span>
               <button class="quantity-btn" (click)="increaseQuantity(cartItem)">+</button>
             </div>
+            <!-- Save for later link sits under the quantity controls -->
+            <button class="save-later-btn"
+                    (click)="saveCartForLater()"
+                    [disabled]="isSavingForLater">
+              <i class="far fa-bookmark"></i> Save for later
+            </button>
           </div>
+
           <div class="cart-item-price">
             ${{ ((cartItem.item?.price ?? 0) * cartItem.quantity) | number:'1.2-2' }}
           </div>
+
           <button class="remove-item" (click)="removeItem(cartItem)">
             <i class="fas fa-trash"></i>
           </button>
+
         </div>
       </div>
 
-      <!-- Cart Summary -->
+      <!-- Cart Summary — unchanged -->
       <div class="cart-summary">
         <h3>Order Summary</h3>
         <div class="summary-row">
@@ -65,10 +79,12 @@
           </p>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
+<!-- ── Empty cart — unchanged ─────────────────────────────────────────── -->
 <ng-template #emptyCart>
   <div class="empty-cart">
     <i class="fas fa-shopping-cart"></i>
@@ -77,3 +93,44 @@
     <a routerLink="/shop" class="btn">Go to Shop</a>
   </div>
 </ng-template>
+
+<!-- ── Saved for later section ────────────────────────────────────────── -->
+<div class="page-content" *ngIf="savedCart && savedCart.cartItems.length > 0">
+  <div class="container">
+
+    <div class="saved-section-header">
+      <h2><i class="far fa-bookmark"></i> Saved for Later</h2>
+      <button class="btn" style="padding: 10px 20px; font-size: 0.875rem;" (click)="moveToCart()">
+        <i class="fas fa-shopping-cart"></i> Move All to Cart
+      </button>
+    </div>
+
+    <div class="cart-items" style="margin-top: 20px;">
+      <div class="cart-item" *ngFor="let savedItem of savedCart.cartItems">
+
+        <div class="cart-item-image"
+             [style.backgroundImage]="'url(' + getItemImage(savedItem.item) + ')'">
+        </div>
+
+        <div class="cart-item-details">
+          <h4>{{ savedItem.item?.title }}</h4>
+          <p>{{ savedItem.item?.condition }}</p>
+          <p style="font-size: 0.85rem; color: var(--text-light);">Qty: {{ savedItem.quantity }}</p>
+          <button class="save-later-btn" (click)="moveToCart()">
+            <i class="fas fa-shopping-cart"></i> Move to cart
+          </button>
+        </div>
+
+        <div class="cart-item-price">
+          ${{ ((savedItem.item?.price ?? 0) * savedItem.quantity) | number:'1.2-2' }}
+        </div>
+
+        <button class="remove-item" (click)="removeSavedItem(savedItem)">
+          <i class="fas fa-trash"></i>
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</div>

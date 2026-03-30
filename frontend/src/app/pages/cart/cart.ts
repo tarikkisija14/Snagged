@@ -17,7 +17,11 @@ import { SHIPPING_COST, TAX_RATE } from '../../shared/constants/order-total.cons
 })
 export class Cart implements OnInit, OnDestroy {
   cart: CartModel | null = null;
+  savedCart: CartModel | null = null;
+
   isLoading = false;
+  isSavedLoading = false;
+  isSavingForLater = false;
 
   readonly shippingCost = SHIPPING_COST;
   readonly taxRate      = TAX_RATE;
@@ -37,9 +41,11 @@ export class Cart implements OnInit, OnDestroy {
       if (!userId) {
         this.router.navigate(['/home/auth/login']);
         this.cart = null;
+        this.savedCart = null;
         return;
       }
       this.loadCart();
+      this.loadSavedCart();
     });
   }
 
@@ -63,6 +69,21 @@ export class Cart implements OnInit, OnDestroy {
     });
   }
 
+  loadSavedCart(): void {
+    this.isSavedLoading = true;
+    this.cartService.getSavedCart().subscribe({
+      next: (cartDto: CartApiDto) => {
+        this.savedCart = cartDto?.items?.length ? this.mapCartDto(cartDto) : null;
+        this.isSavedLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.savedCart = null;
+        this.isSavedLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   private mapCartDto(dto: CartApiDto): CartModel {
     return {
@@ -79,7 +100,6 @@ export class Cart implements OnInit, OnDestroy {
         addedAt:  new Date(i.addedAt),
         price:    i.price,
         imageUrl: i.imageUrl ?? '',
-        // Populate item so the template can read cartItem.item.title / .price
         item: {
           id:          i.itemId,
           title:       i.itemName,
@@ -95,6 +115,8 @@ export class Cart implements OnInit, OnDestroy {
       }))
     };
   }
+
+
 
   increaseQuantity(item: CartItem): void {
     const newQty = item.quantity + 1;
@@ -121,11 +143,54 @@ export class Cart implements OnInit, OnDestroy {
     });
   }
 
+
+  saveCartForLater(): void {
+    if (!this.cart) return;
+    this.isSavingForLater = true;
+    this.cartService.saveForLater(this.cart.id).subscribe({
+      next: () => {
+        this.savedCart = this.cart;
+        this.cart      = null;
+        this.isSavingForLater = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isSavingForLater = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+
+
+
+  moveToCart(): void {
+    if (!this.savedCart) return;
+    this.cartService.moveToCart(this.savedCart.id).subscribe({
+      next: () => {
+        // Reload both sections to reflect server state
+        this.loadCart();
+        this.savedCart = null;
+        this.cdr.detectChanges();
+      },
+      error: () => this.cdr.detectChanges()
+    });
+  }
+
+  removeSavedItem(item: CartItem): void {
+    this.cartService.deleteCartItem(item.id).subscribe(() => {
+      if (this.savedCart)
+        this.savedCart.cartItems = this.savedCart.cartItems.filter(ci => ci.id !== item.id);
+      if (!this.savedCart?.cartItems.length) this.savedCart = null;
+      this.cdr.detectChanges();
+    });
+  }
+
+
+
   getSubtotal(): number {
     if (!this.cart) return 0;
-    return this.cart.cartItems.reduce(
-      (sum, ci) => sum + ci.price * ci.quantity, 0
-    );
+    return this.cart.cartItems.reduce((sum, ci) => sum + ci.price * ci.quantity, 0);
   }
 
   getShipping(): number { return this.shippingCost; }
@@ -137,21 +202,22 @@ export class Cart implements OnInit, OnDestroy {
   }
 
 
+
   getItemImage(item: ItemModel | undefined): string {
     if (!item) return `${this.baseImageUrl}/images/items/placeholder.png`;
 
-    // Find the CartItem that owns this ItemModel to read its top-level imageUrl
-    const cartItem = this.cart?.cartItems.find(ci => ci.itemId === item.id);
-    const imageUrl = cartItem?.imageUrl?.trim()
-      || item.images?.[0]?.imageUrl?.trim();
+    const cartItem = this.cart?.cartItems.find(ci => ci.itemId === item.id)
+      ?? this.savedCart?.cartItems.find(ci => ci.itemId === item.id);
+
+    const imageUrl = cartItem?.imageUrl?.trim() || item.images?.[0]?.imageUrl?.trim();
 
     if (imageUrl) {
-      return imageUrl.startsWith('http')
-        ? imageUrl
-        : `${this.baseImageUrl}${imageUrl}`;
+      return imageUrl.startsWith('http') ? imageUrl : `${this.baseImageUrl}${imageUrl}`;
     }
     return `${this.baseImageUrl}/images/items/placeholder.png`;
   }
+
+
 
   proceedToCheckout(): void {
     if (!this.cart?.cartItems.length) return;
