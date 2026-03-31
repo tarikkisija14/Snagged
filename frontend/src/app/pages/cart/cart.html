@@ -1,11 +1,14 @@
+<!-- ── Active cart ─────────────────────────────────────────────────────── -->
 <div id="cart-page" class="page-content" *ngIf="cart && cart.cartItems.length > 0; else emptyCart">
   <div class="container">
+
     <div class="page-header">
       <h1>Your Shopping Cart</h1>
       <p>Review your items and proceed to checkout</p>
     </div>
 
     <div class="cart-container">
+
       <!-- Cart Items -->
       <div class="cart-items">
         <div class="cart-item" *ngFor="let cartItem of cart.cartItems">
@@ -28,9 +31,19 @@
             <i class="fas fa-trash"></i>
           </button>
         </div>
+
+        <!-- Fix #6: save-for-later acts on the WHOLE cart — placed once, outside *ngFor -->
+        <div class="save-cart-row">
+          <button class="save-later-btn"
+                  (click)="saveCartForLater()"
+                  [disabled]="isSavingForLater">
+            <i class="far fa-bookmark"></i>
+            Save entire cart for later
+          </button>
+        </div>
       </div>
 
-      <!-- Cart Summary -->
+      <!-- Cart Summary — unchanged -->
       <div class="cart-summary">
         <h3>Order Summary</h3>
         <div class="summary-row">
@@ -61,14 +74,17 @@
         <div style="margin-top: 30px; padding: 20px; background: var(--light); border-radius: var(--radius);">
           <h4 style="margin-bottom: 10px; font-size: 1rem;">Sustainability Impact</h4>
           <p style="font-size: 0.9rem; color: var(--text-light);">
-            By purchasing these items, you've saved approximately <strong>15kg of clothing</strong> from landfill and reduced <strong>45kg of CO2 emissions</strong>.
+            By purchasing these items, you've saved approximately <strong>15kg of clothing</strong>
+            from landfill and reduced <strong>45kg of CO2 emissions</strong>.
           </p>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
+<!-- ── Empty cart — unchanged ─────────────────────────────────────────── -->
 <ng-template #emptyCart>
   <div class="empty-cart">
     <i class="fas fa-shopping-cart"></i>
@@ -77,3 +93,37 @@
     <a routerLink="/shop" class="btn">Go to Shop</a>
   </div>
 </ng-template>
+
+<!-- ── Saved for later ────────────────────────────────────────────────── -->
+<div class="page-content" *ngIf="savedCart && savedCart.cartItems.length > 0">
+  <div class="container">
+
+    <div class="saved-section-header">
+      <h2><i class="far fa-bookmark"></i> Saved for Later</h2>
+      <!-- Fix #7: single "Move All" button at section level only — no per-item button -->
+      <button class="btn" style="padding: 10px 20px; font-size: 0.875rem;" (click)="moveToCart()">
+        <i class="fas fa-shopping-cart"></i> Move All to Cart
+      </button>
+    </div>
+
+    <div class="cart-items" style="margin-top: 20px;">
+      <div class="cart-item" *ngFor="let savedItem of savedCart.cartItems">
+        <div class="cart-item-image"
+             [style.backgroundImage]="'url(' + getItemImage(savedItem.item) + ')'">
+        </div>
+        <div class="cart-item-details">
+          <h4>{{ savedItem.item?.title }}</h4>
+          <p>{{ savedItem.item?.condition }}</p>
+          <p style="font-size: 0.85rem; color: var(--text-light);">Qty: {{ savedItem.quantity }}</p>
+        </div>
+        <div class="cart-item-price">
+          ${{ ((savedItem.item?.price ?? 0) * savedItem.quantity) | number:'1.2-2' }}
+        </div>
+        <button class="remove-item" (click)="removeSavedItem(savedItem)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

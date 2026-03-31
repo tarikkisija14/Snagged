@@ -44,7 +44,7 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
 
             var cart = new Snagged.Domain.Entities.Cart
             {
-                User = user, 
+                User = user,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 IsSavedForLater = false
@@ -52,7 +52,7 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
 
             var profile = new Profile
             {
-                User = user, 
+                User = user,
                 Username = $"{user.FirstName}{user.LastName}",
                 PhoneNumber = "",
                 Bio = "",
@@ -64,6 +64,16 @@ namespace Snagged.Application.Catalog.Auth.Commands.Register
             _context.Carts.Add(cart);
             _context.Profiles.Add(profile);
 
+            await _context.SaveChangesAsync(ct);
+
+            _context.Notifications.Add(new Snagged.Domain.Entities.Notification
+            {
+                User = user,
+                Message = $"Welcome to Snagged, {user.FirstName}! Start shopping or list your first item.",
+                NotificationType = "Welcome",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
             await _context.SaveChangesAsync(ct);
 
             var token = _jwtService.GenerateToken(user);

@@ -5,21 +5,18 @@ import { catchError, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const token = localStorage.getItem('token');
+  const token  = localStorage.getItem('token');
 
   if (token && token !== 'null') {
     const cloned = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
+      setHeaders: { Authorization: `Bearer ${token}` }
     });
 
     return next(cloned).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          console.log('401 error - clearing token and redirecting to login');
           localStorage.removeItem('token');
-          router.navigate(['/login']);
+          router.navigate(['/home/auth/login']);
         }
         return throwError(() => error);
       })

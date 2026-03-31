@@ -4,9 +4,10 @@ using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.Application.Catalog.Cart.Commands.UpdateCartItem
 {
-    public class UpdateCartItemHandler(IAppDbContext ctx) : IRequestHandler<UpdateCartitemCommand, Unit>
+    public class UpdateCartItemHandler(IAppDbContext ctx)
+        : IRequestHandler<UpdateCartItemCommand, Unit>
     {
-        public async Task<Unit> Handle(UpdateCartitemCommand request, CancellationToken ct)
+        public async Task<Unit> Handle(UpdateCartItemCommand request, CancellationToken ct)
         {
             var cartItem = await ctx.CartItems.FindAsync(new object[] { request.CartItemId }, ct);
 
