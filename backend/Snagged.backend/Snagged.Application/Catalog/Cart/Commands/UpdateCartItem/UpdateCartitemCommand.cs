@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Cart.Commands.UpdateCartItem
 {
-    public class UpdateCartitemCommand : IRequest<Unit>
+    public class UpdateCartItemCommand : IRequest<Unit>
     {
         public int CartItemId { get; set; }
         public int Quantity { get; set; }

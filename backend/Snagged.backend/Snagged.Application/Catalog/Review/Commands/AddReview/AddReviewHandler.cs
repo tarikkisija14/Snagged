@@ -20,6 +20,16 @@ namespace Snagged.Application.Catalog.Review.Commands.AddReview
             ctx.Reviews.Add(review);
             await ctx.SaveChangesAsync(cancellationToken);
 
+            ctx.Notifications.Add(new Snagged.Domain.Entities.Notification
+            {
+                UserId = request.ReviewedUserId,
+                Message = $"Someone left you a {request.Rating}-star review!",
+                NotificationType = "Review",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+            await ctx.SaveChangesAsync(cancellationToken);
+
             return review.Id;
         }
     }

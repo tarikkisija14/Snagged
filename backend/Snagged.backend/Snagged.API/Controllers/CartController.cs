@@ -60,7 +60,7 @@ namespace Snagged.API.Controllers
 
         [HttpPut("item/{cartItemId:int}")]
         public async Task<IActionResult> UpdateCartItem(
-            int cartItemId, [FromBody] UpdateCartitemCommand command)
+            int cartItemId, [FromBody] UpdateCartItemCommand command)
         {
             if (cartItemId != command.CartItemId)
                 return BadRequest(new { error = "CartItemId in URL does not match the request body." });

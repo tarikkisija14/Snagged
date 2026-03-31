@@ -3,7 +3,6 @@ using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,9 +10,8 @@ using Snagged.Application.Abstractions;
 using Snagged.Application.Catalog.Auth.Commands.Register;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Common.Behaviours;
-using Snagged.Application.Common.Interfaces;
 using Snagged.Application.Common.Helper;
-using Snagged.Infrastructure;
+using Snagged.Application.Common.Interfaces;
 using Snagged.Infrastructure.Commom;
 using Snagged.Infrastructure.Database;
 using Snagged.Infrastructure.Services;
@@ -25,19 +23,11 @@ using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 // DATABASE
-builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.MigrationsAssembly("Snagged.Infrastructure")
-    )
-);
-
-builder.Services.AddScoped<IAppDbContext>(provider =>
-    provider.GetRequiredService<DatabaseContext>());
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-//CURRENTUSERSERVICE
+// CURRENT USER SERVICE
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -46,12 +36,10 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<GetItemsQueryHandler>();
     cfg.RegisterServicesFromAssemblies(
-        typeof(Program).Assembly,                      
-        typeof(RegisterUserCommand).Assembly,          
+        typeof(Program).Assembly,
+        typeof(RegisterUserCommand).Assembly,
         typeof(RegisterUserHandler).Assembly);
 });
-
-builder.Services.AddInfrastructure(builder.Configuration);
 
 // AUTHENTICATION (JWT)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -63,18 +51,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-            )
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
 
 builder.Services.AddAuthorization();
-
 
 // RATE LIMITING
 builder.Services.AddRateLimiter(options =>
@@ -82,9 +66,7 @@ builder.Services.AddRateLimiter(options =>
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
     {
         if (HttpMethods.IsOptions(context.Request.Method))
-        {
             return RateLimitPartition.GetNoLimiter("cors-preflight");
-        }
 
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
@@ -118,19 +100,13 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
-    {
         policy
-            .WithOrigins(
-                "http://localhost:4200",
-                "https://localhost:4200"
-            )
+            .WithOrigins("http://localhost:4200", "https://localhost:4200")
             .AllowAnyHeader()
-            .AllowAnyMethod();
-        
-    });
+            .AllowAnyMethod());
 });
 
-// CONTROLLERS and VALIDATION
+// CONTROLLERS + VALIDATION
 builder.Services.AddControllers();
 
 builder.Services
@@ -146,7 +122,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Snagged API", Version = "v1" });
 
-    // Add this block for JWT support
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
@@ -156,15 +131,14 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
-            new OpenApiSecurityScheme{
-                Reference = new OpenApiReference{
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
-            new string[]{}
+            new string[] {}
         }
     });
 });
@@ -200,19 +174,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseCors("AllowAngular");      
-
+app.UseCors("AllowAngular");
 app.UseRouting();
-
 app.UseRateLimiter();
-
-app.UseAuthentication();        
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 await app.Services.InitializeDatabaseAsync(app.Environment);
-
 
 app.Run();

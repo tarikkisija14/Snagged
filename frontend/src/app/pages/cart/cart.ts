@@ -19,8 +19,8 @@ export class Cart implements OnInit, OnDestroy {
   cart: CartModel | null = null;
   savedCart: CartModel | null = null;
 
-  isLoading = false;
-  isSavedLoading = false;
+  isLoading       = false;
+  isSavedLoading  = false;
   isSavingForLater = false;
 
   readonly shippingCost = SHIPPING_COST;
@@ -40,7 +40,7 @@ export class Cart implements OnInit, OnDestroy {
     this.authSub = this.authService.currentUser$.subscribe(userId => {
       if (!userId) {
         this.router.navigate(['/home/auth/login']);
-        this.cart = null;
+        this.cart      = null;
         this.savedCart = null;
         return;
       }
@@ -53,6 +53,8 @@ export class Cart implements OnInit, OnDestroy {
     this.authSub?.unsubscribe();
   }
 
+
+
   loadCart(): void {
     this.isLoading = true;
     this.cartService.getCartByUser().subscribe({
@@ -62,7 +64,8 @@ export class Cart implements OnInit, OnDestroy {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Failed to load cart:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -73,17 +76,21 @@ export class Cart implements OnInit, OnDestroy {
     this.isSavedLoading = true;
     this.cartService.getSavedCart().subscribe({
       next: (cartDto: CartApiDto) => {
-        this.savedCart = cartDto?.items?.length ? this.mapCartDto(cartDto) : null;
+        this.savedCart      = cartDto?.items?.length ? this.mapCartDto(cartDto) : null;
         this.isSavedLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.savedCart = null;
+      error: (err) => {
+        // Fix #15: log instead of silently swallowing
+        console.error('Failed to load saved cart:', err);
+        this.savedCart      = null;
         this.isSavedLoading = false;
         this.cdr.detectChanges();
       }
     });
   }
+
+
 
   private mapCartDto(dto: CartApiDto): CartModel {
     return {
@@ -120,26 +127,29 @@ export class Cart implements OnInit, OnDestroy {
 
   increaseQuantity(item: CartItem): void {
     const newQty = item.quantity + 1;
-    this.cartService.updateCartItem(item.id, newQty).subscribe(() => {
-      item.quantity = newQty;
-      this.cdr.detectChanges();
+    this.cartService.updateCartItem(item.id, newQty).subscribe({
+      next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
+      error: (err) => console.error('Failed to update quantity:', err)
     });
   }
 
   decreaseQuantity(item: CartItem): void {
     if (item.quantity <= 1) return;
     const newQty = item.quantity - 1;
-    this.cartService.updateCartItem(item.id, newQty).subscribe(() => {
-      item.quantity = newQty;
-      this.cdr.detectChanges();
+    this.cartService.updateCartItem(item.id, newQty).subscribe({
+      next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
+      error: (err) => console.error('Failed to update quantity:', err)
     });
   }
 
   removeItem(item: CartItem): void {
-    this.cartService.deleteCartItem(item.id).subscribe(() => {
-      if (this.cart)
-        this.cart.cartItems = this.cart.cartItems.filter(ci => ci.id !== item.id);
-      this.cdr.detectChanges();
+    this.cartService.deleteCartItem(item.id).subscribe({
+      next: () => {
+        if (this.cart)
+          this.cart.cartItems = this.cart.cartItems.filter(ci => ci.id !== item.id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Failed to remove item:', err)
     });
   }
 
@@ -149,12 +159,13 @@ export class Cart implements OnInit, OnDestroy {
     this.isSavingForLater = true;
     this.cartService.saveForLater(this.cart.id).subscribe({
       next: () => {
-        this.savedCart = this.cart;
-        this.cart      = null;
+        this.savedCart        = this.cart;
+        this.cart             = null;
         this.isSavingForLater = false;
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Failed to save cart for later:', err);
         this.isSavingForLater = false;
         this.cdr.detectChanges();
       }
@@ -168,21 +179,26 @@ export class Cart implements OnInit, OnDestroy {
     if (!this.savedCart) return;
     this.cartService.moveToCart(this.savedCart.id).subscribe({
       next: () => {
-        // Reload both sections to reflect server state
-        this.loadCart();
         this.savedCart = null;
-        this.cdr.detectChanges();
+        this.loadCart();
       },
-      error: () => this.cdr.detectChanges()
+      error: (err) => {
+        console.error('Failed to move cart:', err);
+        this.cdr.detectChanges();
+      }
     });
   }
 
   removeSavedItem(item: CartItem): void {
-    this.cartService.deleteCartItem(item.id).subscribe(() => {
-      if (this.savedCart)
-        this.savedCart.cartItems = this.savedCart.cartItems.filter(ci => ci.id !== item.id);
-      if (!this.savedCart?.cartItems.length) this.savedCart = null;
-      this.cdr.detectChanges();
+    this.cartService.deleteCartItem(item.id).subscribe({
+      next: () => {
+        if (this.savedCart) {
+          this.savedCart.cartItems = this.savedCart.cartItems.filter(ci => ci.id !== item.id);
+          if (!this.savedCart.cartItems.length) this.savedCart = null;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Failed to remove saved item:', err)
     });
   }
 
@@ -211,9 +227,9 @@ export class Cart implements OnInit, OnDestroy {
 
     const imageUrl = cartItem?.imageUrl?.trim() || item.images?.[0]?.imageUrl?.trim();
 
-    if (imageUrl) {
+    if (imageUrl)
       return imageUrl.startsWith('http') ? imageUrl : `${this.baseImageUrl}${imageUrl}`;
-    }
+
     return `${this.baseImageUrl}/images/items/placeholder.png`;
   }
 
@@ -221,7 +237,6 @@ export class Cart implements OnInit, OnDestroy {
 
   proceedToCheckout(): void {
     if (!this.cart?.cartItems.length) return;
-
     this.cartService.checkout().subscribe({
       next: ({ orderId }) => this.router.navigate(['/payment', orderId]),
       error: (err) => console.error('Checkout failed:', err)

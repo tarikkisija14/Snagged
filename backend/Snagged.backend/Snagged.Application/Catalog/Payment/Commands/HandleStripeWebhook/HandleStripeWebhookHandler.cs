@@ -10,7 +10,7 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
     {
         public async Task Handle(HandleStripeWebhookCommand request, CancellationToken ct)
         {
-            
+
             var alreadyProcessed = await ctx.Payments
                 .AnyAsync(p => p.StripePaymentIntentId == request.StripePaymentIntentId, ct);
             if (alreadyProcessed)
@@ -32,27 +32,37 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
 
             ctx.Payments.Add(payment);
 
-           
+
             order.Status = PaymentStatus.Paid;
 
             await ctx.SaveChangesAsync(ct);
 
-           
+
             order.PaymentId = payment.Id;
+            await ctx.SaveChangesAsync(ct);
+
+            ctx.Notifications.Add(new Domain.Entities.Notification
+            {
+                UserId = order.BuyerId,
+                Message = $"Payment for order #{order.Id} was successful. Thank you for your purchase!",
+                NotificationType = "Payment",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
             await ctx.SaveChangesAsync(ct);
         }
 
         private async Task<Domain.Entities.Order?> ResolveOrderAsync(
             HandleStripeWebhookCommand request, CancellationToken ct)
         {
-           
+
             var order = await ctx.Orders
                 .FirstOrDefaultAsync(o => o.StripePaymentIntentId == request.StripePaymentIntentId, ct);
 
             if (order is not null)
                 return order;
 
-            
+
             if (!request.OrderIdHint.HasValue)
                 return null;
 

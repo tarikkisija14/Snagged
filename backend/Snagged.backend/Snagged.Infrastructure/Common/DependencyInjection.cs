@@ -1,24 +1,26 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Snagged.Application.Abstractions;
 using Snagged.Infrastructure.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace Snagged.Infrastructure.Commom
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddInfrastructure(
+            this IServiceCollection services,
+            IConfiguration config)
         {
             services.AddDbContext<DatabaseContext>(options =>
-                options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    config.GetConnectionString("DefaultConnection"),
+                    sqlOptions => sqlOptions.MigrationsAssembly("Snagged.Infrastructure")
+                )
+            );
 
-            services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<DatabaseContext>());
+            services.AddScoped<IAppDbContext>(provider =>
+                provider.GetRequiredService<DatabaseContext>());
 
             return services;
         }

@@ -39,6 +39,45 @@
         <mat-icon>favorite_border</mat-icon>
       </button>
 
+      <!-- Notification Bell -->
+      <div class="notif-wrapper" *ngIf="authService.isLoggedIn()">
+        <button class="icon-btn notif-btn" aria-label="Notifications" (click)="toggleNotifPanel()">
+          <mat-icon>notifications_none</mat-icon>
+          <span class="notif-badge" *ngIf="unreadCount > 0">
+            {{ unreadCount > 9 ? '9+' : unreadCount }}
+          </span>
+        </button>
+
+        <div class="notif-panel" *ngIf="showNotifPanel">
+          <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-mark-all" (click)="markAllRead()" *ngIf="unreadCount > 0">
+              Mark all read
+            </button>
+          </div>
+          <div class="notif-list" *ngIf="notifications.length > 0; else noNotifs">
+            <div
+              class="notif-item"
+              *ngFor="let n of notifications"
+              [class.unread]="!n.isRead"
+              (click)="markAsRead(n, $event)"
+            >
+              <div class="notif-dot" *ngIf="!n.isRead"></div>
+              <div class="notif-content">
+                <p class="notif-message">{{ n.message }}</p>
+                <span class="notif-time">{{ n.createdAt | date:'MMM d, h:mm a' }}</span>
+              </div>
+              <button class="notif-delete-btn" title="Delete" (click)="deleteNotification(n, $event)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+          <ng-template #noNotifs>
+            <div class="notif-empty">No notifications</div>
+          </ng-template>
+        </div>
+      </div>
+
       <button
         class="icon-btn cart-btn"
         aria-label="Cart"
