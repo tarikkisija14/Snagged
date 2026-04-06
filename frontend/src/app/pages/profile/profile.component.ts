@@ -1,89 +1,86 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { ProfileService } from '../../core/services/profile-service/profile-service';
-import { ProfileModel } from '../../shared/models/profile.model';
-import { AuthService } from '../../core/services/auth-service/AuthService';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import {ItemModel} from '../../shared/models/item.model';
+import { ProfileService }  from '../../shared/services/profile-service';
+import { ProfileModel }    from '../../shared/models/profile.model';
+import { AuthService }     from '../../core/services/auth-service/AuthService';
+import { Router }          from '@angular/router';
+import { Subject }         from 'rxjs';
+import { takeUntil }       from 'rxjs/operators';
+import { ItemModel }       from '../../shared/models/item.model';
 
 @Component({
   selector: 'app-profile',
-  templateUrl: './profile.component.html',
   standalone: false,
+  templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   profile?: ProfileModel;
-  isLoading: boolean = false;
-  private destroy$ = new Subject<void>();
+  isLoading    = false;
+  profileError = false;
   items: ItemModel[] = [];
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private profileService: ProfileService,
     private authService: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
-      console.log('User not authenticated, redirecting to login');
-      this.router.navigate(['/login']);
+      this.router.navigate(['/home/auth/login']);
       return;
     }
-
     this.loadProfile();
     this.loadMyItems();
   }
 
-  loadProfile() {
-    this.isLoading = true;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadProfile(): void {
+    this.isLoading    = true;
+    this.profileError = false;
 
     this.profileService.getProfile()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.profile = data;
+          this.profile   = data;
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
-        error: (err) => {
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        }
+        error: () => {
+          this.isLoading    = false;
+          this.profileError = true;
+          this.cdr.markForCheck();
+        },
       });
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  loadMyItems(): void {
+    this.profileService.getMyItems()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next:  (data) => { this.items = data; this.cdr.markForCheck(); },
+        error: () => {},
+      });
   }
 
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/']);
   }
-  onEditItem(item: ItemModel) {
-    // TODO
-    console.log('Edit item:', item);
+
+  onViewItem(item: ItemModel): void {
+    this.router.navigate(['/items', item.id]);
   }
 
-  onViewItem(item: ItemModel) {
-    // TODO
-    console.log('View item:', item);
-  }
-  loadMyItems(): void {
-    this.profileService.getMyItems()
-      .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data) => {
-        this.items = data;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Greška pri učitavanju artikala', err);
-      }
-    });
+  onEditItem(_item: ItemModel): void {
+    // TODO: implement item editing
   }
 }

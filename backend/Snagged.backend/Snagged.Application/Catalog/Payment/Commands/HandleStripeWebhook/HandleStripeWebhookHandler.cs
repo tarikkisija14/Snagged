@@ -10,7 +10,6 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
     {
         public async Task Handle(HandleStripeWebhookCommand request, CancellationToken ct)
         {
-
             var alreadyProcessed = await ctx.Payments
                 .AnyAsync(p => p.StripePaymentIntentId == request.StripePaymentIntentId, ct);
             if (alreadyProcessed)
@@ -25,21 +24,27 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                 StripePaymentIntentId = request.StripePaymentIntentId,
                 StripeChargeId = request.StripeChargeId,
                 PaidAmount = request.PaidAmount,
-                PaymentMethod = request.PaymentMethod,
+                PaymentMethod = request.PaymentMethod ?? string.Empty,
                 PaymentDate = DateTime.UtcNow,
                 OrderId = order.Id
             };
 
             ctx.Payments.Add(payment);
-
-
-            order.Status = PaymentStatus.Paid;
-
             await ctx.SaveChangesAsync(ct);
-
 
             order.PaymentId = payment.Id;
-            await ctx.SaveChangesAsync(ct);
+            order.Status = PaymentStatus.Paid;
+
+            var orderItems = await ctx.OrderItems
+                .Include(oi => oi.Item)
+                .Where(oi => oi.OrderId == order.Id)
+                .ToListAsync(ct);
+
+            foreach (var oi in orderItems)
+            {
+                if (oi.Item != null)
+                    oi.Item.IsSold = true;
+            }
 
             ctx.Notifications.Add(new Domain.Entities.Notification
             {
@@ -49,19 +54,18 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
+
             await ctx.SaveChangesAsync(ct);
         }
 
         private async Task<Domain.Entities.Order?> ResolveOrderAsync(
             HandleStripeWebhookCommand request, CancellationToken ct)
         {
-
             var order = await ctx.Orders
                 .FirstOrDefaultAsync(o => o.StripePaymentIntentId == request.StripePaymentIntentId, ct);
 
             if (order is not null)
                 return order;
-
 
             if (!request.OrderIdHint.HasValue)
                 return null;

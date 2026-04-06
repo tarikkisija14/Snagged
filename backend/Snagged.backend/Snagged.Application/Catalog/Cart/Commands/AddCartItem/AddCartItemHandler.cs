@@ -12,7 +12,6 @@ namespace Snagged.Application.Catalog.Cart.Commands.AddCartItem
     {
         public async Task<int> Handle(AddCartItemCommand request, CancellationToken ct)
         {
-            
             var userId = currentUser.UserId;
 
             var itemExists = await ctx.Items.AnyAsync(i => i.Id == request.ItemId && !i.IsSold, ct);
@@ -22,13 +21,33 @@ namespace Snagged.Application.Catalog.Cart.Commands.AddCartItem
 
             var cart = await ctx.Carts
                 .Include(c => c.CartItems)
-               
                 .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsSavedForLater, ct);
 
             if (cart is null)
             {
-                cart = new Snagged.Domain.Entities.Cart { UserId = userId };
-                ctx.Carts.Add(cart);
+                
+                var savedCart = await ctx.Carts
+                    .Include(c => c.CartItems)
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.IsSavedForLater, ct);
+
+                if (savedCart is not null)
+                {
+                    savedCart.IsSavedForLater = false;
+                    savedCart.UpdatedAt = DateTime.UtcNow;
+                    cart = savedCart;
+                }
+                else
+                {
+                    cart = new Snagged.Domain.Entities.Cart
+                    {
+                        UserId = userId,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        IsSavedForLater = false
+                    };
+                    ctx.Carts.Add(cart);
+                }
+
                 await ctx.SaveChangesAsync(ct);
             }
 

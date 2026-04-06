@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Snagged.Application.Common.Paging
 {
     public sealed class PageResult<T>
     {
         public int Total { get; init; }
-        public IReadOnlyList<T> Items { get; init; }
+        public IReadOnlyList<T> Items { get; init; } = Array.Empty<T>();
 
         /// <summary>
         /// Creates a PageResult from an IQueryable using EF Core asynchronous methods.

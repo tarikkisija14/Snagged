@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ItemModel } from '../../shared/models/item.model';
 import { Category } from '../../shared/models/category';
 import { Subcategory } from '../../shared/models/subcategory';
@@ -8,6 +9,7 @@ import { SubcategoryService } from '../../shared/services/subcategory-service';
 import { PageResult } from '../../shared/models/page-result';
 import { CartService } from '../../shared/services/cart-service';
 import { AuthService } from '../../core/services/auth-service/AuthService';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -15,8 +17,9 @@ import { environment } from '../../../environments/environment';
   standalone: false,
   templateUrl: './catalog-list.html',
   styleUrl: './catalog-list.scss',
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class CatalogList implements OnInit {
+export class CatalogList implements OnInit, OnDestroy {
   items: ItemModel[] = [];
   categories: Category[] = [];
   subcategories: Subcategory[] = [];
@@ -28,8 +31,8 @@ export class CatalogList implements OnInit {
   selectedSubcategoryIds: number[] = [];
   selectedConditions: string[] = [];
 
-  page     = 1;
-  pageSize = 14;
+  page       = 1;
+  pageSize   = 14;
   totalItems = 0;
   totalPages = 1;
 
@@ -45,93 +48,99 @@ export class CatalogList implements OnInit {
   addedItemIds = new Set<number>();
 
   private readonly baseImageUrl = environment.apiUrl.replace('/api', '');
+  private categoryMap = new Map<number, string>();
+  private subs = new Subscription();
 
   constructor(
     private itemService: ItemService,
     private categoryService: CategoryService,
     private subcategoryService: SubcategoryService,
-    private cdr: ChangeDetectorRef,
     private cartService: CartService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    if (this.mode === 'home') {
-      this.pageSize = 9;
-    }
-    this.loadInitialData();
+    if (this.mode === 'home') this.pageSize = 9;
+    this.loadCategories();
+    this.loadItems();
   }
 
-  loadInitialData(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (categories) => {
-        this.categories = categories;
-        this.cdr.detectChanges();
-        this.loadItems();
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  loadCategories(): void {
+    const sub = this.categoryService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories  = cats;
+        this.categoryMap = new Map(cats.map(c => [c.id, c.name]));
+        this.cdr.markForCheck();
       },
-      error: () => {
-        this.loadItems();
-      }
+      error: () => {},
     });
+    this.subs.add(sub);
   }
 
   loadItems(): void {
     this.isLoading = true;
-    this.page      = Math.max(1, this.page);
+    this.cdr.markForCheck();
 
-    const filter: Record<string, unknown> = {
-      'paging.page':     this.page,
-      'paging.pageSize': this.pageSize,
-      sortBy:            this.selectedSortBy,
-      sortOrder:         this.selectedSortOrder,
+    this.page = Math.max(1, this.page);
+
+    const filter: Parameters<ItemService['getFilteredItems']>[0] = {
+      page: this.page, pageSize: this.pageSize,
+      sortBy: this.selectedSortBy, sortOrder: this.selectedSortOrder,
     };
 
-    if (this.selectedCategoryIds.length > 0)
-      filter['categoryIds'] = this.selectedCategoryIds;
+    if (this.selectedCategoryIds.length > 0)   filter.categoryIds    = this.selectedCategoryIds;
+    if (this.selectedSubcategoryIds.length > 0) filter.subcategoryIds = this.selectedSubcategoryIds;
+    if (this.selectedConditions.length > 0)     filter.conditions     = this.selectedConditions;
+    if (this.currentMinPrice > this.minPrice)   filter.minPrice       = this.currentMinPrice;
+    if (this.currentMaxPrice < this.maxPrice)   filter.maxPrice       = this.currentMaxPrice;
 
-    if (this.selectedSubcategoryIds.length > 0)
-      filter['subcategoryIds'] = this.selectedSubcategoryIds;
-
-    if (this.selectedConditions.length > 0)
-      filter['conditions'] = this.selectedConditions;
-
-    if (this.currentMinPrice > this.minPrice)
-      filter['minPrice'] = this.currentMinPrice;
-
-    if (this.currentMaxPrice < this.maxPrice)
-      filter['maxPrice'] = this.currentMaxPrice;
-
-    this.itemService.getFilteredItems(filter).subscribe({
+    const sub = this.itemService.getFilteredItems(filter).subscribe({
       next: (res: PageResult<ItemModel>) => {
-        this.items      = res.items || [];
-        this.totalItems = res.total || 0;
+        this.items      = Array.isArray(res?.items) ? [...res.items] : [];
+        this.totalItems = typeof res?.total === 'number' ? res.total : 0;
         this.totalPages = Math.ceil(this.totalItems / this.pageSize) || 1;
         this.isLoading  = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.items      = [];
         this.totalItems = 0;
         this.totalPages = 1;
         this.isLoading  = false;
-        this.cdr.detectChanges();
-      }
+        this.cdr.markForCheck();
+      },
     });
+    this.subs.add(sub);
   }
 
-  prevPage(): void {
-    if (this.page > 1) { this.page--; this.loadItems(); }
-  }
-
-  nextPage(): void {
-    if (this.page < this.totalPages) { this.page++; this.loadItems(); }
-  }
-
-  goToPage(pageNumber: number): void {
-    if (pageNumber >= 1 && pageNumber <= this.totalPages) {
-      this.page = pageNumber;
+  loadSubcategories(): void {
+    if (this.selectedCategoryIds.length === 0) {
+      this.subcategories = [];
       this.loadItems();
+      return;
     }
+    const categoryId = this.selectedCategoryIds[0];
+    const sub = this.subcategoryService.getSubcategories(categoryId).subscribe({
+      next: (subs) => {
+        this.subcategories = subs;
+        this.loadItems();
+      },
+      error: () => {
+        this.subcategories = [];
+        this.loadItems();
+      },
+    });
+    this.subs.add(sub);
+  }
+
+  getCategoryName(categoryId: number): string | null {
+    return this.categoryMap.get(categoryId) ?? null;
   }
 
   onCategoryChange(categoryId: number, checked: boolean): void {
@@ -151,7 +160,6 @@ export class CatalogList implements OnInit {
   onSubcategoryChange(subcategoryId: number, checked: boolean, categoryId: number): void {
     if (!this.selectedCategoryIds.includes(categoryId)) return;
     this.page = 1;
-
     if (checked) {
       if (!this.selectedSubcategoryIds.includes(subcategoryId))
         this.selectedSubcategoryIds = [...this.selectedSubcategoryIds, subcategoryId];
@@ -169,28 +177,6 @@ export class CatalogList implements OnInit {
     this.loadItems();
   }
 
-  loadSubcategories(): void {
-    if (this.selectedCategoryIds.length === 0) {
-      this.subcategories = [];
-      this.loadItems();
-      return;
-    }
-
-    const categoryId = this.selectedCategoryIds[0];
-
-    this.subcategoryService.getSubcategories().subscribe({
-      next: (all) => {
-        this.subcategories = all.filter(sub => Number(sub.categoryId) === categoryId);
-        this.cdr.detectChanges();
-        this.loadItems();
-      },
-      error: () => {
-        this.subcategories = [];
-        this.loadItems();
-      }
-    });
-  }
-
   onSortChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     const sortMap: Record<string, { sortBy: string; sortOrder: string }> = {
@@ -199,7 +185,7 @@ export class CatalogList implements OnInit {
       'price-high-low': { sortBy: 'price',      sortOrder: 'desc' },
       'most-popular':   { sortBy: 'popularity', sortOrder: 'desc' },
     };
-    const sort             = sortMap[value] ?? sortMap['newest'];
+    const sort = sortMap[value] ?? sortMap['newest'];
     this.selectedSortBy    = sort.sortBy;
     this.selectedSortOrder = sort.sortOrder;
     this.page = 1;
@@ -209,32 +195,21 @@ export class CatalogList implements OnInit {
   onMinPriceChange(value: string): void {
     this.page = 1;
     const num = Number(value);
-    this.currentMinPrice = isNaN(num)
-      ? this.minPrice
-      : Math.min(Math.max(num, this.minPrice), this.maxPrice);
-    if (this.currentMinPrice > this.currentMaxPrice)
-      this.currentMaxPrice = this.currentMinPrice;
+    this.currentMinPrice = isNaN(num) ? this.minPrice : Math.min(Math.max(num, this.minPrice), this.maxPrice);
+    if (this.currentMinPrice > this.currentMaxPrice) this.currentMaxPrice = this.currentMinPrice;
     this.loadItems();
   }
 
   onMaxPriceChange(value: string): void {
     this.page = 1;
     const num = Number(value);
-    this.currentMaxPrice = isNaN(num)
-      ? this.maxPrice
-      : Math.min(Math.max(num, this.minPrice), this.maxPrice);
-    if (this.currentMaxPrice < this.currentMinPrice)
-      this.currentMinPrice = this.currentMaxPrice;
+    this.currentMaxPrice = isNaN(num) ? this.maxPrice : Math.min(Math.max(num, this.minPrice), this.maxPrice);
+    if (this.currentMaxPrice < this.currentMinPrice) this.currentMinPrice = this.currentMaxPrice;
     this.loadItems();
   }
 
   clearCondition(): void  { this.page = 1; this.selectedConditions = []; this.loadItems(); }
-  clearPriceRange(): void {
-    this.page = 1;
-    this.currentMinPrice = this.minPrice;
-    this.currentMaxPrice = this.maxPrice;
-    this.loadItems();
-  }
+  clearPriceRange(): void { this.page = 1; this.currentMinPrice = this.minPrice; this.currentMaxPrice = this.maxPrice; this.loadItems(); }
 
   clearFilters(): void {
     this.page                   = 1;
@@ -247,6 +222,21 @@ export class CatalogList implements OnInit {
     this.loadItems();
   }
 
+  prevPage(): void { if (this.page > 1) { this.page--; this.loadItems(); } }
+  nextPage(): void { if (this.page < this.totalPages) { this.page++; this.loadItems(); } }
+  goToPage(n: number): void { if (n >= 1 && n <= this.totalPages) { this.page = n; this.loadItems(); } }
+
+  get pageNumbers(): number[] {
+    const maxVisible = 7;
+    if (this.totalPages <= maxVisible) {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+    const half  = Math.floor(maxVisible / 2);
+    let start   = Math.max(1, this.page - half);
+    const end   = Math.min(this.totalPages, start + maxVisible - 1);
+    start       = Math.max(1, end - maxVisible + 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
 
   getItemImage(item: ItemModel): string {
     const mainImage = item.images?.find(img => img.isMain) ?? item.images?.[0];
@@ -258,25 +248,31 @@ export class CatalogList implements OnInit {
     return `${this.baseImageUrl}/images/items/placeholder.png`;
   }
 
+  trackById(_index: number, item: ItemModel): number { return item.id; }
+
   addToCart(item: ItemModel): void {
-    // SECURITY FIX: userId is no longer sent — the backend resolves it from the JWT token
-    this.cartService.addCartItem(item.id, 1).subscribe({
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/home/auth/login']);
+      return;
+    }
+    if (this.addedItemIds.has(item.id)) return;
+    const sub = this.cartService.addCartItem(item.id, 1).subscribe({
       next: () => {
         this.addedItemIds = new Set(this.addedItemIds).add(item.id);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
         setTimeout(() => {
           const updated = new Set(this.addedItemIds);
           updated.delete(item.id);
           this.addedItemIds = updated;
-          this.cdr.detectChanges();
-        }, 1000);
+          this.cdr.markForCheck();
+        }, 1500);
       },
       error: () => {
         const updated = new Set(this.addedItemIds);
         updated.delete(item.id);
         this.addedItemIds = updated;
-        this.cdr.detectChanges();
-      }
+      },
     });
+    this.subs.add(sub);
   }
 }

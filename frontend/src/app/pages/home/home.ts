@@ -3,7 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { map, Observable, shareReplay, Subscription, filter } from 'rxjs';
 import Swiper from 'swiper';
-import { Pagination, EffectCreative, Autoplay, Navigation } from 'swiper/modules';
+import { Pagination, Autoplay, Navigation } from 'swiper/modules';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +15,7 @@ export class Home implements OnInit, OnDestroy {
   private breakpointObserver = inject(BreakpointObserver);
   private swiper?: Swiper;
   private routerSubscription?: Subscription;
+  private initTimer?: ReturnType<typeof setTimeout>;
 
   constructor(private router: Router) {}
 
@@ -25,19 +26,17 @@ export class Home implements OnInit, OnDestroy {
       shareReplay()
     );
 
-  ngOnInit() {
-    setTimeout(() => {
+  ngOnInit(): void {
+    this.initTimer = setTimeout(() => {
       this.initSwiper();
 
       this.routerSubscription = this.router.events
-        .pipe(filter(event => event instanceof NavigationEnd))
+        .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
         .subscribe((event: NavigationEnd) => {
-          if (this.swiper && this.swiper.autoplay) {
-
+          if (this.swiper?.autoplay) {
             if (event.url === '/' || event.url === '/home') {
               this.swiper.autoplay.start();
             } else {
-
               this.swiper.autoplay.stop();
             }
           }
@@ -45,12 +44,17 @@ export class Home implements OnInit, OnDestroy {
     }, 100);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
+    if (this.initTimer !== undefined) {
+      clearTimeout(this.initTimer);
+    }
+    this.routerSubscription?.unsubscribe();
     if (this.swiper) {
       this.swiper.destroy(true, true);
     }
   }
-  private initSwiper() {
+
+  private initSwiper(): void {
     this.swiper = new Swiper('.hero-swiper', {
       modules: [Pagination, Autoplay, Navigation],
       effect: 'slide',
@@ -76,12 +80,7 @@ export class Home implements OnInit, OnDestroy {
     });
   }
 
-  goToShop() {
+  goToShop(): void {
     this.router.navigate(['/shop']);
-  }
-
-  goToSell() {
-   //todo
-    console.log('Navigate to sell page');
   }
 }

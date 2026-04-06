@@ -622,13 +622,13 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -639,11 +639,19 @@ namespace Snagged.Infrastructure.Migrations
                     b.Property<int>("ReviewerId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("ReviewedUserId");
 
-                    b.HasIndex("ReviewerId");
+                    b.HasIndex("ReviewerId", "ReviewedUserId")
+                        .IsUnique();
 
                     b.ToTable("Reviews", (string)null);
                 });

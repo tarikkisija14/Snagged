@@ -207,9 +207,13 @@ namespace Snagged.Infrastructure.Database
             modelBuilder.Entity<Review>(entity =>
             {
                 entity.ToTable("Reviews");
-                entity.Property(r => r.Comment).IsRequired().HasMaxLength(2000);
+                entity.HasIndex(r => new { r.ReviewerId, r.ReviewedUserId }).IsUnique(); 
+                entity.HasIndex(r => r.ReviewedUserId);                                   
+                entity.HasIndex(r => r.CreatedAt);                                        
+                entity.Property(r => r.Comment).IsRequired().HasMaxLength(1000);
                 entity.Property(r => r.Rating).IsRequired();
-                entity.Property(r => r.CreatedAt).IsRequired().HasDefaultValueSql("GETDATE()");
+                entity.Property(r => r.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(r => r.UpdatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             });
 
             // ROLE

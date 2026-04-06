@@ -38,18 +38,14 @@ export class Header implements OnInit, OnDestroy {
         this.isMobile = result.matches;
       });
 
-    if (this.authService.isLoggedIn()) {
-      this.startPolling();
-    }
-
     this.authSub = this.authService.currentUser$.subscribe(userId => {
       if (userId) {
         this.startPolling();
       } else {
         this.stopPolling();
-        this.notifications = [];
-        this.unreadCount = 0;
-        this.showNotifPanel = false;
+        this.notifications    = [];
+        this.unreadCount      = 0;
+        this.showNotifPanel   = false;
       }
     });
   }
@@ -68,7 +64,7 @@ export class Header implements OnInit, OnDestroy {
     ).subscribe({
       next: (list) => {
         this.notifications = list;
-        this.unreadCount = list.filter(n => !n.isRead).length;
+        this.unreadCount   = list.filter(n => !n.isRead).length;
       },
       error: () => {}
     });
@@ -88,7 +84,7 @@ export class Header implements OnInit, OnDestroy {
     if (notif.isRead) return;
     this.notificationService.markAsRead(notif.id).subscribe({
       next: () => {
-        notif.isRead = true;
+        notif.isRead     = true;
         this.unreadCount = Math.max(0, this.unreadCount - 1);
       },
       error: () => {}
@@ -110,17 +106,13 @@ export class Header implements OnInit, OnDestroy {
     this.notificationService.deleteNotification(notif.id).subscribe({
       next: () => {
         this.notifications = this.notifications.filter(n => n.id !== notif.id);
-        this.unreadCount = this.notifications.filter(n => !n.isRead).length;
+        this.unreadCount   = this.notifications.filter(n => !n.isRead).length;
       },
       error: () => {}
     });
   }
 
-  openLogin(): void {
-    this.router.navigate(['home/auth/login']);
-  }
-
-  onUserIconClick() {
+  onUserIconClick(): void {
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/profile']);
     } else {
@@ -133,7 +125,7 @@ export class Header implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  goToCart() {
+  goToCart(): void {
     this.router.navigate(['/cart']).catch(() => {});
   }
 }

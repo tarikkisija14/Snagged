@@ -1,26 +1,38 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+} from '@angular/core';
+import { Router } from '@angular/router';
 import { ItemModel } from '../../models/item.model';
+import { AuthService } from '../../../core/services/auth-service/AuthService';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-product-card',
   standalone: false,
   templateUrl: './product-card.component.html',
-  styleUrl: './product-card.component.scss',
+  styleUrls: ['./product-card.component.scss'],
 })
 export class ProductCardComponent {
   @Input() item!: ItemModel;
+  @Input() categoryName: string | null = null;
   @Input() showActions: boolean = true;
   @Input() showBadge: boolean = true;
-  @Input() showRating: boolean = true;
   @Input() showDetails: boolean = true;
 
-  @Output() addToCartClick    = new EventEmitter<ItemModel>();
-  @Output() viewDetailsClick  = new EventEmitter<ItemModel>();
+  @Output() addToCartClick   = new EventEmitter<ItemModel>();
+  @Output() viewDetailsClick = new EventEmitter<ItemModel>();
 
   addedToCart = false;
 
   private readonly baseUrl = environment.apiUrl.replace('/api', '');
+
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+  ) {}
 
   getItemImage(): string {
     if (this.item?.images?.length > 0) {
@@ -29,7 +41,7 @@ export class ProductCardComponent {
         return this.resolveImageUrl(mainImage.imageUrl);
       }
     }
-    return 'https://placehold.co/400x600/e0e0e0/666?text=No+Image';
+    return `${this.baseUrl}/images/items/placeholder.png`;
   }
 
   private resolveImageUrl(imageUrl: string): string {
@@ -40,18 +52,26 @@ export class ProductCardComponent {
   }
 
   onAddToCart(): void {
-    if (!this.item) return;
+    if (!this.item || this.item.isSold || this.addedToCart) return;
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/home/auth/login']);
+      return;
+    }
     this.addedToCart = true;
     this.addToCartClick.emit(this.item);
-    setTimeout(() => { this.addedToCart = false; }, 2000);
+    setTimeout(() => {
+      this.addedToCart = false;
+    }, 2000);
   }
 
   onViewDetails(): void {
     if (!this.item) return;
     this.viewDetailsClick.emit(this.item);
+    this.router.navigate(['/items', this.item.id]);
   }
 
   onImageError(event: Event): void {
-    (event.target as HTMLImageElement).src = 'https://placehold.co/400x600/e0e0e0/666?text=No+Image';
+    (event.target as HTMLImageElement).src =
+      `${this.baseUrl}/images/items/placeholder.png`;
   }
 }

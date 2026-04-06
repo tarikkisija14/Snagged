@@ -25,10 +25,14 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
             return await PageResult<ItemDto>.FromQueryableAsync(dtoQuery, paging, ct);
         }
 
-        
-
         private static IQueryable<Item> ApplyFilters(IQueryable<Item> query, GetItemsFilteredQuery request)
         {
+            
+            if (request.IsSold.HasValue)
+                query = query.Where(x => x.IsSold == request.IsSold.Value);
+            else
+                query = query.Where(x => !x.IsSold);
+
             if (request.CategoryIds is { Count: > 0 })
                 query = query.Where(x => request.CategoryIds.Contains(x.CategoryId));
 
@@ -41,9 +45,6 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
 
             if (!string.IsNullOrWhiteSpace(request.TitleContains))
                 query = query.Where(x => x.Title.Contains(request.TitleContains));
-
-            if (request.IsSold.HasValue)
-                query = query.Where(x => x.IsSold == request.IsSold.Value);
 
             if (request.MinPrice.HasValue)
                 query = query.Where(x => x.Price >= request.MinPrice.Value);
@@ -64,12 +65,10 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
 
                 "popularity" => query.OrderByDescending(x => x.Favorites.Count),
 
-                
                 _ => query.OrderByDescending(x => x.CreatedAt)
             };
         }
 
-        
         private static PageRequest ResolvePaging(GetItemsFilteredQuery request)
         {
             if (request.LoadAllItems == true)

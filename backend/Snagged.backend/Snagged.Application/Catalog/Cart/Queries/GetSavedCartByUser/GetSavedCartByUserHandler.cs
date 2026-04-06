@@ -14,33 +14,15 @@ namespace Snagged.Application.Catalog.Cart.Queries.GetSavedCartByUser
 
             var cart = await ctx.Carts
                 .AsNoTracking()
-                .Where(c => c.UserId == userId && c.IsSavedForLater)
-                .Select(c => new CartDto
-                {
-                    Id = c.Id,
-                    UserId = c.UserId,
-                    CreatedAt = c.CreatedAt,
-                    UpdatedAt = c.UpdatedAt,
-                    Items = c.CartItems.Select(ci => new CartItemDto
-                    {
-                        Id = ci.Id,
-                        ItemId = ci.ItemId,
-                        ItemName = ci.Item.Title,
-                        ImageUrl = ci.Item.Images
-                                      .Where(img => img.IsMain)
-                                      .Select(img => img.ImageUrl)
-                                      .FirstOrDefault()
-                                   ?? ci.Item.Images
-                                      .Select(img => img.ImageUrl)
-                                      .FirstOrDefault(),
-                        Price = ci.Item.Price,
-                        Quantity = ci.Quantity,
-                        AddedAt = ci.AddedAt
-                    }).ToList()
-                })
-                .FirstOrDefaultAsync(ct);
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Item)
+                        .ThenInclude(i => i.Images)
+                .FirstOrDefaultAsync(c => c.UserId == userId && c.IsSavedForLater, ct);
 
-            return cart;
+            if (cart is null)
+                return null;
+
+            return cart.ToDto();
         }
     }
 }

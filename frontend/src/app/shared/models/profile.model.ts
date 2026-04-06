@@ -1,5 +1,5 @@
-import { User } from './user';
 export interface ProfileModel {
+  userId: number;
   username: string;
   phoneNumber?: string;
   profileImageUrl?: string;

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import {environment} from '../../../environments/development';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {Category} from '../models/category';
+import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Category } from '../models/category';
 
 @Injectable({
   providedIn: 'root',
@@ -30,5 +30,4 @@ export class CategoryService {
   deleteCategory(id: number): Observable<boolean> {
     return this.http.delete<boolean>(`${this.apiUrl}/${id}`);
   }
-
 }

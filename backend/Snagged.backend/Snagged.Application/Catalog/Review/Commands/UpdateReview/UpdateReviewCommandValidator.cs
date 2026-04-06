@@ -1,9 +1,4 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Review.Commands.UpdateReview
 {
@@ -19,6 +14,7 @@ namespace Snagged.Application.Catalog.Review.Commands.UpdateReview
 
             RuleFor(x => x.Comment)
                 .NotEmpty().WithMessage("Comment is required.")
+                .MinimumLength(3).WithMessage("Comment must be at least 3 characters.")
                 .MaximumLength(1000).WithMessage("Comment cannot exceed 1000 characters.");
         }
     }

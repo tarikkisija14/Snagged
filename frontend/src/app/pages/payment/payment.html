@@ -6,18 +6,23 @@
     </div>
 
     <div class="cart-summary">
+
+      <div *ngIf="totalAmount !== null" class="total-display">
+        <span class="total-label">Total due:</span>
+        <span class="total-amount">${{ totalAmount | number:'1.2-2' }}</span>
+      </div>
+
       <!-- Stripe Card Element -->
       <div id="card-element" class="card-container"></div>
 
       <button class="btn" (click)="pay()" [disabled]="loading">
-        <i class="fas fa-lock"></i> Pay
+        <i class="fas fa-lock"></i>
+        {{ loading ? 'Processing...' : 'Pay Now' }}
       </button>
 
-      <!-- Poruka uspjeha ili errora -->
       <div *ngIf="message" class="message">
         {{ message }}
       </div>
-
 
       <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}

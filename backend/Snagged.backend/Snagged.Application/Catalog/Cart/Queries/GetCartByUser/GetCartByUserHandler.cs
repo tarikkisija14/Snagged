@@ -19,7 +19,18 @@ namespace Snagged.Application.Catalog.Cart.Queries.GetCartByUser
                         .ThenInclude(i => i.Images)
                 .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsSavedForLater, ct);
 
-            return cart?.ToDto(isSavedForLater: false);
+            if (cart is null)
+                return new CartDto
+                {
+                    Id = 0,
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsSavedForLater = false,
+                    Items = new List<CartItemDto>()
+                };
+
+            return cart.ToDto();
         }
     }
 }

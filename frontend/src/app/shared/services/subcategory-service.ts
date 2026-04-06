@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import {environment} from '../../../environments/development';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {Subcategory} from '../models/subcategory';
+import { environment } from '../../../environments/environment';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Subcategory } from '../models/subcategory';
 
 @Injectable({
   providedIn: 'root',
@@ -35,5 +35,4 @@ export class SubcategoryService {
   deleteSubcategory(id: number): Observable<boolean> {
     return this.http.delete<boolean>(`${this.apiUrl}/${id}`);
   }
-
 }

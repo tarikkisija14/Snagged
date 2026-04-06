@@ -1,8 +1,15 @@
+/* :host makes <app-product-card> a block-level grid item */
+/* Without this, custom elements default to display:inline which can cause layout issues */
+:host {
+  display: block;
+}
+
 .product-card {
   background: white;
   border-radius: 8px;
   overflow: hidden;
   transition: var(--transition);
+  height: 100%;
 
   &:hover {
     transform: translateY(-2px);

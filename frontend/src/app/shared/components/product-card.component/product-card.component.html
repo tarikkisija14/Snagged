@@ -1,51 +1,40 @@
 <div class="product-card">
 
-  <div class="product-image-wrapper">
+  <div class="product-image-wrapper" (click)="onViewDetails()" style="cursor:pointer">
     <img
       [appLazyLoad]="getItemImage()"
-      [alt]="item?.title || 'Product image'"
+      [alt]="item.title || 'Product image'"
       class="product-image"
-      [errorImage]="'https://placehold.co/400x600/e0e0e0/666?text=No+Image'"
+      (error)="onImageError($event)"
     />
 
-
-    <div class="product-badge" *ngIf="showBadge && item?.condition">
+    <div class="product-badge" *ngIf="showBadge && item.condition">
       {{ item.condition }}
     </div>
 
+    <div class="sold-overlay" *ngIf="item.isSold">
+      <span>SOLD</span>
+    </div>
 
-    <div class="product-actions" *ngIf="showActions">
-      <button class="product-action-btn" title="Add to favorites">
+    <div class="product-actions" *ngIf="showActions && !item.isSold">
+      <button class="product-action-btn" title="Add to favorites" (click)="$event.stopPropagation()">
         <i class="far fa-heart"></i>
-      </button>
-      <button class="product-action-btn" title="Quick view">
-        <i class="fas fa-expand"></i>
       </button>
     </div>
   </div>
 
-
   <div class="product-info">
 
-    <span class="product-category" *ngIf="item?.categoryId">
-      Category
+    <span class="product-category" *ngIf="categoryName">
+      {{ categoryName }}
     </span>
 
-
-    <h3 class="product-title">{{ item?.title }}</h3>
-
+    <h3 class="product-title" (click)="onViewDetails()" style="cursor:pointer">
+      {{ item.title }}
+    </h3>
 
     <div class="product-price">
-      ${{ item?.price | number:'1.2-2' }}
-    </div>
-
-    <div class="product-rating" *ngIf="showRating">
-      <i class="fas fa-star"></i>
-      <i class="fas fa-star"></i>
-      <i class="fas fa-star"></i>
-      <i class="fas fa-star"></i>
-      <i class="far fa-star"></i>
-      <span>({{ item?.likesCount || 0 }})</span>
+      ${{ item.price | number:'1.2-2' }}
     </div>
 
     <div class="product-footer">
@@ -53,9 +42,9 @@
         class="add-to-cart"
         (click)="onAddToCart()"
         [class.clicked]="addedToCart"
-        [disabled]="item?.isSold">
+        [disabled]="item.isSold">
         <span>
-          {{ item?.isSold ? 'Sold Out' : (addedToCart ? '✓ Added!' : 'Add to Cart') }}
+          {{ item.isSold ? 'Sold Out' : (addedToCart ? '✓ Added!' : 'Add to Cart') }}
         </span>
       </button>
       <button

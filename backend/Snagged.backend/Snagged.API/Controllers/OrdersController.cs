@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Snagged.Application.Catalog.Orders.Commands;
 using Snagged.Application.Catalog.Orders.Commands.CreateOrder;
@@ -13,6 +14,7 @@ namespace Snagged.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -29,7 +31,7 @@ namespace Snagged.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<OrderDto>> GetOrderById(int id)
         {
             try
@@ -40,7 +42,7 @@ namespace Snagged.API.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound($"Order with Id {id} not found.");
+                return NotFound(new { error = $"Order with Id {id} not found." });
             }
         }
 
@@ -51,11 +53,11 @@ namespace Snagged.API.Controllers
             return CreatedAtAction(nameof(GetOrderById), new { id = orderId }, orderId);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderCommand command)
         {
             if (id != command.Id)
-                return BadRequest("ID mismatch");
+                return BadRequest(new { error = "ID mismatch." });
 
             try
             {
@@ -64,11 +66,11 @@ namespace Snagged.API.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound($"Order with Id {id} not found.");
+                return NotFound(new { error = $"Order with Id {id} not found." });
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             try
@@ -79,7 +81,7 @@ namespace Snagged.API.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound($"Order with Id {id} not found.");
+                return NotFound(new { error = $"Order with Id {id} not found." });
             }
         }
 

@@ -12,6 +12,7 @@ namespace Snagged.Application.Catalog.Items
             return query.Select(i => new ItemDto
             {
                 Id = i.Id,
+                UserId = i.UserId,
                 Title = i.Title,
                 Description = i.Description,
                 Price = i.Price,

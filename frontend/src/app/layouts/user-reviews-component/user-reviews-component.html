@@ -1,0 +1,56 @@
+<section class="reviews-section">
+
+  <div class="summary-bar" *ngIf="totalReviews > 0">
+    <app-star-rating
+      [rating]="averageRating"
+      [readonly]="true"
+      [showLabel]="true"
+      [reviewCount]="totalReviews"
+    ></app-star-rating>
+  </div>
+
+  <ng-container *ngIf="isLoggedIn && currentUserId !== reviewedUserId">
+    <button
+      mat-raised-button
+      color="accent"
+      class="write-review-btn"
+      *ngIf="!showForm"
+      (click)="openForm()"
+    >
+      <mat-icon>rate_review</mat-icon>
+      {{ myReview ? 'Edit Your Review' : 'Write a Review' }}
+    </button>
+
+    <app-review-form
+      *ngIf="showForm"
+      [existingReview]="myReview"
+      [isSubmitting]="isSubmitting"
+      (submitReview)="onSubmit($event)"
+      (deleteReview)="onDeleteMyReview()"
+      (cancelForm)="showForm = false"
+    ></app-review-form>
+  </ng-container>
+
+  <div class="banner banner--error" *ngIf="errorMessage" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <div class="banner banner--success" *ngIf="successMessage" role="status">
+    {{ successMessage }}
+  </div>
+
+  <app-review-list
+    [reviews]="reviews"
+    [total]="totalReviews"
+    [page]="page"
+    [pageSize]="pageSize"
+    [isLoading]="isLoadingReviews"
+    [currentUserId]="currentUserId"
+    [currentSort]="sortOrder"
+    (sortChange)="onSortChange($event)"
+    (pageChange)="onPageChange($event)"
+    (editReview)="onEditFromList($event)"
+    (deleteReview)="onDeleteFromList($event)"
+  ></app-review-list>
+
+</section>

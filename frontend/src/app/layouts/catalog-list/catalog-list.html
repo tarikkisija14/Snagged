@@ -3,72 +3,61 @@
 
     <aside class="filters">
       <div class="filter-section">
-        <h3>Categories <span (click)="clearFilters()">Clear</span></h3>
+        <h3>Categories <span class="clear-link" (click)="clearFilters()">Clear all</span></h3>
         <div class="filter-options">
           <div class="filter-option" *ngFor="let cat of categories">
-            <input type="checkbox"
-                   [id]="'category' + cat.id"
-                   [checked]="selectedCategoryIds.includes(cat.id)"
-                   (change)="onCategoryChange(cat.id, $any($event.target).checked)">
-            <label [for]="'category' + cat.id">{{cat.name}}</label>
+            <input
+              type="checkbox"
+              [id]="'category' + cat.id"
+              [checked]="selectedCategoryIds.includes(cat.id)"
+              (change)="onCategoryChange(cat.id, $any($event.target).checked)"
+            />
+            <label [for]="'category' + cat.id">{{ cat.name }}</label>
           </div>
         </div>
       </div>
 
       <div class="filter-section" *ngIf="subcategories.length > 0">
-        <h3>Subcategories <span (click)="selectedSubcategoryIds=[]; loadItems()">Clear</span></h3>
+        <h3>Subcategories <span class="clear-link" (click)="selectedSubcategoryIds=[]; loadItems()">Clear</span></h3>
         <div class="filter-options">
           <div class="filter-option" *ngFor="let sub of subcategories">
-            <input type="checkbox"
-                   [id]="'sub' + sub.id"
-                   [checked]="selectedSubcategoryIds.includes(sub.id)"
-                   (change)="onSubcategoryChange(sub.id, $any($event.target).checked, sub.categoryId)">
-            <label [for]="'sub' + sub.id">{{sub.name}}</label>
+            <input
+              type="checkbox"
+              [id]="'sub' + sub.id"
+              [checked]="selectedSubcategoryIds.includes(sub.id)"
+              (change)="onSubcategoryChange(sub.id, $any($event.target).checked, sub.categoryId)"
+            />
+            <label [for]="'sub' + sub.id">{{ sub.name }}</label>
           </div>
         </div>
       </div>
 
       <div class="filter-section">
-        <h3>Price Range <span (click)="clearPriceRange()">Clear</span></h3>
+        <h3>Price Range <span class="clear-link" (click)="clearPriceRange()">Clear</span></h3>
         <div class="price-inputs">
-
-          <input type="number"
-                 #minInput
-                 placeholder="Min"
-                 [value]="currentMinPrice"
-                 (input)="onMinPriceChange(minInput.value)"
-                 min="0"
-                 max="10000">
-          <input type="number"
-                 #maxInput
-                 placeholder="Max"
-                 [value]="currentMaxPrice"
-                 (input)="onMaxPriceChange(maxInput.value)"
-                 min="0"
-                 max="10000">
+          <input type="number" #minInput placeholder="Min" [value]="currentMinPrice"
+                 (change)="onMinPriceChange(minInput.value)" min="0" max="10000" />
+          <input type="number" #maxInput placeholder="Max" [value]="currentMaxPrice"
+                 (change)="onMaxPriceChange(maxInput.value)" min="0" max="10000" />
         </div>
       </div>
 
       <div class="filter-section">
-        <h3>Condition <span (click)="clearCondition()">Clear</span></h3>
+        <h3>Condition <span class="clear-link" (click)="clearCondition()">Clear</span></h3>
         <div class="filter-options">
           <div class="filter-option" *ngFor="let cond of allConditions">
-            <input type="checkbox"
-                   [id]="'cond' + cond"
+            <input type="checkbox" [id]="'cond' + cond"
                    [checked]="selectedConditions.includes(cond)"
-                   (change)="onConditionChange(cond, $any($event.target).checked)">
-            <label [for]="'cond' + cond">{{cond}}</label>
+                   (change)="onConditionChange(cond, $any($event.target).checked)" />
+            <label [for]="'cond' + cond">{{ cond }}</label>
           </div>
         </div>
       </div>
-
-
     </aside>
 
-    <!-- Products -->
     <main class="products">
       <div class="products-header">
-        <h2>{{ mode === 'shop' ? ' All Products' : 'Featured Items' }}</h2>
+        <h2>{{ mode === 'shop' ? 'All Products' : 'Featured Items' }}</h2>
         <div class="sort-options">
           <select (change)="onSortChange($event)">
             <option value="newest">Newest</option>
@@ -79,28 +68,31 @@
         </div>
       </div>
 
-      <div class="products-grid">
+      <div class="loading-state" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && items.length === 0">
+        <mat-icon>search_off</mat-icon>
+        <p>No items found. Try adjusting your filters.</p>
+      </div>
+
+      <div class="products-grid" *ngIf="!isLoading && items.length > 0">
         <app-product-card
-          *ngFor="let item of items"
+          *ngFor="let item of items; trackBy: trackById"
           [item]="item"
+          [categoryName]="getCategoryName(item.categoryId)"
           (addToCartClick)="addToCart($event)">
         </app-product-card>
       </div>
 
-
-      <!-- Pagination (samo za Shop) -->
       <div class="pagination" *ngIf="mode === 'shop' && totalPages > 1">
-        <button (click)="prevPage()" [disabled]="page === 1">&laquo; <</button>
-
-        <button *ngFor="let p of [].constructor(totalPages); let i = index"
-                [class.active]="page === (i+1)"
-                (click)="goToPage(i+1)">
-          {{ i+1 }}
-        </button>
-
-        <button (click)="nextPage()" [disabled]="page === totalPages">> &raquo;</button>
+        <button (click)="prevPage()" [disabled]="page === 1">&laquo;</button>
+        <ng-container *ngFor="let p of pageNumbers">
+          <button [class.active]="page === p" (click)="goToPage(p)">{{ p }}</button>
+        </ng-container>
+        <button (click)="nextPage()" [disabled]="page === totalPages">&raquo;</button>
       </div>
-
     </main>
 
   </div>

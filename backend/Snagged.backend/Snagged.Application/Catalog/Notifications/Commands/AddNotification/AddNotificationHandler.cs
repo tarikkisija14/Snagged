@@ -1,11 +1,6 @@
 ﻿using MediatR;
 using Snagged.Application.Abstractions;
 using Snagged.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Notifications.Commands.AddNotification
 {
@@ -19,7 +14,7 @@ namespace Snagged.Application.Catalog.Notifications.Commands.AddNotification
                 Message = request.Message,
                 NotificationType = request.NotificationType,
                 IsRead = false,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             ctx.Notifications.Add(notification);
