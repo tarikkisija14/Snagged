@@ -31,9 +31,6 @@ namespace Snagged.API.Controllers
         public async Task<IActionResult> GetMyCart()
         {
             var result = await mediator.Send(new GetCartByUserQuery());
-            if (result is null)
-                return NotFound();
-
             return Ok(result);
         }
 

@@ -1,36 +1,31 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewer
 {
-    public class GetReviewsByReviewerHandler : IRequestHandler<GetReviewsByReviewerQuery, List<ReviewDto>>
+    public class GetReviewsByReviewerHandler(IAppDbContext ctx)
+        : IRequestHandler<GetReviewsByReviewerQuery, List<ReviewDto>>
     {
-        private readonly IAppDbContext _ctx;
-
-        public GetReviewsByReviewerHandler(IAppDbContext ctx)
-        {
-            _ctx = ctx;
-        }
-
         public async Task<List<ReviewDto>> Handle(GetReviewsByReviewerQuery request, CancellationToken cancellationToken)
         {
-            return _ctx.Reviews
+            return await ctx.Reviews
                 .Where(r => r.ReviewerId == request.ReviewerId)
+                .Include(r => r.Reviewer).ThenInclude(u => u!.Profile)
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => new ReviewDto
                 {
                     Id = r.Id,
                     ReviewerId = r.ReviewerId,
+                    ReviewerUsername = r.Reviewer!.Profile!.Username,
+                    ReviewerProfileImageUrl = r.Reviewer.Profile.ProfileImageUrl,
                     ReviewedUserId = r.ReviewedUserId,
                     Rating = r.Rating,
                     Comment = r.Comment,
-                    CreatedAt = r.CreatedAt
-                }).ToList();
+                    CreatedAt = r.CreatedAt,
+                    UpdatedAt = r.UpdatedAt
+                })
+                .ToListAsync(cancellationToken);
         }
     }
 }

@@ -1,0 +1,65 @@
+<mat-card class="review-form-card">
+  <mat-card-header>
+    <mat-card-title>{{ existingReview ? 'Edit Your Review' : 'Write a Review' }}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+
+    <div class="field-group">
+      <label class="field-label">
+        Your Rating <span class="required">*</span>
+      </label>
+      <app-star-rating
+        [rating]="selectedRating"
+        [readonly]="false"
+        (ratingChange)="selectedRating = $event"
+      ></app-star-rating>
+      <span class="field-error" *ngIf="submitted && selectedRating === 0">
+        Please select a star rating.
+      </span>
+    </div>
+
+    <div class="field-group">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Comment</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="comment"
+          placeholder="Share your experience with this user…"
+          rows="4"
+          maxlength="1000"
+        ></textarea>
+        <mat-hint align="end">{{ comment.length }}/1000</mat-hint>
+      </mat-form-field>
+      <span class="field-error" *ngIf="submitted && comment.trim().length < 3">
+        Comment must be at least 3 characters.
+      </span>
+    </div>
+
+  </mat-card-content>
+
+  <mat-card-actions class="form-actions">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="submit()"
+      [disabled]="isSubmitting"
+    >
+      {{ isSubmitting ? 'Saving…' : (existingReview ? 'Update Review' : 'Submit Review') }}
+    </button>
+
+    <button
+      mat-stroked-button
+      color="warn"
+      *ngIf="existingReview"
+      (click)="requestDelete()"
+      [disabled]="isSubmitting"
+    >
+      Delete Review
+    </button>
+
+    <button mat-button (click)="cancel()" [disabled]="isSubmitting">
+      Cancel
+    </button>
+  </mat-card-actions>
+</mat-card>

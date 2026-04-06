@@ -31,8 +31,8 @@ export class ItemService {
 
   getPagedItems(page: number = 1, pageSize: number = 10): Observable<PageResult<ItemModel>> {
     const params = new HttpParams()
-      .set('page', page)
-      .set('pageSize', pageSize);
+      .set('Paging.Page', page.toString())
+      .set('Paging.PageSize', pageSize.toString());
     return this.http.get<PageResult<ItemModel>>(`${this.apiUrl}/paged`, { params });
   }
 
@@ -44,21 +44,37 @@ export class ItemService {
     return this.http.put<void>(`${this.apiUrl}/${id}`, item);
   }
 
-  getFilteredItems(filter: any): Observable<PageResult<ItemModel>> {
+  getFilteredItems(filter: {
+    page?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortOrder?: string;
+    categoryIds?: number[];
+    subcategoryIds?: number[];
+    conditions?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+  }): Observable<PageResult<ItemModel>> {
     let params = new HttpParams();
 
-    Object.keys(filter).forEach(key => {
-      const value = filter[key];
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(item => {
-            params = params.append(key, item.toString());
-          });
-        } else {
-          params = params.set(key, value.toString());
-        }
-      }
-    });
+    if (filter.page != null)
+      params = params.set('Paging.Page', filter.page.toString());
+    if (filter.pageSize != null)
+      params = params.set('Paging.PageSize', filter.pageSize.toString());
+    if (filter.sortBy)
+      params = params.set('SortBy', filter.sortBy);
+    if (filter.sortOrder)
+      params = params.set('SortOrder', filter.sortOrder);
+    if (filter.categoryIds?.length)
+      filter.categoryIds.forEach(id => (params = params.append('CategoryIds', id.toString())));
+    if (filter.subcategoryIds?.length)
+      filter.subcategoryIds.forEach(id => (params = params.append('SubcategoryIds', id.toString())));
+    if (filter.conditions?.length)
+      filter.conditions.forEach(c => (params = params.append('Conditions', c)));
+    if (filter.minPrice != null)
+      params = params.set('MinPrice', filter.minPrice.toString());
+    if (filter.maxPrice != null)
+      params = params.set('MaxPrice', filter.maxPrice.toString());
 
     return this.http.get<PageResult<ItemModel>>(`${this.apiUrl}/filtered`, { params });
   }

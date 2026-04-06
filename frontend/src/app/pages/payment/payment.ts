@@ -4,12 +4,13 @@ import { loadStripe, Stripe, StripeCardElement, StripeElements } from '@stripe/s
 import { environment } from '../../../environments/environment';
 import { CartService } from '../../shared/services/cart-service';
 import { SHIPPING_COST, TAX_RATE } from '../../shared/constants/order-total.constants';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-payment',
   templateUrl: './payment.html',
   styleUrls: ['./payment.scss'],
-  standalone: false
+  standalone: false,
 })
 export class Payment implements OnInit {
   orderId!: number;
@@ -20,14 +21,14 @@ export class Payment implements OnInit {
   errorMessage = '';
   loading      = false;
 
-
   totalAmount: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private cartService: CartService,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private http: HttpClient,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -40,8 +41,10 @@ export class Payment implements OnInit {
       this.cardElement.mount('#card-element');
     }
 
-
-    this.totalAmount = this.calculateTotal();
+    this.totalAmount = this.calculateTotalFromCart();
+    if (this.totalAmount === null) {
+      this.fetchOrderTotal();
+    }
   }
 
   async pay(): Promise<void> {
@@ -54,7 +57,7 @@ export class Payment implements OnInit {
     this.cartService.createStripePaymentIntent(this.orderId).subscribe({
       next: async ({ clientSecret }) => {
         const result = await this.stripe!.confirmCardPayment(clientSecret, {
-          payment_method: { card: this.cardElement }
+          payment_method: { card: this.cardElement },
         });
 
         this.loading = false;
@@ -64,7 +67,7 @@ export class Payment implements OnInit {
         } else if (result.paymentIntent?.status === 'succeeded') {
           this.message = 'Payment successful! Redirecting...';
           this.router.navigate(['/payment-success'], {
-            queryParams: { orderId: this.orderId }
+            queryParams: { orderId: this.orderId },
           });
         }
 
@@ -72,20 +75,40 @@ export class Payment implements OnInit {
       },
       error: () => {
         this.loading      = false;
-        this.errorMessage = 'Payment failed due to a server error.';
+        this.errorMessage = 'Payment failed due to a server error. Please try again.';
         this.cd.detectChanges();
-      }
+      },
     });
   }
 
-
-  private calculateTotal(): number | null {
+  private calculateTotalFromCart(): number | null {
     const cart = this.cartService.getCart();
-    if (!cart) return null;
+    if (!cart || !cart.cartItems.length) return null;
 
     const subtotal = cart.cartItems.reduce(
-      (sum, ci) => sum + ci.item!.price * ci.quantity, 0
+      (sum, ci) => sum + ci.price * ci.quantity, 0
     );
     return +(subtotal + SHIPPING_COST + subtotal * TAX_RATE).toFixed(2);
+  }
+
+  private fetchOrderTotal(): void {
+    this.http
+      .get<{ orderItems: { price: number; quantity: number }[] }>(
+        `${environment.apiUrl}/orders/${this.orderId}`
+      )
+      .subscribe({
+        next: (order) => {
+          if (order?.orderItems?.length) {
+            const subtotal = order.orderItems.reduce(
+              (sum, oi) => sum + oi.price * oi.quantity, 0
+            );
+            this.totalAmount = +(subtotal + SHIPPING_COST + subtotal * TAX_RATE).toFixed(2);
+            this.cd.detectChanges();
+          }
+        },
+        error: () => {
+          // Total remains null; non-critical — payment still works
+        },
+      });
   }
 }

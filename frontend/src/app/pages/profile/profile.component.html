@@ -1,81 +1,147 @@
-<section class="profile-page" *ngIf="!isLoading; else loading">
+<ng-container *ngIf="isLoading; else content">
+  <div class="center-state">
+    <div class="spinner-wrap">
+      <mat-spinner diameter="44"></mat-spinner>
+    </div>
+  </div>
+</ng-container>
 
-  <div class="profile-layout" *ngIf="profile; else noProfile">
+<ng-template #content>
+  <div class="profile-page">
 
-    <mat-card class="profile-header-card">
-      <div class="profile-header-content">
+    <div class="profile-layout" *ngIf="profile; else noProfile">
 
-        <img
-          class="avatar"
-          [appLazyLoad]="profile.profileImageUrl || 'assets/default-avatar.png'"
-          alt="Profile avatar"
-        />
+      <!-- ── Hero banner ── -->
+      <div class="profile-hero">
+        <div class="hero-bg"></div>
 
-        <div class="profile-meta">
-          <h1>{{ profile.username }}</h1>
+        <div class="hero-inner container">
+          <div class="avatar-wrap">
+            <img
+              class="avatar"
+              [appLazyLoad]="profile.profileImageUrl || 'assets/default-avatar.png'"
+              alt="Profile avatar"
+            />
+            <div class="avatar-ring"></div>
+          </div>
 
-          <mat-chip color="primary" selected>
-            ⭐ {{ profile.averageRating }} ({{ profile.reviewCount }})
-          </mat-chip>
+          <div class="hero-info">
+            <h1 class="username">{{ profile.username }}</h1>
 
-          <p class="bio">
-            {{ profile.bio || 'No bio yet.' }}
-          </p>
+            <div class="rating-row" *ngIf="profile.reviewCount > 0">
+              <app-star-rating
+                [rating]="profile.averageRating"
+                [readonly]="true"
+                [showLabel]="true"
+                [reviewCount]="profile.reviewCount"
+              ></app-star-rating>
+            </div>
+            <div class="rating-row no-reviews" *ngIf="profile.reviewCount === 0">
+              <span class="no-reviews-text">No reviews yet</span>
+            </div>
 
-          <div class="actions">
-            <button mat-raised-button color="primary">
+            <p class="bio">{{ profile.bio || 'No bio added yet.' }}</p>
+          </div>
+
+          <div class="hero-actions">
+            <button mat-stroked-button class="btn-edit">
+              <mat-icon>edit</mat-icon>
               Edit profile
             </button>
-            <button mat-stroked-button color="warn" (click)="onLogout()">
+            <button mat-stroked-button class="btn-logout" (click)="onLogout()">
+              <mat-icon>logout</mat-icon>
               Logout
             </button>
           </div>
         </div>
-
-      </div>
-    </mat-card>
-
-    <section class="items-section">
-      <h2>My items ({{ items.length }})</h2>
-
-      <div class="items-grid" *ngIf="items.length; else noItems">
-        <app-product-card
-          *ngFor="let item of items"
-          [item]="item"
-          [showActions]="false"
-          [showRating]="false"
-          [showDetails]="true"
-          (addToCartClick)="onEditItem($event)"
-          (viewDetailsClick)="onViewItem($event)">
-        </app-product-card>
       </div>
 
-      <ng-template #noItems>
-        <div class="empty-state">
-          <p>You haven't listed any items yet.</p>
-          <button mat-raised-button color="primary">Add your first item</button>
+      <div class="content-area container">
+
+        <!-- ── Stats strip ── -->
+        <div class="stats-strip">
+          <div class="stat-chip">
+            <span class="stat-value">{{ items.length }}</span>
+            <span class="stat-label">Listed items</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-chip">
+            <span class="stat-value">{{ profile.reviewCount }}</span>
+            <span class="stat-label">Reviews received</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-chip">
+            <span class="stat-value">
+              {{ profile.averageRating > 0 ? (profile.averageRating | number:'1.1-1') : '—' }}
+            </span>
+            <span class="stat-label">Avg. rating</span>
+          </div>
         </div>
-      </ng-template>
-    </section>
 
-  </div>
-</section>
+        <!-- ── My listings ── -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">My listings</h2>
+            <span class="section-count">{{ items.length }}</span>
+          </div>
 
-<ng-template #noProfile>
-  <div class="center-state">
-    <mat-card>
-      <h2>Profile not ready</h2>
-      <p>Please refresh or log in again.</p>
+          <div class="items-grid" *ngIf="items.length; else noItems">
+            <app-product-card
+              *ngFor="let item of items"
+              [item]="item"
+              [showActions]="false"
+              [showRating]="false"
+              [showDetails]="true"
+              (viewDetailsClick)="onViewItem($event)">
+            </app-product-card>
+          </div>
 
-      <button mat-raised-button color="primary" (click)="ngOnInit()">
-        Refresh
-      </button>
-    </mat-card>
-  </div>
-</ng-template>
+          <ng-template #noItems>
+            <div class="empty-state">
+              <div class="empty-icon">
+                <mat-icon>inventory_2</mat-icon>
+              </div>
+              <p class="empty-title">No listings yet</p>
+              <p class="empty-sub">Items you list for sale will appear here.</p>
+            </div>
+          </ng-template>
+        </section>
 
-<ng-template #loading>
-  <div class="center-state">
-    <mat-spinner diameter="40"></mat-spinner>
+        <!-- ── Reviews ── -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Reviews about me</h2>
+            <span class="section-count">{{ profile.reviewCount }}</span>
+          </div>
+
+          <app-user-reviews
+            [reviewedUserId]="profile.userId"
+            [averageRatingInput]="profile.averageRating"
+            [reviewCountInput]="profile.reviewCount"
+          ></app-user-reviews>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ── Error state ── -->
+    <ng-template #noProfile>
+      <div class="center-state">
+        <div class="error-card">
+          <mat-icon class="error-icon">cloud_off</mat-icon>
+          <h2>Couldn't load profile</h2>
+          <p>Something went wrong while loading your profile.</p>
+          <div class="error-actions">
+            <button mat-raised-button color="primary" (click)="loadProfile()">
+              <mat-icon>refresh</mat-icon> Try again
+            </button>
+            <button mat-stroked-button color="warn" (click)="onLogout()">
+              <mat-icon>logout</mat-icon> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
   </div>
 </ng-template>

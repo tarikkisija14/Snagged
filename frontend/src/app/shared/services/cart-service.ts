@@ -5,7 +5,6 @@ import { EMPTY, Observable } from 'rxjs';
 import { Cart } from '../models/cart';
 import { AuthService } from '../../core/services/auth-service/AuthService';
 
-
 export interface CartItemApiDto {
   id: number;
   itemId: number;
@@ -21,6 +20,7 @@ export interface CartApiDto {
   userId: number;
   createdAt: string;
   updatedAt: string;
+  isSavedForLater: boolean;
   items: CartItemApiDto[];
 }
 
@@ -30,12 +30,11 @@ export interface CartApiDto {
 export class CartService {
   private readonly apiUrl = `${environment.apiUrl}/cart`;
 
-
   private cart: Cart | null = null;
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   setCart(cart: Cart): void {
@@ -47,27 +46,17 @@ export class CartService {
   }
 
   getCartByUser(): Observable<CartApiDto> {
-    if (!this.authService.isLoggedIn()) {
-      console.warn('CartService: user is not logged in.');
-      return EMPTY;
-    }
+    if (!this.authService.isLoggedIn()) return EMPTY;
     return this.http.get<CartApiDto>(this.apiUrl);
   }
 
-
   getSavedCart(): Observable<CartApiDto> {
-    if (!this.authService.isLoggedIn()) {
-      console.warn('CartService: user is not logged in.');
-      return EMPTY;
-    }
+    if (!this.authService.isLoggedIn()) return EMPTY;
     return this.http.get<CartApiDto>(`${this.apiUrl}/saved`);
   }
 
   addCartItem(itemId: number, quantity: number = 1): Observable<number> {
-    if (!this.authService.isLoggedIn()) {
-      console.warn('CartService: user is not logged in.');
-      return EMPTY;
-    }
+    if (!this.authService.isLoggedIn()) return EMPTY;
     return this.http.post<number>(`${this.apiUrl}/item`, { itemId, quantity });
   }
 
@@ -80,35 +69,27 @@ export class CartService {
   }
 
   clearCart(): Observable<void> {
-    if (!this.authService.isLoggedIn()) {
-      console.warn('CartService: user is not logged in.');
-      return EMPTY;
-    }
+    if (!this.authService.isLoggedIn()) return EMPTY;
     return this.http.delete<void>(`${this.apiUrl}/clear`);
   }
-
 
   saveForLater(cartId: number): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/save-for-later/${cartId}`, {});
   }
-
 
   moveToCart(cartId: number): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/move-to-cart/${cartId}`, {});
   }
 
   checkout(): Observable<{ orderId: number }> {
-    if (!this.authService.isLoggedIn()) {
-      console.warn('CartService: user is not logged in.');
-      return EMPTY;
-    }
+    if (!this.authService.isLoggedIn()) return EMPTY;
     return this.http.post<{ orderId: number }>(`${this.apiUrl}/checkout`, {});
   }
 
   createStripePaymentIntent(orderId: number): Observable<{ clientSecret: string }> {
     return this.http.post<{ clientSecret: string }>(
       `${environment.apiUrl}/payment/stripe/create-intent/${orderId}`,
-      {}
+      {},
     );
   }
 

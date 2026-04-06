@@ -1,0 +1,191 @@
+<!-- ── Loading ─────────────────────────────────────────────────────── -->
+<div class="detail-loading" *ngIf="isLoading">
+  <div class="loading-inner">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+</div>
+
+<!-- ── Not found ───────────────────────────────────────────────────── -->
+<div class="detail-not-found" *ngIf="!isLoading && notFound">
+  <div class="not-found-card">
+    <mat-icon class="not-found-icon">search_off</mat-icon>
+    <h2>Item not found</h2>
+    <p>This item may have been removed or the link is no longer valid.</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Back to Shop
+    </button>
+  </div>
+</div>
+
+<!-- ── Main detail page ────────────────────────────────────────────── -->
+<div class="detail-page" *ngIf="!isLoading && !notFound && item">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb container" aria-label="breadcrumb">
+    <button mat-button (click)="goBack()" class="breadcrumb-back">
+      <mat-icon>arrow_back_ios</mat-icon> Shop
+    </button>
+    <span class="breadcrumb-sep">/</span>
+    <span *ngIf="item.categoryName" class="breadcrumb-cat">{{ item.categoryName }}</span>
+    <span *ngIf="item.subcategoryName" class="breadcrumb-sep">/</span>
+    <span *ngIf="item.subcategoryName" class="breadcrumb-cat">{{ item.subcategoryName }}</span>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">{{ item.title }}</span>
+  </nav>
+
+  <div class="detail-layout container">
+
+    <!-- ══ LEFT: Gallery ════════════════════════════════════════════ -->
+    <div class="gallery">
+
+      <div class="gallery-main" [class.is-sold]="item.isSold">
+        <img
+          [src]="mainImageUrl"
+          [alt]="item.title"
+          class="main-image"
+          (error)="onImageError($event)"
+        />
+
+        <!-- Sold ribbon -->
+        <div class="sold-ribbon" *ngIf="item.isSold">
+          <span>SOLD</span>
+        </div>
+
+        <!-- Zoom hint -->
+        <div class="zoom-hint" *ngIf="!item.isSold">
+          <mat-icon>zoom_in</mat-icon>
+        </div>
+      </div>
+
+      <!-- Thumbnails -->
+      <div class="gallery-thumbs" *ngIf="item.images.length > 1">
+        <button
+          *ngFor="let img of item.images || []"
+          class="thumb-btn"
+          [class.active]="selectedImage?.id === img.id"
+          (click)="selectImage(img)"
+          [attr.aria-label]="'View image ' + img.id"
+        >
+          <img [src]="resolveUrl(img.imageUrl)" [alt]="item.title" (error)="onImageError($event)" />
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ══ RIGHT: Info panel ════════════════════════════════════════ -->
+    <div class="info-panel">
+
+      <!-- Category chips -->
+      <div class="category-badges">
+        <span class="chip chip-cat" *ngIf="item.categoryName">{{ item.categoryName }}</span>
+        <span class="chip chip-sub" *ngIf="item.subcategoryName">{{ item.subcategoryName }}</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="item-title">{{ item.title }}</h1>
+
+      <!-- Price -->
+      <div class="price-row">
+        <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
+        <span class="price-tag" *ngIf="!item.isSold">Available</span>
+        <span class="price-tag sold-tag" *ngIf="item.isSold">Sold out</span>
+      </div>
+
+      <!-- Divider -->
+      <div class="info-divider"></div>
+
+      <!-- Condition -->
+      <div class="condition-row" *ngIf="item.condition">
+        <span class="condition-label">Condition</span>
+        <span class="condition-badge condition-{{ (item.condition || '').toLowerCase() }}">
+          {{ item.condition }}
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="item-description-wrapper" *ngIf="item.description">
+        <p class="desc-label">Description</p>
+        <p class="item-description">{{ item.description }}</p>
+      </div>
+
+      <!-- Seller -->
+      <div class="seller-card" *ngIf="item.sellerUsername">
+        <div class="seller-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div class="seller-info">
+          <span class="seller-label">Listed by</span>
+          <button class="seller-name-btn" (click)="goToSeller()">
+            {{ item.sellerUsername }}
+            <mat-icon class="seller-link-icon">open_in_new</mat-icon>
+          </button>
+        </div>
+        <div class="meta-date">
+          <mat-icon class="meta-icon">schedule</mat-icon>
+          {{ item.createdAt | date:'mediumDate' }}
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-area">
+        <ng-container *ngIf="isLoggedIn; else loginPrompt">
+          <button
+            class="add-cart-btn"
+            [class.added]="addedToCart"
+            [class.sold]="item.isSold"
+            [disabled]="item.isSold || addedToCart || isOwnItem"
+            (click)="addToCart()"
+          >
+            <mat-icon>{{ item.isSold ? 'block' : (addedToCart ? 'check_circle' : 'shopping_bag') }}</mat-icon>
+            <span>{{
+                item.isSold ? 'Sold Out' :
+                  isOwnItem   ? 'Your Item' :
+                    addedToCart ? 'Added to Cart!' : 'Add to Cart'
+              }}</span>
+          </button>
+        </ng-container>
+
+        <ng-template #loginPrompt>
+          <button class="add-cart-btn login-btn" [routerLink]="['/home/auth/login']">
+            <mat-icon>login</mat-icon>
+            <span>Log in to Buy</span>
+          </button>
+        </ng-template>
+
+        <div class="cart-error" *ngIf="cartError" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ cartError }}</span>
+        </div>
+
+        <!-- Trust badges -->
+        <div class="trust-row">
+          <span class="trust-badge">
+            <mat-icon>verified_user</mat-icon> Secure checkout
+          </span>
+          <span class="trust-badge">
+            <mat-icon>eco</mat-icon> Sustainable fashion
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Seller reviews ──────────────────────────────────────────── -->
+  <div class="reviews-wrapper container seller-reviews" *ngIf="item.userId && !isOwnItem">
+    <div class="reviews-header">
+      <h2 class="reviews-title">
+        <mat-icon>rate_review</mat-icon>
+        Seller reviews
+      </h2>
+      <p class="reviews-sub">Reviews for <strong>{{ item.sellerUsername || 'this seller' }}</strong></p>
+    </div>
+
+    <app-user-reviews
+      [reviewedUserId]="item.userId"
+      [averageRatingInput]="averageRating"
+      [reviewCountInput]="reviewCount">
+    </app-user-reviews>
+  </div>
+
+</div>

@@ -1,12 +1,18 @@
-import { User } from './user';
-
 export interface Review {
   id: number;
   reviewerId: number;
-  reviewer?: User;
+  reviewerUsername: string;
+  reviewerProfileImageUrl?: string | null;
   reviewedUserId: number;
-  reviewedUser?: User;
   rating: number;
   comment: string;
-  createdAt: Date | string;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface PagedReviews {
+  total: number;
+  items: Review[];
+}
+
+export type ReviewSortOrder = 'Newest' | 'HighestRating' | 'LowestRating';

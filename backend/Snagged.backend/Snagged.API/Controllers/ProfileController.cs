@@ -1,46 +1,39 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Snagged.Application.Abstractions;
+using Snagged.Application.Catalog.Profiles.Commands.CreateProfile;
 using Snagged.Application.Catalog.Profiles.Queries;
+using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Common.Interfaces;
 
 namespace Snagged.API.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("api/profile")]
-    public class ProfileController : ControllerBase
+    public class ProfileController(IMediator mediator, ICurrentUserService currentUser) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public ProfileController(IMediator mediator) {
-            _mediator = mediator;
-        }
-
         [HttpGet("me")]
         public async Task<IActionResult> GetProfile()
         {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
+            try
             {
-                return Unauthorized("User ID not found in token.");
+                var result = await mediator.Send(new GetProfileQuery { UserId = currentUser.UserId });
+                return Ok(result);
             }
-
-            if (!int.TryParse(userIdClaim.Value, out int userId))
+            catch (SnaggedNotFoundException)
             {
-                return BadRequest("Invalid User ID format.");
+                
+                try
+                {
+                    var created = await mediator.Send(new CreateProfileCommand { UserId = currentUser.UserId });
+                    return Ok(created);
+                }
+                catch (SnaggedNotFoundException ex)
+                {
+                    return NotFound(new { message = ex.Message });
+                }
             }
-
-            var result = await _mediator.Send(new GetProfileQuery { UserId = userId });
-
-            if (result == null)
-            {
-                return NotFound(new { message = "Profile not found for this user." });
-            }
-
-            return Ok(result);
         }
     }
 }

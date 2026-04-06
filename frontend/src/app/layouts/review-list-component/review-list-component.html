@@ -1,0 +1,65 @@
+<div class="list-header">
+  <h3 class="list-title">Reviews ({{ total }})</h3>
+
+  <mat-form-field appearance="outline" class="sort-select">
+    <mat-label>Sort by</mat-label>
+    <mat-select [ngModel]="sortValue" (ngModelChange)="onSortChange($event)">
+      <mat-option value="Newest">Newest first</mat-option>
+      <mat-option value="HighestRating">Highest rating</mat-option>
+      <mat-option value="LowestRating">Lowest rating</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="loading-row" *ngIf="isLoading">
+  <mat-spinner diameter="36"></mat-spinner>
+</div>
+
+<div class="empty-state" *ngIf="!isLoading && reviews.length === 0">
+  <p>No reviews yet. Be the first to leave one!</p>
+</div>
+
+<ng-container *ngIf="!isLoading">
+  <mat-card class="review-card" *ngFor="let review of reviews">
+    <mat-card-header>
+      <img
+        mat-card-avatar
+        [src]="review.reviewerProfileImageUrl || 'assets/default-avatar.png'"
+        [alt]="review.reviewerUsername"
+        class="avatar"
+        (error)="onAvatarError($event)"
+      />
+      <mat-card-title>{{ review.reviewerUsername }}</mat-card-title>
+      <mat-card-subtitle class="review-meta">
+        <app-star-rating [rating]="review.rating" [readonly]="true"></app-star-rating>
+        <span class="dot">·</span>
+        <span>{{ review.createdAt | date: 'mediumDate' }}</span>
+        <span class="edited-tag" *ngIf="isEdited(review)">(edited)</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p class="review-comment">{{ review.comment }}</p>
+    </mat-card-content>
+
+    <mat-card-actions *ngIf="review.reviewerId === currentUserId" class="owner-actions">
+      <button mat-button color="primary" (click)="editReview.emit(review)">
+        <mat-icon>edit</mat-icon> Edit
+      </button>
+      <button mat-button color="warn" (click)="onDelete(review)">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</ng-container>
+
+<mat-paginator
+  *ngIf="total > pageSize"
+  [length]="total"
+  [pageSize]="pageSize"
+  [pageIndex]="page - 1"
+  [pageSizeOptions]="[5, 10, 25]"
+  (page)="onPage($event)"
+  showFirstLastButtons
+  aria-label="Select page of reviews"
+></mat-paginator>

@@ -1,12 +1,17 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Snagged.Application.Catalog.Review;
 using Snagged.Application.Catalog.Review.Commands.AddReview;
 using Snagged.Application.Catalog.Review.Commands.DeleteReview;
 using Snagged.Application.Catalog.Review.Commands.UpdateReview;
+using Snagged.Application.Catalog.Review.Queries.GetMyReview;
 using Snagged.Application.Catalog.Review.Queries.GetReviewById;
 using Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewedUser;
 using Snagged.Application.Catalog.Review.Queries.GetReviewsByReviewer;
+using Snagged.Application.Catalog.Review.Queries.GetReviewsByItem;
+using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Common.Paging;
 
 namespace Snagged.API.Controllers
 {
@@ -14,53 +19,102 @@ namespace Snagged.API.Controllers
     [ApiController]
     public class ReviewController(IMediator mediator) : ControllerBase
     {
-        [HttpPost("add")]
+        [HttpPost]
         [Authorize]
         public async Task<IActionResult> Add([FromBody] AddReviewCommand cmd)
         {
-            var id = await mediator.Send(cmd);
-            return Ok(new { id });
+            try
+            {
+                var id = await mediator.Send(cmd);
+                return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (SnaggedNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        [HttpPut("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateReviewCommand cmd)
+        {
+            cmd.Id = id;
+            try
+            {
+                var ok = await mediator.Send(cmd);
+                if (!ok) return NotFound(new { message = "Review not found." });
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var ok = await mediator.Send(new DeleteReviewCommand { Id = id });
+                if (!ok) return NotFound(new { message = "Review not found." });
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
         {
             var review = await mediator.Send(new GetReviewByIdQuery { Id = id });
-            if (review == null) return NotFound(new { message = "Review not found" });
+            if (review == null) return NotFound(new { message = "Review not found." });
             return Ok(review);
         }
 
-        [HttpGet("reviewer/{reviewerId}")]
-        public async Task<IActionResult> GetByReviewer(int reviewerId)
+        [HttpGet("user/{reviewedUserId:int}/paged")]
+        public async Task<IActionResult> GetPaged(
+            int reviewedUserId,
+            [FromQuery] PageRequest paging,
+            [FromQuery] ReviewSortOrder sortOrder = ReviewSortOrder.Newest)
         {
-            var list = await mediator.Send(new GetReviewsByReviewerQuery { ReviewerId = reviewerId });
-            return Ok(list);
+            var result = await mediator.Send(new GetReviewsPagedQuery
+            {
+                ReviewedUserId = reviewedUserId,
+                Paging = paging,
+                SortOrder = sortOrder
+            });
+            return Ok(result);
         }
 
-        [HttpGet("reviewed/{reviewedUserId}")]
+        [HttpGet("reviewed/{reviewedUserId:int}")]
         public async Task<IActionResult> GetByReviewedUser(int reviewedUserId)
         {
             var list = await mediator.Send(new GetReviewsByReviewedUserQuery { ReviewedUserId = reviewedUserId });
             return Ok(list);
         }
 
-        [HttpPut("{id}/update")]
-        [Authorize]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateReviewCommand cmd)
+        [HttpGet("reviewer/{reviewerId:int}")]
+        public async Task<IActionResult> GetByReviewer(int reviewerId)
         {
-            cmd.Id = id;
-            var ok = await mediator.Send(cmd);
-            if (!ok) return NotFound(new { message = "Review not found" });
-            return NoContent();
+            var list = await mediator.Send(new GetReviewsByReviewerQuery { ReviewerId = reviewerId });
+            return Ok(list);
         }
 
-        [HttpDelete("{id}")]
+        [HttpGet("my/{reviewedUserId:int}")]
         [Authorize]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> GetMyReview(int reviewedUserId)
         {
-            var ok = await mediator.Send(new DeleteReviewCommand { Id = id });
-            if (!ok) return NotFound(new { message = "Review not found" });
-            return NoContent();
+            var review = await mediator.Send(new GetMyReviewForUserQuery { ReviewedUserId = reviewedUserId });
+            if (review == null) return NoContent();
+            return Ok(review);
         }
     }
 }

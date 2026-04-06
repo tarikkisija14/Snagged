@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
 using Snagged.Application.Common.Exceptions;
-using Snagged.Application.Catalog.Auth.Commands.Login;
 
 namespace Snagged.Application.Catalog.Auth.Commands.Login
 {
@@ -19,30 +18,25 @@ namespace Snagged.Application.Catalog.Auth.Commands.Login
 
         public async Task<string> Handle(LoginUserCommand request, CancellationToken ct)
         {
-           var user = await _context.Users
+            var user = await _context.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == request.email, ct);
 
-            if (user == null ||
-            !BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
-            {
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
                 throw new InvalidCredentialsException();
-            }
 
-            var existingCart = await _context.Carts
-            .FirstOrDefaultAsync(c => c.UserId == user.Id && !c.IsSavedForLater, ct);
+            var cartExists = await _context.Carts
+                .AnyAsync(c => c.UserId == user.Id, ct);
 
-            if (existingCart == null)
+            if (!cartExists)
             {
-                var cart = new Snagged.Domain.Entities.Cart
+                _context.Carts.Add(new Snagged.Domain.Entities.Cart
                 {
                     UserId = user.Id,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     IsSavedForLater = false
-                };
-
-                _context.Carts.Add(cart);
+                });
                 await _context.SaveChangesAsync(ct);
             }
 

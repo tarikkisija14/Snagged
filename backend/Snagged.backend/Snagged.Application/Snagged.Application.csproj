@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Catalog\Auth\Queries\" />
-    <Folder Include="Catalog\Profiles\Commands\" />
     <Folder Include="Modules\" />
   </ItemGroup>
 

@@ -13,15 +13,17 @@ import { SHIPPING_COST, TAX_RATE } from '../../shared/constants/order-total.cons
   selector: 'app-cart',
   templateUrl: './cart.html',
   styleUrls: ['./cart.scss'],
-  standalone: false
+  standalone: false,
 })
 export class Cart implements OnInit, OnDestroy {
   cart: CartModel | null = null;
   savedCart: CartModel | null = null;
 
-  isLoading       = false;
-  isSavedLoading  = false;
+  isLoading        = false;
+  isSavedLoading   = false;
   isSavingForLater = false;
+  isCheckingOut    = false;
+  checkoutError    = '';
 
   readonly shippingCost = SHIPPING_COST;
   readonly taxRate      = TAX_RATE;
@@ -33,19 +35,19 @@ export class Cart implements OnInit, OnDestroy {
     private cartService: CartService,
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.authSub = this.authService.currentUser$.subscribe(userId => {
-      if (!userId) {
-        this.router.navigate(['/home/auth/login']);
+      if (userId) {
+        this.loadCart();
+        this.loadSavedCart();
+      } else {
         this.cart      = null;
         this.savedCart = null;
-        return;
+        this.cdr.detectChanges();
       }
-      this.loadCart();
-      this.loadSavedCart();
     });
   }
 
@@ -53,7 +55,13 @@ export class Cart implements OnInit, OnDestroy {
     this.authSub?.unsubscribe();
   }
 
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
 
+  goToLogin(): void {
+    this.router.navigate(['/home/auth/login']);
+  }
 
   loadCart(): void {
     this.isLoading = true;
@@ -64,11 +72,10 @@ export class Cart implements OnInit, OnDestroy {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Failed to load cart:', err);
+      error: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -80,17 +87,13 @@ export class Cart implements OnInit, OnDestroy {
         this.isSavedLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        // Fix #15: log instead of silently swallowing
-        console.error('Failed to load saved cart:', err);
+      error: () => {
         this.savedCart      = null;
         this.isSavedLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
-
-
 
   private mapCartDto(dto: CartApiDto): CartModel {
     return {
@@ -98,7 +101,7 @@ export class Cart implements OnInit, OnDestroy {
       userId:          dto.userId,
       createdAt:       new Date(dto.createdAt),
       updatedAt:       new Date(dto.updatedAt),
-      isSavedForLater: false,
+      isSavedForLater: dto.isSavedForLater,
       cartItems: dto.items.map((i: CartItemApiDto): CartItem => ({
         id:       i.id,
         cartId:   dto.id,
@@ -118,18 +121,16 @@ export class Cart implements OnInit, OnDestroy {
           likesCount:  0,
           images:      [],
           categoryId:  0,
-        } as ItemModel
-      }))
+        } as ItemModel,
+      })),
     };
   }
-
-
 
   increaseQuantity(item: CartItem): void {
     const newQty = item.quantity + 1;
     this.cartService.updateCartItem(item.id, newQty).subscribe({
       next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
-      error: (err) => console.error('Failed to update quantity:', err)
+      error: () => {},
     });
   }
 
@@ -138,7 +139,7 @@ export class Cart implements OnInit, OnDestroy {
     const newQty = item.quantity - 1;
     this.cartService.updateCartItem(item.id, newQty).subscribe({
       next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
-      error: (err) => console.error('Failed to update quantity:', err)
+      error: () => {},
     });
   }
 
@@ -149,10 +150,9 @@ export class Cart implements OnInit, OnDestroy {
           this.cart.cartItems = this.cart.cartItems.filter(ci => ci.id !== item.id);
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Failed to remove item:', err)
+      error: () => {},
     });
   }
-
 
   saveCartForLater(): void {
     if (!this.cart) return;
@@ -164,16 +164,12 @@ export class Cart implements OnInit, OnDestroy {
         this.isSavingForLater = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Failed to save cart for later:', err);
+      error: () => {
         this.isSavingForLater = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
-
-
-
 
   moveToCart(): void {
     if (!this.savedCart) return;
@@ -182,10 +178,9 @@ export class Cart implements OnInit, OnDestroy {
         this.savedCart = null;
         this.loadCart();
       },
-      error: (err) => {
-        console.error('Failed to move cart:', err);
+      error: () => {
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -198,11 +193,9 @@ export class Cart implements OnInit, OnDestroy {
         }
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Failed to remove saved item:', err)
+      error: () => {},
     });
   }
-
-
 
   getSubtotal(): number {
     if (!this.cart) return 0;
@@ -217,29 +210,28 @@ export class Cart implements OnInit, OnDestroy {
     return +(this.getSubtotal() + this.getShipping() + this.getTax()).toFixed(2);
   }
 
-
-
-  getItemImage(item: ItemModel | undefined): string {
-    if (!item) return `${this.baseImageUrl}/images/items/placeholder.png`;
-
-    const cartItem = this.cart?.cartItems.find(ci => ci.itemId === item.id)
-      ?? this.savedCart?.cartItems.find(ci => ci.itemId === item.id);
-
-    const imageUrl = cartItem?.imageUrl?.trim() || item.images?.[0]?.imageUrl?.trim();
-
-    if (imageUrl)
+  getItemImage(cartItem: CartItem): string {
+    const imageUrl = cartItem.imageUrl?.trim();
+    if (imageUrl) {
       return imageUrl.startsWith('http') ? imageUrl : `${this.baseImageUrl}${imageUrl}`;
-
+    }
     return `${this.baseImageUrl}/images/items/placeholder.png`;
   }
 
-
-
   proceedToCheckout(): void {
-    if (!this.cart?.cartItems.length) return;
+    if (!this.cart?.cartItems.length || this.isCheckingOut) return;
+    this.checkoutError = '';
+    this.isCheckingOut = true;
     this.cartService.checkout().subscribe({
-      next: ({ orderId }) => this.router.navigate(['/payment', orderId]),
-      error: (err) => console.error('Checkout failed:', err)
+      next: ({ orderId }) => {
+        this.isCheckingOut = false;
+        this.router.navigate(['/payment', orderId]);
+      },
+      error: (err) => {
+        this.isCheckingOut = false;
+        this.checkoutError = err?.error?.error ?? 'Checkout failed. Please try again.';
+        this.cdr.detectChanges();
+      },
     });
   }
 }

@@ -90,7 +90,7 @@ builder.Services.AddRateLimiter(options =>
         await context.HttpContext.Response.WriteAsJsonAsync(new
         {
             error = "TooManyRequests",
-            message = "Previše zahtjeva, pokušajte kasnije.",
+            message = "Too many requests. Please try again later.",
             timestamp = DateTime.UtcNow
         }, cancellationToken: token);
     };
@@ -109,11 +109,14 @@ builder.Services.AddCors(options =>
 // CONTROLLERS + VALIDATION
 builder.Services.AddControllers();
 
+// FluentValidation
 builder.Services
     .AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddValidatorsFromAssembly(Assembly.Load("Snagged.Application"));
+
+// MediatR pipeline validation behaviour
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
 // SWAGGER
@@ -124,7 +127,7 @@ builder.Services.AddSwaggerGen(c =>
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+        Description = "JWT Authorization header. Example: 'Bearer {token}'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -138,7 +141,7 @@ builder.Services.AddSwaggerGen(c =>
             {
                 Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
@@ -150,10 +153,41 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 
 var app = builder.Build();
 
-// STATIC FILES
+// ── Middleware pipeline ──────────────────────────────────────────────────────
+// Exception handler MUST be first so it wraps all subsequent middleware.
+app.UseExceptionHandler(errApp => errApp.Run(async ctx =>
+{
+    var ex = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+
+    ctx.Response.ContentType = "application/json";
+
+    if (ex is ValidationException ve)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
+        var errors = ve.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(e => e.ErrorMessage).ToArray()
+            );
+        await ctx.Response.WriteAsJsonAsync(new { errors });
+        return;
+    }
+
+    ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    await ctx.Response.WriteAsJsonAsync(new { message = "An unexpected error occurred." });
+}));
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Serve item images from the configured folder
 var imagesFolder = Path.Combine(
     app.Environment.ContentRootPath,
-    builder.Configuration["ImageSettings:ItemsPath"] ?? ""
+    builder.Configuration["ImageSettings:ItemsPath"] ?? "images/items"
 );
 
 if (!Directory.Exists(imagesFolder))
@@ -165,17 +199,9 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images/items"
 });
 
-// PIPELINE
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseCors("AllowAngular");
 app.UseRouting();
+app.UseCors("AllowAngular");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,11 +1,6 @@
 ﻿using MediatR;
 using Snagged.Application.Abstractions;
 using Snagged.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Orders.Commands.CreateOrder
 {
@@ -17,7 +12,7 @@ namespace Snagged.Application.Catalog.Orders.Commands.CreateOrder
             {
                 BuyerId = request.Order.BuyerId,
                 Status = request.Order.Status,
-                OrderDate = DateTime.Now,
+                OrderDate = DateTime.UtcNow,
                 OrderItems = request.Order.Items.Select(i => new Snagged.Domain.Entities.OrderItem
                 {
                     ItemId = i.ItemId,
