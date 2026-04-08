@@ -1,4 +1,6 @@
+// MODIFIED
 import { Component, OnInit, OnDestroy, Input, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ItemModel } from '../../shared/models/item.model';
 import { Category } from '../../shared/models/category';
@@ -31,6 +33,8 @@ export class CatalogList implements OnInit, OnDestroy {
   selectedSubcategoryIds: number[] = [];
   selectedConditions: string[] = [];
 
+  activeSearchTerm = '';
+
   page       = 1;
   pageSize   = 14;
   totalItems = 0;
@@ -59,12 +63,19 @@ export class CatalogList implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     if (this.mode === 'home') this.pageSize = 9;
     this.loadCategories();
-    this.loadItems();
+
+    const paramSub = this.route.queryParamMap.subscribe(params => {
+      this.activeSearchTerm = params.get('q') ?? '';
+      this.page = 1;
+      this.loadItems();
+    });
+    this.subs.add(paramSub);
   }
 
   ngOnDestroy(): void {
@@ -94,6 +105,7 @@ export class CatalogList implements OnInit, OnDestroy {
       sortBy: this.selectedSortBy, sortOrder: this.selectedSortOrder,
     };
 
+    if (this.activeSearchTerm)                filter.titleContains  = this.activeSearchTerm;
     if (this.selectedCategoryIds.length > 0)   filter.categoryIds    = this.selectedCategoryIds;
     if (this.selectedSubcategoryIds.length > 0) filter.subcategoryIds = this.selectedSubcategoryIds;
     if (this.selectedConditions.length > 0)     filter.conditions     = this.selectedConditions;

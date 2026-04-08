@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿
+using FluentValidation;
 
 namespace Snagged.Application.Catalog.Items.Queries.GetItemSuggestions
 {
@@ -8,7 +9,11 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemSuggestions
         {
             RuleFor(x => x.Query)
                 .NotEmpty()
-                .MinimumLength(2);
+                .MinimumLength(2)
+                .MaximumLength(100);
+
+            RuleFor(x => x.Limit)
+                .InclusiveBetween(1, 20);
         }
     }
 }

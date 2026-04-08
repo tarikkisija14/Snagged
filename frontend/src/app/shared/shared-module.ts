@@ -1,9 +1,9 @@
+// MODIFIED
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-// Angular Material
 import { MatCardModule }            from '@angular/material/card';
 import { MatButtonModule }          from '@angular/material/button';
 import { MatIconModule }            from '@angular/material/icon';
@@ -15,16 +15,17 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule }           from '@angular/material/chips';
 import { MatSnackBarModule }        from '@angular/material/snack-bar';
 
-// Shared components & directives
-import { ProductCardComponent }   from './components/product-card.component/product-card.component';
-import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
-import { ButtonComponent }        from './components/button.component/button.component';
+import { ProductCardComponent }       from './components/product-card.component/product-card.component';
+import { LazyLoadImageDirective }     from './directives/lazy-load-image.directive';
+import { ButtonComponent }            from './components/button.component/button.component';
+import {SearchSuggestions} from './components/search-suggestions/search-suggestions';
 
 @NgModule({
   declarations: [
     LazyLoadImageDirective,
     ProductCardComponent,
     ButtonComponent,
+    SearchSuggestions,
   ],
   imports: [
     CommonModule,
@@ -50,6 +51,7 @@ import { ButtonComponent }        from './components/button.component/button.com
     LazyLoadImageDirective,
     ProductCardComponent,
     ButtonComponent,
+    SearchSuggestions,
     MatCardModule,
     MatButtonModule,
     MatIconModule,

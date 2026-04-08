@@ -1,3 +1,4 @@
+<!-- MODIFIED -->
 <header class="header">
   <div class="container">
 
@@ -23,19 +24,50 @@
 
     <div class="header-actions">
 
+      <!-- Search with typeahead -->
       <div class="search-wrapper">
+
+        <!-- Ghost hint rendered behind the real input -->
+        <div class="search-hint-overlay" *ngIf="autocompleteHint" aria-hidden="true">
+          <span class="hint-typed">{{ searchQuery }}</span><span class="hint-ghost">{{ autocompleteHint.slice(searchQuery.length) }}</span>
+        </div>
+
         <input
-          type="search"
+          type="text"
+          id="site-search"
+          name="site-search"
           placeholder="Search for items..."
           class="search-bar"
+          autocomplete="off"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          (focus)="onSearchFocus()"
+          (keydown)="onSearchKeydown($event)"
+          aria-label="Search items"
+          aria-autocomplete="both"
+          aria-haspopup="listbox"
         />
         <mat-icon class="search-icon">search</mat-icon>
+
+        <!-- Tab hint label -->
+        <span class="search-tab-hint" *ngIf="autocompleteHint">Tab</span>
+
+        <!-- Dropdown suggestions -->
+        <app-search-suggestions
+          *ngIf="searchOpen"
+          [suggestions]="suggestions"
+          [recentSearches]="recentSearches"
+          [loading]="searchLoading"
+          [query]="searchQuery"
+          [activeIndex]="activeIndex"
+          (selectSuggestion)="selectSuggestion($event)"
+          (selectRecent)="selectRecent($event)"
+          (deleteRecent)="deleteRecent($event)"
+          (clearRecent)="clearRecent()"
+        ></app-search-suggestions>
       </div>
 
-      <button
-        class="icon-btn"
-        aria-label="Wishlist"
-      >
+      <button class="icon-btn" aria-label="Wishlist">
         <mat-icon>favorite_border</mat-icon>
       </button>
 
@@ -78,41 +110,25 @@
         </div>
       </div>
 
-      <button
-        class="icon-btn cart-btn"
-        aria-label="Cart"
-        routerLink="/cart"
-      >
+      <button class="icon-btn cart-btn" aria-label="Cart" routerLink="/cart">
         <mat-icon>shopping_cart</mat-icon>
       </button>
 
-      <button
-        type="button"
-        class="icon-btn"
-        aria-label="Account"
-        (click)="onUserIconClick()"
-      >
+      <button type="button" class="icon-btn" aria-label="Account" (click)="onUserIconClick()">
         <mat-icon>person_outline</mat-icon>
       </button>
-
     </div>
   </div>
 
   <mat-menu #mobileMenu="matMenu" class="mobileMenu">
     <button mat-menu-item routerLink="/shop">
-      <mat-icon>storefront</mat-icon>
-      <span>Shop</span>
+      <mat-icon>storefront</mat-icon><span>Shop</span>
     </button>
-
     <button mat-menu-item routerLink="/new-arrivals">
-      <mat-icon>new_releases</mat-icon>
-      <span>New Arrivals</span>
+      <mat-icon>new_releases</mat-icon><span>New Arrivals</span>
     </button>
-
     <button mat-menu-item routerLink="/sell">
-      <mat-icon>sell</mat-icon>
-      <span>Sell</span>
+      <mat-icon>sell</mat-icon><span>Sell</span>
     </button>
-
   </mat-menu>
 </header>

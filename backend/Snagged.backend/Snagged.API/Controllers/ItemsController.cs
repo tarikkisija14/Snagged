@@ -103,9 +103,9 @@ namespace Snagged.API.Controllers
         }
 
         [HttpGet("suggestions")]
-        public async Task<IActionResult> GetSuggestions([FromQuery] GetItemSuggestionsQuery query)
+        public async Task<IActionResult> GetSuggestions([FromQuery] GetItemSuggestionsQuery request)
         {
-            var result = await mediator.Send(query);
+            var result = await mediator.Send(request);
             return Ok(result);
         }
     }
