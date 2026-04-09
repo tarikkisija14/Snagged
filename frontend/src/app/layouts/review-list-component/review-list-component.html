@@ -22,9 +22,10 @@
 <ng-container *ngIf="!isLoading">
   <mat-card class="review-card" *ngFor="let review of reviews">
     <mat-card-header>
+
       <img
         mat-card-avatar
-        [src]="review.reviewerProfileImageUrl || 'assets/default-avatar.png'"
+        [src]="review.reviewerProfileImageUrl || defaultAvatar"
         [alt]="review.reviewerUsername"
         class="avatar"
         (error)="onAvatarError($event)"

@@ -81,7 +81,6 @@ export class Header implements OnInit, OnDestroy {
 
     this.loadingSub = this.searchService.loading.subscribe(l => {
       this.searchLoading = l;
-      if (l) this.autocompleteHint = '';
       this.cdr.markForCheck();
     });
   }
@@ -98,6 +97,7 @@ export class Header implements OnInit, OnDestroy {
     const q = this.searchQuery;
     if (!q || this.suggestions.length === 0) {
       this.autocompleteHint = '';
+      this.cdr.markForCheck();
       return;
     }
     const first = this.suggestions[0].title;
@@ -106,10 +106,13 @@ export class Header implements OnInit, OnDestroy {
     } else {
       this.autocompleteHint = '';
     }
+    this.cdr.markForCheck();
   }
 
   onSearchInput(): void {
-    this.autocompleteHint = '';
+    if (!this.searchQuery) {
+      this.autocompleteHint = '';
+    }
     this.searchService.search(this.searchQuery);
   }
 

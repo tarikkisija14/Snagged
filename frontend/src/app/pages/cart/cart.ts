@@ -5,7 +5,8 @@ import { ItemModel } from '../../shared/models/item.model';
 import { CartService, CartApiDto, CartItemApiDto } from '../../shared/services/cart-service';
 import { AuthService } from '../../core/services/auth-service/AuthService';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { SHIPPING_COST, TAX_RATE } from '../../shared/constants/order-total.constants';
 
@@ -29,7 +30,9 @@ export class Cart implements OnInit, OnDestroy {
   readonly taxRate      = TAX_RATE;
 
   private readonly baseImageUrl = environment.apiUrl.replace('/api', '');
-  private authSub: Subscription | null = null;
+
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private cartService: CartService,
@@ -39,20 +42,23 @@ export class Cart implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.authSub = this.authService.currentUser$.subscribe(userId => {
-      if (userId) {
-        this.loadCart();
-        this.loadSavedCart();
-      } else {
-        this.cart      = null;
-        this.savedCart = null;
-        this.cdr.detectChanges();
-      }
-    });
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(userId => {
+        if (userId) {
+          this.loadCart();
+          this.loadSavedCart();
+        } else {
+          this.cart      = null;
+          this.savedCart = null;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   ngOnDestroy(): void {
-    this.authSub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get isLoggedIn(): boolean {
@@ -65,34 +71,38 @@ export class Cart implements OnInit, OnDestroy {
 
   loadCart(): void {
     this.isLoading = true;
-    this.cartService.getCartByUser().subscribe({
-      next: (cartDto: CartApiDto) => {
-        this.cart = this.mapCartDto(cartDto);
-        this.cartService.setCart(this.cart);
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.cartService.getCartByUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cartDto: CartApiDto) => {
+          this.cart = this.mapCartDto(cartDto);
+          this.cartService.setCart(this.cart);
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   loadSavedCart(): void {
     this.isSavedLoading = true;
-    this.cartService.getSavedCart().subscribe({
-      next: (cartDto: CartApiDto) => {
-        this.savedCart      = cartDto?.items?.length ? this.mapCartDto(cartDto) : null;
-        this.isSavedLoading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.savedCart      = null;
-        this.isSavedLoading = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.cartService.getSavedCart()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cartDto: CartApiDto) => {
+          this.savedCart      = cartDto?.items?.length ? this.mapCartDto(cartDto) : null;
+          this.isSavedLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.savedCart      = null;
+          this.isSavedLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   private mapCartDto(dto: CartApiDto): CartModel {
@@ -128,73 +138,85 @@ export class Cart implements OnInit, OnDestroy {
 
   increaseQuantity(item: CartItem): void {
     const newQty = item.quantity + 1;
-    this.cartService.updateCartItem(item.id, newQty).subscribe({
-      next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
-      error: () => {},
-    });
+    this.cartService.updateCartItem(item.id, newQty)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
+        error: () => {},
+      });
   }
 
   decreaseQuantity(item: CartItem): void {
     if (item.quantity <= 1) return;
     const newQty = item.quantity - 1;
-    this.cartService.updateCartItem(item.id, newQty).subscribe({
-      next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
-      error: () => {},
-    });
+    this.cartService.updateCartItem(item.id, newQty)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => { item.quantity = newQty; this.cdr.detectChanges(); },
+        error: () => {},
+      });
   }
 
   removeItem(item: CartItem): void {
-    this.cartService.deleteCartItem(item.id).subscribe({
-      next: () => {
-        if (this.cart)
-          this.cart.cartItems = this.cart.cartItems.filter(ci => ci.id !== item.id);
-        this.cdr.detectChanges();
-      },
-      error: () => {},
-    });
+    this.cartService.deleteCartItem(item.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          if (this.cart)
+            this.cart.cartItems = this.cart.cartItems.filter(ci => ci.id !== item.id);
+          this.cdr.detectChanges();
+        },
+        error: () => {},
+      });
   }
 
   saveCartForLater(): void {
     if (!this.cart) return;
     this.isSavingForLater = true;
-    this.cartService.saveForLater(this.cart.id).subscribe({
-      next: () => {
-        this.savedCart        = this.cart;
-        this.cart             = null;
-        this.isSavingForLater = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.isSavingForLater = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.cartService.saveForLater(this.cart.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.savedCart        = this.cart;
+          this.cart             = null;
+          this.isSavingForLater = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isSavingForLater = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   moveToCart(): void {
     if (!this.savedCart) return;
-    this.cartService.moveToCart(this.savedCart.id).subscribe({
-      next: () => {
-        this.savedCart = null;
-        this.loadCart();
-      },
-      error: () => {
-        this.cdr.detectChanges();
-      },
-    });
+    this.cartService.moveToCart(this.savedCart.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.savedCart = null;
+          this.loadCart();
+        },
+        error: () => {
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   removeSavedItem(item: CartItem): void {
-    this.cartService.deleteCartItem(item.id).subscribe({
-      next: () => {
-        if (this.savedCart) {
-          this.savedCart.cartItems = this.savedCart.cartItems.filter(ci => ci.id !== item.id);
-          if (!this.savedCart.cartItems.length) this.savedCart = null;
-        }
-        this.cdr.detectChanges();
-      },
-      error: () => {},
-    });
+    this.cartService.deleteCartItem(item.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          if (this.savedCart) {
+            this.savedCart.cartItems = this.savedCart.cartItems.filter(ci => ci.id !== item.id);
+            if (!this.savedCart.cartItems.length) this.savedCart = null;
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {},
+      });
   }
 
   getSubtotal(): number {
@@ -222,16 +244,18 @@ export class Cart implements OnInit, OnDestroy {
     if (!this.cart?.cartItems.length || this.isCheckingOut) return;
     this.checkoutError = '';
     this.isCheckingOut = true;
-    this.cartService.checkout().subscribe({
-      next: ({ orderId }) => {
-        this.isCheckingOut = false;
-        this.router.navigate(['/payment', orderId]);
-      },
-      error: (err) => {
-        this.isCheckingOut = false;
-        this.checkoutError = err?.error?.error ?? 'Checkout failed. Please try again.';
-        this.cdr.detectChanges();
-      },
-    });
+    this.cartService.checkout()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ orderId }) => {
+          this.isCheckingOut = false;
+          this.router.navigate(['/payment', orderId]);
+        },
+        error: (err) => {
+          this.isCheckingOut = false;
+          this.checkoutError = err?.error?.error ?? 'Checkout failed. Please try again.';
+          this.cdr.detectChanges();
+        },
+      });
   }
 }

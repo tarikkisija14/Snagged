@@ -13,24 +13,20 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
     {
         public async Task<int> Handle(CheckoutCommand request, CancellationToken ct)
         {
-
             var userId = currentUser.UserId;
 
             var cart = await ctx.Carts
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.Item)
-
                 .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsSavedForLater, ct);
 
             if (cart is null || !cart.CartItems.Any())
                 throw new SnaggedNotFoundException("Cart is empty or does not exist.");
 
-
             var soldItems = cart.CartItems.Where(ci => ci.Item.IsSold).ToList();
             if (soldItems.Any())
             {
                 var soldTitles = string.Join(", ", soldItems.Select(ci => ci.Item.Title));
-
                 throw new SnaggedBusinessRuleException(
                     "ITEMS_UNAVAILABLE",
                     $"The following items are no longer available: {soldTitles}.");
@@ -39,7 +35,6 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
             var order = new Order
             {
                 BuyerId = userId,
-
                 OrderDate = DateTime.UtcNow,
                 Status = PaymentStatus.Pending
             };
@@ -56,9 +51,11 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
 
             ctx.Orders.Add(order);
             ctx.CartItems.RemoveRange(cart.CartItems);
+
+           
             await ctx.SaveChangesAsync(ct);
 
-            ctx.Notifications.Add(new Domain.Entities.Notification
+            ctx.Notifications.Add(new Notification
             {
                 UserId = userId,
                 Message = $"Your order #{order.Id} has been placed successfully! Proceed to payment.",
@@ -66,6 +63,7 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
+
             await ctx.SaveChangesAsync(ct);
 
             return order.Id;
