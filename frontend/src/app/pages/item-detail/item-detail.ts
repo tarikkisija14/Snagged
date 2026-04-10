@@ -90,12 +90,16 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadSellerRatingSummary(sellerId: number): void {
+    console.log('[ItemDetail] loadSellerRatingSummary - sellerId:', sellerId);
     this.reviewService
       .getPagedReviews(sellerId, 1, 1, 'Newest')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
+          console.log('[ItemDetail] getPagedReviews result:', result);
+          console.log('[ItemDetail] averageRating BEFORE:', this.averageRating, '| reviewCount BEFORE:', this.reviewCount);
           this.reviewCount = result.total;
+          console.log('[ItemDetail] averageRating AFTER:', this.averageRating, '| reviewCount AFTER:', this.reviewCount);
           this.cdr.markForCheck();
         },
         error: () => {},

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   Input,
   OnChanges,
@@ -56,7 +57,8 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(
     private reviewService: ReviewService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -81,8 +83,13 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private syncInputRating(): void {
-    this.averageRating = this.averageRatingInput;
-    this.totalReviews  = this.reviewCountInput;
+    console.log('[UserReviews] syncInputRating - averageRatingInput:', this.averageRatingInput, '| reviewCountInput:', this.reviewCountInput);
+    if (this.averageRating === 0) {
+      this.averageRating = this.averageRatingInput;
+    }
+    if (this.totalReviews === 0) {
+      this.totalReviews = this.reviewCountInput;
+    }
   }
 
   private initLoad(): void {
@@ -106,7 +113,8 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
-    setTimeout(() => (this.successMessage = ''), 4000);
+    this.cdr.markForCheck();
+    setTimeout(() => { this.successMessage = ''; this.cdr.markForCheck(); }, 4000);
   }
 
   private handleError(err: unknown): void {
@@ -118,22 +126,36 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
       : null;
     this.errorMessage =
       serverMsg ?? validationErrors ?? 'Something went wrong. Please try again.';
-    setTimeout(() => (this.errorMessage = ''), 6000);
+    this.cdr.markForCheck();
+    setTimeout(() => { this.errorMessage = ''; this.cdr.markForCheck(); }, 6000);
   }
 
   loadReviews(): void {
     this.isLoadingReviews = true;
+    this.cdr.markForCheck();
 
     this.reviewService
-      .getPagedReviews(this.reviewedUserId, this.page, this.pageSize, this.sortOrder)
+      .getPagedReviews(this.reviewedUserId, 1, 1000, this.sortOrder)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
-          this.reviews = result.items ?? [];
-          if (this.reviewCountInput === 0) {
-            this.totalReviews = result.total;
+          console.log('[UserReviews] loadReviews result:', result);
+          const allReviews = result.items ?? [];
+          this.totalReviews = result.total;
+
+          if (allReviews.length > 0) {
+            const sum = allReviews.reduce((acc, r) => acc + r.rating, 0);
+            this.averageRating = Math.round((sum / allReviews.length) * 10) / 10;
+          } else {
+            this.averageRating = 0;
           }
+          console.log('[UserReviews] computed averageRating:', this.averageRating, '| totalReviews:', this.totalReviews);
+
+          const start = (this.page - 1) * this.pageSize;
+          this.reviews = allReviews.slice(start, start + this.pageSize);
+
           this.isLoadingReviews = false;
+          this.cdr.markForCheck();
         },
         error: (err: unknown) => {
           this.isLoadingReviews = false;
@@ -147,7 +169,7 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
       .getMyReviewForUser(this.reviewedUserId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (r) => (this.myReview = r),
+        next: (r) => { this.myReview = r; this.cdr.markForCheck(); },
         error: () => {},
       });
   }
@@ -155,11 +177,13 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
   openForm(): void {
     this.errorMessage = '';
     this.showForm = true;
+    this.cdr.markForCheck();
   }
 
   onSubmit(event: ReviewSubmitEvent): void {
     this.isSubmitting = true;
     this.errorMessage = '';
+    this.cdr.markForCheck();
 
     const obs: Observable<any> = this.myReview
       ? this.reviewService.updateReview(this.myReview.id, event as UpdateReviewDto)
@@ -185,6 +209,7 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
   onDeleteMyReview(): void {
     if (!this.myReview) return;
     this.isSubmitting = true;
+    this.cdr.markForCheck();
     this.reviewService
       .deleteReview(this.myReview.id)
       .pipe(takeUntil(this.destroy$))
@@ -201,17 +226,17 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onEditFromList(review: Review): void {
-
     if (review.reviewerId !== this.currentUserId) return;
     this.myReview = review;
     this.showForm = true;
+    this.cdr.markForCheck();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   onDeleteFromList(review: Review): void {
-
     if (review.reviewerId !== this.currentUserId) return;
     this.isSubmitting = true;
+    this.cdr.markForCheck();
     this.reviewService
       .deleteReview(review.id)
       .pipe(takeUntil(this.destroy$))
