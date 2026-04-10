@@ -1,0 +1,70 @@
+<!-- MODIFIED -->
+<div class="suggestions-dropdown" *ngIf="visible">
+
+  <!-- Loading -->
+  <div class="suggestions-loading" *ngIf="loading">
+    <mat-icon class="spin">autorenew</mat-icon>
+    <span>Searching…</span>
+  </div>
+
+  <!-- Live results -->
+  <ng-container *ngIf="!loading && suggestions.length > 0">
+    <div class="suggestions-section-label">Results</div>
+    <div
+      class="suggestion-item"
+      *ngFor="let s of suggestions; let i = index"
+      [class.active]="i === activeIndex"
+      (click)="selectSuggestion.emit(s)"
+    >
+      <img
+        class="suggestion-thumb"
+        [src]="getImageUrl(s.imageUrl)"
+        [alt]="s.title"
+        loading="lazy"
+      />
+      <div class="suggestion-info">
+        <span class="suggestion-title">
+          <ng-container *ngFor="let part of highlight(s.title, query)">
+            <mark *ngIf="part.match; else plain">{{ part.text }}</mark>
+            <ng-template #plain>{{ part.text }}</ng-template>
+          </ng-container>
+        </span>
+        <span class="suggestion-meta">
+          <span *ngIf="s.categoryName" class="suggestion-category">{{ s.categoryName }}</span>
+          <span class="suggestion-price">€{{ s.price | number:'1.2-2' }}</span>
+        </span>
+      </div>
+      <mat-icon class="suggestion-arrow">north_west</mat-icon>
+    </div>
+  </ng-container>
+
+  <!-- No results -->
+  <div class="suggestions-empty" *ngIf="noResults">
+    No results for "<strong>{{ query }}</strong>"
+  </div>
+
+  <!-- Recent searches -->
+  <ng-container *ngIf="showRecent">
+    <div class="suggestions-section-label">
+      Recent
+      <button class="suggestions-clear-btn" (click)="clearRecent.emit()">Clear</button>
+    </div>
+    <div
+      class="suggestion-item recent-item"
+      *ngFor="let r of recentSearches; let i = index"
+      [class.active]="i === activeIndex"
+      (click)="selectRecent.emit(r)"
+    >
+      <mat-icon class="recent-icon">history</mat-icon>
+      <span class="suggestion-title">{{ r }}</span>
+      <button
+        class="recent-delete-btn"
+        (click)="$event.stopPropagation(); deleteRecent.emit(r)"
+        aria-label="Remove"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </ng-container>
+
+</div>

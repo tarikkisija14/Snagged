@@ -81,22 +81,58 @@ $mobile:  576px;
     position: relative;
     margin-right: 1rem;
 
+    /* The wrapper provides the visible background — input is transparent */
+    background: #f8f9fa;
+    border-radius: 50px;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+    width: 200px;
+
+    &:focus-within {
+      width: 260px;
+      background: #fff;
+      border-color: $brand-purple;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
     .search-bar {
-      width: 200px;
+      /* Transparent so ghost overlay shows through */
+      width: 100%;
       padding: 0.6rem 1rem 0.6rem 2.5rem;
       border-radius: 50px;
-      border: 1px solid #eee;
-      background: #f8f9fa;
+      border: none;
+      background: transparent;
       font-size: 0.85rem;
-      transition: all 0.3s ease;
+      outline: none;
+      position: relative;
+      z-index: 2;
+      color: #222;
+      caret-color: #222;
+    }
 
-      &:focus {
-        width: 260px;
-        background: #fff;
-        border-color: var(--primary);
-        outline: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      }
+    /* Ghost text overlay — sits behind the input */
+    .search-hint-overlay {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 0;
+      right: 0;
+      padding: 0.6rem 1rem 0.6rem 2.5rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      pointer-events: none;
+      white-space: nowrap;
+      overflow: hidden;
+      z-index: 1;
+      line-height: normal;
+    }
+
+    .hint-typed {
+      color: transparent; /* hides typed part — input text sits on top */
+    }
+
+    .hint-ghost {
+      color: #aaa;
     }
 
     .search-icon {
@@ -107,6 +143,23 @@ $mobile:  576px;
       font-size: 1.2rem;
       color: #999;
       pointer-events: none;
+      z-index: 3;
+    }
+
+    .search-tab-hint {
+      position: absolute;
+      right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.62rem;
+      color: #bbb;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 1px 5px;
+      pointer-events: none;
+      z-index: 3;
+      line-height: 1.5;
+      background: #fff;
     }
   }
 }
@@ -152,15 +205,14 @@ $mobile:  576px;
   }
 }
 @media (max-width: $mobile) {
-  .header-actions .search-wrapper .search-bar {
+  .header-actions .search-wrapper {
     width: 150px;
 
-    &:focus {
+    &:focus-within {
       background: #dcd9d9;
       width: 170px;
     }
   }
-
 
   .logo .logo-text {
     font-size: 1.5rem;

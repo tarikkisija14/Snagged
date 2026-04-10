@@ -1,0 +1,171 @@
+// NEW FILE
+.suggestions-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  min-width: 300px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.13);
+  z-index: 300;
+  overflow: hidden;
+  animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.suggestions-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #aaa;
+  padding: 10px 14px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.suggestions-clear-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0;
+  &:hover { color: #541a8b; text-decoration: underline; }
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+  border-bottom: 1px solid #f7f7f7;
+
+  &:last-child { border-bottom: none; }
+  &:hover, &.active { background: #f5f0fc; }
+}
+
+.suggestion-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: #f0f0f0;
+}
+
+.suggestion-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestion-title {
+  font-size: 0.85rem;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  mark {
+    background: transparent;
+    color: #541a8b;
+    font-weight: 700;
+    padding: 0;
+  }
+}
+
+.suggestion-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestion-category {
+  font-size: 0.72rem;
+  color: #999;
+}
+
+.suggestion-price {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #541a8b;
+}
+
+.suggestion-arrow {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #ccc;
+  flex-shrink: 0;
+}
+
+.recent-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #bbb;
+  flex-shrink: 0;
+}
+
+.recent-item .suggestion-title {
+  color: #555;
+  flex: 1;
+}
+
+.recent-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  color: #ccc;
+  border-radius: 4px;
+  flex-shrink: 0;
+  &:hover { color: #888; background: #f0f0f0; }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.suggestions-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  font-size: 0.83rem;
+  color: #aaa;
+}
+
+.spin {
+  animation: rotate 0.8s linear infinite;
+  font-size: 18px;
+}
+
+@keyframes rotate {
+  to { transform: rotate(360deg); }
+}
+
+.suggestions-empty {
+  padding: 16px;
+  font-size: 0.83rem;
+  color: #aaa;
+  text-align: center;
+
+  strong { color: #444; }
+}

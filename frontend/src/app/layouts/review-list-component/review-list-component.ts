@@ -31,6 +31,10 @@ export class ReviewListComponent implements OnChanges {
 
   sortValue: ReviewSortOrder = 'Newest';
 
+  // Inline SVG data URI — no external file required.
+  readonly defaultAvatar =
+    'data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 40 40%22%3E%3Ccircle cx%3D%2220%22 cy%3D%2220%22 r%3D%2220%22 fill%3D%22%23e0e0e0%22%2F%3E%3Ccircle cx%3D%2220%22 cy%3D%2215%22 r%3D%226%22 fill%3D%22%23bdbdbd%22%2F%3E%3Cellipse cx%3D%2220%22 cy%3D%2232%22 rx%3D%2210%22 ry%3D%228%22 fill%3D%22%23bdbdbd%22%2F%3E%3C%2Fsvg%3E';
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentSort']) {
       this.sortValue = this.currentSort;
@@ -57,6 +61,10 @@ export class ReviewListComponent implements OnChanges {
   }
 
   onAvatarError(event: Event): void {
-    (event.target as HTMLImageElement).src = 'assets/default-avatar.png';
+    const img = event.target as HTMLImageElement;
+
+    if (!img.src.startsWith('data:')) {
+      img.src = this.defaultAvatar;
+    }
   }
 }

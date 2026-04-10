@@ -19,6 +19,8 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItems
 
             return await query
                 .OrderByDescending(i => i.CreatedAt)
+                
+                .Take(request.Take)
                 .ProjectToDto()
                 .ToListAsync(ct);
         }

@@ -17,9 +17,10 @@
 
         <div class="hero-inner container">
           <div class="avatar-wrap">
+            <!-- FIX: Use defaultAvatar property (inline SVG) instead of missing assets/default-avatar.png -->
             <img
               class="avatar"
-              [appLazyLoad]="profile.profileImageUrl || 'assets/default-avatar.png'"
+              [appLazyLoad]="profile.profileImageUrl || defaultAvatar"
               alt="Profile avatar"
             />
             <div class="avatar-ring"></div>

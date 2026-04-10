@@ -1,13 +1,13 @@
+// MODIFIED
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ItemModel } from '../models/item.model';
-import { PageResult } from '../models/page-result';
+import { ItemModel }        from '../models/item.model';
+import { PageResult }       from '../models/page-result';
+import { SearchSuggestion } from '../models/search-suggestion.model';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ItemService {
   private readonly apiUrl = `${environment.apiUrl}/items`;
 
@@ -15,9 +15,7 @@ export class ItemService {
 
   getItems(search?: string): Observable<ItemModel[]> {
     let params = new HttpParams();
-    if (search) {
-      params = params.set('search', search);
-    }
+    if (search) params = params.set('search', search);
     return this.http.get<ItemModel[]>(this.apiUrl, { params });
   }
 
@@ -29,7 +27,7 @@ export class ItemService {
     return this.http.post<number>(this.apiUrl, item);
   }
 
-  getPagedItems(page: number = 1, pageSize: number = 10): Observable<PageResult<ItemModel>> {
+  getPagedItems(page = 1, pageSize = 10): Observable<PageResult<ItemModel>> {
     const params = new HttpParams()
       .set('Paging.Page', page.toString())
       .set('Paging.PageSize', pageSize.toString());
@@ -54,28 +52,31 @@ export class ItemService {
     conditions?: string[];
     minPrice?: number;
     maxPrice?: number;
+    titleContains?: string;
   }): Observable<PageResult<ItemModel>> {
     let params = new HttpParams();
 
-    if (filter.page != null)
-      params = params.set('Paging.Page', filter.page.toString());
-    if (filter.pageSize != null)
-      params = params.set('Paging.PageSize', filter.pageSize.toString());
-    if (filter.sortBy)
-      params = params.set('SortBy', filter.sortBy);
-    if (filter.sortOrder)
-      params = params.set('SortOrder', filter.sortOrder);
+    if (filter.page != null)        params = params.set('Paging.Page', filter.page.toString());
+    if (filter.pageSize != null)    params = params.set('Paging.PageSize', filter.pageSize.toString());
+    if (filter.sortBy)              params = params.set('SortBy', filter.sortBy);
+    if (filter.sortOrder)           params = params.set('SortOrder', filter.sortOrder);
+    if (filter.titleContains)       params = params.set('TitleContains', filter.titleContains);
     if (filter.categoryIds?.length)
       filter.categoryIds.forEach(id => (params = params.append('CategoryIds', id.toString())));
     if (filter.subcategoryIds?.length)
       filter.subcategoryIds.forEach(id => (params = params.append('SubcategoryIds', id.toString())));
     if (filter.conditions?.length)
       filter.conditions.forEach(c => (params = params.append('Conditions', c)));
-    if (filter.minPrice != null)
-      params = params.set('MinPrice', filter.minPrice.toString());
-    if (filter.maxPrice != null)
-      params = params.set('MaxPrice', filter.maxPrice.toString());
+    if (filter.minPrice != null)    params = params.set('MinPrice', filter.minPrice.toString());
+    if (filter.maxPrice != null)    params = params.set('MaxPrice', filter.maxPrice.toString());
 
     return this.http.get<PageResult<ItemModel>>(`${this.apiUrl}/filtered`, { params });
+  }
+
+  getSuggestions(query: string, limit = 8): Observable<SearchSuggestion[]> {
+    const params = new HttpParams()
+      .set('Query', query)
+      .set('Limit', limit.toString());
+    return this.http.get<SearchSuggestion[]>(`${this.apiUrl}/suggestions`, { params });
   }
 }

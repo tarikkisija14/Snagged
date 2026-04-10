@@ -8,6 +8,7 @@ using Snagged.Application.Catalog.Orders.Commands.UpdateOrder;
 using Snagged.Application.Catalog.Orders.Queries.GetOrders;
 using Snagged.Application.Catalog.Orders.Queries.GetOrdersById;
 using Snagged.Application.Catalog.Orders.Queries.GetOrdersPaged;
+using Snagged.Application.Common.Exceptions;
 using Snagged.Application.Common.Paging;
 
 namespace Snagged.API.Controllers
@@ -15,19 +16,13 @@ namespace Snagged.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class OrdersController : ControllerBase
+    
+    public class OrdersController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public OrdersController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         [HttpGet]
         public async Task<ActionResult<List<OrderDto>>> GetOrders([FromQuery] GetOrdersQuery query)
         {
-            var result = await _mediator.Send(query);
+            var result = await mediator.Send(query);
             return Ok(result);
         }
 
@@ -36,20 +31,20 @@ namespace Snagged.API.Controllers
         {
             try
             {
-                var query = new GetOrdersByIdQuery { Id = id };
-                var result = await _mediator.Send(query);
+                var result = await mediator.Send(new GetOrdersByIdQuery { Id = id });
                 return Ok(result);
             }
-            catch (KeyNotFoundException)
+            
+            catch (SnaggedNotFoundException ex)
             {
-                return NotFound(new { error = $"Order with Id {id} not found." });
+                return NotFound(new { error = ex.Message });
             }
         }
 
         [HttpPost]
         public async Task<ActionResult<int>> CreateOrder([FromBody] CreateOrderCommand command)
         {
-            var orderId = await _mediator.Send(command);
+            var orderId = await mediator.Send(command);
             return CreatedAtAction(nameof(GetOrderById), new { id = orderId }, orderId);
         }
 
@@ -61,12 +56,12 @@ namespace Snagged.API.Controllers
 
             try
             {
-                await _mediator.Send(command);
+                await mediator.Send(command);
                 return NoContent();
             }
-            catch (KeyNotFoundException)
+            catch (SnaggedNotFoundException ex)
             {
-                return NotFound(new { error = $"Order with Id {id} not found." });
+                return NotFound(new { error = ex.Message });
             }
         }
 
@@ -75,20 +70,19 @@ namespace Snagged.API.Controllers
         {
             try
             {
-                var command = new DeleteOrderCommand { Id = id };
-                await _mediator.Send(command);
+                await mediator.Send(new DeleteOrderCommand { Id = id });
                 return NoContent();
             }
-            catch (KeyNotFoundException)
+            catch (SnaggedNotFoundException ex)
             {
-                return NotFound(new { error = $"Order with Id {id} not found." });
+                return NotFound(new { error = ex.Message });
             }
         }
 
         [HttpGet("paged")]
         public async Task<ActionResult<PageResult<OrderDto>>> GetPagedOrders([FromQuery] GetOrdersPagedQuery query)
         {
-            var result = await _mediator.Send(query);
+            var result = await mediator.Send(query);
             return Ok(result);
         }
     }

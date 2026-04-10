@@ -57,7 +57,13 @@
 
     <main class="products">
       <div class="products-header">
-        <h2>{{ mode === 'shop' ? 'All Products' : 'Featured Items' }}</h2>
+        <h2>
+          <ng-container *ngIf="activeSearchTerm; else defaultTitle">
+            Results for &quot;<strong>{{ activeSearchTerm }}</strong>&quot;
+            <span class="result-count">({{ totalItems }})</span>
+          </ng-container>
+          <ng-template #defaultTitle>{{ mode === 'shop' ? 'All Products' : 'Featured Items' }}</ng-template>
+        </h2>
         <div class="sort-options">
           <select (change)="onSortChange($event)">
             <option value="newest">Newest</option>
