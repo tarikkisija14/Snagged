@@ -27,7 +27,6 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
 
         private static IQueryable<Item> ApplyFilters(IQueryable<Item> query, GetItemsFilteredQuery request)
         {
-            
             if (request.IsSold.HasValue)
                 query = query.Where(x => x.IsSold == request.IsSold.Value);
             else
@@ -51,6 +50,15 @@ namespace Snagged.Application.Catalog.Items.Queries.GetItemsFiltered
 
             if (request.MaxPrice.HasValue)
                 query = query.Where(x => x.Price <= request.MaxPrice.Value);
+
+            if (request.Tags is { Count: > 0 })
+            {
+                var normalised = request.Tags
+                    .Select(t => t.Trim().ToLowerInvariant())
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .ToList();
+                query = query.Where(x => x.ItemTags.Any(it => normalised.Contains(it.Tag.Name)));
+            }
 
             return query;
         }

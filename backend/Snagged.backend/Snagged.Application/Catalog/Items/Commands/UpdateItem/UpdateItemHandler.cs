@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
 using Snagged.Application.Common.Exceptions;
+using Snagged.Domain.Entities;
 
 namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
 {
@@ -21,8 +23,46 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
             item.CategoryId = request.CategoryId;
             item.SubcategoryId = request.SubcategoryId;
 
+            await SyncTagsAsync(ctx, item, request.Tags, ct);
+
             await ctx.SaveChangesAsync(ct);
             return Unit.Value;
+        }
+
+        private static async Task SyncTagsAsync(
+            IAppDbContext ctx, Item item, List<string> tagNames, CancellationToken ct)
+        {
+            var existing = await ctx.ItemTags
+                .Where(it => it.ItemId == item.Id)
+                .Include(it => it.Tag)
+                .ToListAsync(ct);
+
+            var desired = tagNames
+                .Select(t => t.Trim().ToLowerInvariant())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Distinct()
+                .ToHashSet();
+
+            
+            var toRemove = existing.Where(it => !desired.Contains(it.Tag.Name)).ToList();
+            ctx.ItemTags.RemoveRange(toRemove);
+
+            
+            var currentNames = existing
+                .Where(it => desired.Contains(it.Tag.Name))
+                .Select(it => it.Tag.Name)
+                .ToHashSet();
+
+            foreach (var name in desired.Except(currentNames))
+            {
+                var tag = await ctx.Tags.FirstOrDefaultAsync(t => t.Name == name, ct)
+                          ?? new Tag { Name = name };
+
+                if (tag.Id == 0)
+                    ctx.Tags.Add(tag);
+
+                ctx.ItemTags.Add(new ItemTag { Item = item, Tag = tag });
+            }
         }
     }
 }

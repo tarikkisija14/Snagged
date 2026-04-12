@@ -1,16 +1,11 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
 {
-    public class UpdateItemCommand: IRequest<Unit>
+    public class UpdateItemCommand : IRequest<Unit>
     {
-        [JsonIgnore] 
+        [JsonIgnore]
         public int Id { get; set; }
 
         public required string Title { get; set; }
@@ -20,5 +15,6 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
         public required bool IsSold { get; set; }
         public required int CategoryId { get; set; }
         public int? SubcategoryId { get; set; }
+        public List<string> Tags { get; set; } = new();
     }
 }

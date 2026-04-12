@@ -33,6 +33,15 @@
       {{ item.title }}
     </h3>
 
+    <div class="product-tags" *ngIf="visibleTags.length > 0">
+      <span
+        class="product-tag-chip"
+        *ngFor="let tag of visibleTags"
+        (click)="onTagClick(tag, $event)"
+      >{{ tag }}</span>
+      <span class="product-tag-more" *ngIf="extraTagCount > 0">+{{ extraTagCount }}</span>
+    </div>
+
     <div class="product-price">
       ${{ item.price | number:'1.2-2' }}
     </div>

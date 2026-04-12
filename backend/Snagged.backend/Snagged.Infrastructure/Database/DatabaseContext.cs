@@ -2,8 +2,6 @@
 using Snagged.Application.Abstractions;
 using Snagged.Domain.Entities;
 
-
-
 namespace Snagged.Infrastructure.Database
 {
     public class DatabaseContext : DbContext, IAppDbContext
@@ -34,12 +32,12 @@ namespace Snagged.Infrastructure.Database
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ItemTag> ItemTags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-           
 
             // USER
             modelBuilder.Entity<User>(entity =>
@@ -207,9 +205,9 @@ namespace Snagged.Infrastructure.Database
             modelBuilder.Entity<Review>(entity =>
             {
                 entity.ToTable("Reviews");
-                entity.HasIndex(r => new { r.ReviewerId, r.ReviewedUserId }).IsUnique(); 
-                entity.HasIndex(r => r.ReviewedUserId);                                   
-                entity.HasIndex(r => r.CreatedAt);                                        
+                entity.HasIndex(r => new { r.ReviewerId, r.ReviewedUserId }).IsUnique();
+                entity.HasIndex(r => r.ReviewedUserId);
+                entity.HasIndex(r => r.CreatedAt);
                 entity.Property(r => r.Comment).IsRequired().HasMaxLength(1000);
                 entity.Property(r => r.Rating).IsRequired();
                 entity.Property(r => r.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
@@ -241,6 +239,20 @@ namespace Snagged.Infrastructure.Database
                 entity.Property(ci => ci.AddedAt).IsRequired().HasDefaultValueSql("GETDATE()");
             });
 
+            // TAG
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.ToTable("Tags");
+                entity.HasIndex(t => t.Name).IsUnique();
+                entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+            });
+
+            // ITEM TAG
+            modelBuilder.Entity<ItemTag>(entity =>
+            {
+                entity.ToTable("ItemTags");
+                entity.HasKey(it => new { it.ItemId, it.TagId });
+            });
 
             // User → Role
             modelBuilder.Entity<User>()
@@ -426,7 +438,19 @@ namespace Snagged.Infrastructure.Database
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId);
 
-          
+            // ItemTag → Item
+            modelBuilder.Entity<ItemTag>()
+                .HasOne(it => it.Item)
+                .WithMany(i => i.ItemTags)
+                .HasForeignKey(it => it.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ItemTag → Tag
+            modelBuilder.Entity<ItemTag>()
+                .HasOne(it => it.Tag)
+                .WithMany(t => t.ItemTags)
+                .HasForeignKey(it => it.TagId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

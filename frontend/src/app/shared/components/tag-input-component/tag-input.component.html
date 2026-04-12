@@ -1,0 +1,46 @@
+<div class="tag-input-wrapper">
+
+  <!-- Selected tags as chips -->
+  <div class="tag-chips" *ngIf="tags.length > 0">
+    <span class="tag-chip" *ngFor="let tag of tags">
+      <span class="tag-chip-label">{{ tag }}</span>
+      <button
+        class="tag-chip-remove"
+        type="button"
+        (click)="removeTag(tag)"
+        [attr.aria-label]="'Remove tag ' + tag"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </span>
+  </div>
+
+  <!-- Input + autocomplete -->
+  <div class="tag-input-field" *ngIf="tags.length < maxTags">
+    <input
+      type="text"
+      [placeholder]="placeholder"
+      [value]="inputValue"
+      (input)="onInput($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      (blur)="onBlur()"
+      autocomplete="off"
+    />
+
+    <div class="tag-suggestions" *ngIf="showDropdown && suggestions.length > 0">
+      <div
+        class="tag-suggestion-item"
+        *ngFor="let s of suggestions; let i = index"
+        [class.active]="i === activeIndex"
+        (mousedown)="selectSuggestion(s.name)"
+      >
+        <mat-icon class="tag-icon">label</mat-icon>
+        {{ s.name }}
+      </div>
+    </div>
+  </div>
+
+  <p class="tag-hint" *ngIf="tags.length < maxTags">
+    Press <kbd>Enter</kbd> or <kbd>,</kbd> to add a tag
+  </p>
+</div>
