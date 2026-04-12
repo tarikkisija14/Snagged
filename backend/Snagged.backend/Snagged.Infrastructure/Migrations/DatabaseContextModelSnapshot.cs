@@ -329,6 +329,21 @@ namespace Snagged.Infrastructure.Migrations
                     b.ToTable("ItemImages", (string)null);
                 });
 
+            modelBuilder.Entity("Snagged.Domain.Entities.ItemTag", b =>
+                {
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ItemTags", (string)null);
+                });
+
             modelBuilder.Entity("Snagged.Domain.Entities.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -701,6 +716,27 @@ namespace Snagged.Infrastructure.Migrations
                     b.ToTable("Subcategories", (string)null);
                 });
 
+            modelBuilder.Entity("Snagged.Domain.Entities.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Tags", (string)null);
+                });
+
             modelBuilder.Entity("Snagged.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -877,6 +913,25 @@ namespace Snagged.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("Snagged.Domain.Entities.ItemTag", b =>
+                {
+                    b.HasOne("Snagged.Domain.Entities.Item", "Item")
+                        .WithMany("ItemTags")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Snagged.Domain.Entities.Tag", "Tag")
+                        .WithMany("ItemTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.Message", b =>
@@ -1062,6 +1117,8 @@ namespace Snagged.Infrastructure.Migrations
 
                     b.Navigation("Images");
 
+                    b.Navigation("ItemTags");
+
                     b.Navigation("OrderItems");
 
                     b.Navigation("Reports");
@@ -1082,6 +1139,11 @@ namespace Snagged.Infrastructure.Migrations
             modelBuilder.Entity("Snagged.Domain.Entities.Subcategory", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Snagged.Domain.Entities.Tag", b =>
+                {
+                    b.Navigation("ItemTags");
                 });
 
             modelBuilder.Entity("Snagged.Domain.Entities.User", b =>

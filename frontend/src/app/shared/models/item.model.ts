@@ -16,4 +16,5 @@ export interface ItemModel {
   categoryName?: string;
   subcategoryName?: string;
   sellerUsername?: string;
+  tags?: string[];
 }

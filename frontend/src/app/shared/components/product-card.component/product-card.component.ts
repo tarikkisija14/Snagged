@@ -24,6 +24,7 @@ export class ProductCardComponent {
 
   @Output() addToCartClick   = new EventEmitter<ItemModel>();
   @Output() viewDetailsClick = new EventEmitter<ItemModel>();
+  @Output() tagClick         = new EventEmitter<string>();
 
   addedToCart = false;
 
@@ -33,6 +34,14 @@ export class ProductCardComponent {
     private router: Router,
     private authService: AuthService,
   ) {}
+
+  get visibleTags(): string[] {
+    return this.item?.tags?.slice(0, 3) ?? [];
+  }
+
+  get extraTagCount(): number {
+    return Math.max(0, (this.item?.tags?.length ?? 0) - 3);
+  }
 
   getItemImage(): string {
     if (this.item?.images?.length > 0) {
@@ -59,15 +68,19 @@ export class ProductCardComponent {
     }
     this.addedToCart = true;
     this.addToCartClick.emit(this.item);
-    setTimeout(() => {
-      this.addedToCart = false;
-    }, 2000);
+    setTimeout(() => { this.addedToCart = false; }, 2000);
   }
 
   onViewDetails(): void {
     if (!this.item) return;
     this.viewDetailsClick.emit(this.item);
     this.router.navigate(['/items', this.item.id]);
+  }
+
+  onTagClick(tag: string, event: Event): void {
+    event.stopPropagation();
+    this.tagClick.emit(tag);
+    this.router.navigate(['/shop'], { queryParams: { tag } });
   }
 
   onImageError(event: Event): void {

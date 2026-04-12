@@ -11,6 +11,8 @@ import { SubcategoryService } from '../../shared/services/subcategory-service';
 import { PageResult } from '../../shared/models/page-result';
 import { CartService } from '../../shared/services/cart-service';
 import { AuthService } from '../../core/services/auth-service/AuthService';
+import { TagService } from '../../shared/services/tag-service';
+import { PopularTag } from '../../shared/models/tag-suggestion.model';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
@@ -26,12 +28,14 @@ export class CatalogList implements OnInit, OnDestroy {
   categories: Category[] = [];
   subcategories: Subcategory[] = [];
   allConditions: string[] = ['New', 'Excellent', 'Good', 'Fair'];
+  popularTags: PopularTag[] = [];
 
   @Input() mode: 'home' | 'shop' = 'shop';
 
   selectedCategoryIds: number[] = [];
   selectedSubcategoryIds: number[] = [];
   selectedConditions: string[] = [];
+  selectedTags: string[] = [];
 
   activeSearchTerm = '';
 
@@ -61,6 +65,7 @@ export class CatalogList implements OnInit, OnDestroy {
     private subcategoryService: SubcategoryService,
     private cartService: CartService,
     private authService: AuthService,
+    private tagService: TagService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
@@ -69,6 +74,7 @@ export class CatalogList implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.mode === 'home') this.pageSize = 9;
     this.loadCategories();
+    this.loadPopularTags();
 
     const paramSub = this.route.queryParamMap.subscribe(params => {
       this.activeSearchTerm = params.get('q') ?? '';
@@ -94,6 +100,29 @@ export class CatalogList implements OnInit, OnDestroy {
     this.subs.add(sub);
   }
 
+  loadPopularTags(): void {
+    const sub = this.tagService.getPopular(20).subscribe({
+      next: (tags) => {
+        this.popularTags = tags;
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
+    this.subs.add(sub);
+  }
+
+  isTagSelected(name: string): boolean {
+    return this.selectedTags.includes(name);
+  }
+
+  toggleTag(name: string): void {
+    this.page = 1;
+    this.selectedTags = this.isTagSelected(name)
+      ? this.selectedTags.filter(t => t !== name)
+      : [...this.selectedTags, name];
+    this.loadItems();
+  }
+
   loadItems(): void {
     this.isLoading = true;
     this.cdr.markForCheck();
@@ -105,12 +134,13 @@ export class CatalogList implements OnInit, OnDestroy {
       sortBy: this.selectedSortBy, sortOrder: this.selectedSortOrder,
     };
 
-    if (this.activeSearchTerm)                filter.titleContains  = this.activeSearchTerm;
-    if (this.selectedCategoryIds.length > 0)   filter.categoryIds    = this.selectedCategoryIds;
+    if (this.activeSearchTerm)                  filter.titleContains  = this.activeSearchTerm;
+    if (this.selectedCategoryIds.length > 0)    filter.categoryIds    = this.selectedCategoryIds;
     if (this.selectedSubcategoryIds.length > 0) filter.subcategoryIds = this.selectedSubcategoryIds;
     if (this.selectedConditions.length > 0)     filter.conditions     = this.selectedConditions;
     if (this.currentMinPrice > this.minPrice)   filter.minPrice       = this.currentMinPrice;
     if (this.currentMaxPrice < this.maxPrice)   filter.maxPrice       = this.currentMaxPrice;
+    if (this.selectedTags.length > 0)           filter.tags           = this.selectedTags;
 
     const sub = this.itemService.getFilteredItems(filter).subscribe({
       next: (res: PageResult<ItemModel>) => {
@@ -228,6 +258,7 @@ export class CatalogList implements OnInit, OnDestroy {
     this.selectedCategoryIds    = [];
     this.selectedSubcategoryIds = [];
     this.selectedConditions     = [];
+    this.selectedTags           = [];
     this.currentMinPrice        = this.minPrice;
     this.currentMaxPrice        = this.maxPrice;
     this.subcategories          = [];

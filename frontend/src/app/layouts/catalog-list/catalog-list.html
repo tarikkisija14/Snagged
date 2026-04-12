@@ -53,6 +53,25 @@
           </div>
         </div>
       </div>
+
+      <div class="filter-section" *ngIf="popularTags.length > 0">
+        <h3>
+          Popular Tags
+          <span class="clear-link" *ngIf="selectedTags.length > 0" (click)="selectedTags = []; loadItems()">Clear</span>
+        </h3>
+        <div class="tag-filter-chips">
+          <button
+            *ngFor="let tag of popularTags"
+            class="tag-filter-chip"
+            [class.selected]="isTagSelected(tag.name)"
+            (click)="toggleTag(tag.name)"
+            type="button"
+          >
+            {{ tag.name }}
+            <span class="tag-count">{{ tag.itemCount }}</span>
+          </button>
+        </div>
+      </div>
     </aside>
 
     <main class="products">

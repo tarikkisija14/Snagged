@@ -11,8 +11,7 @@ namespace Snagged.Application.Catalog.Items.Commands.AddItem
         public int CategoryId { get; set; }
         public int? SubcategoryId { get; set; }
 
-       
-
         public List<string> ImageUrls { get; set; } = new();
+        public List<string> Tags { get; set; } = new();
     }
 }

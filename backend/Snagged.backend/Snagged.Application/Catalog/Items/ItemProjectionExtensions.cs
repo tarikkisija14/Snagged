@@ -35,7 +35,8 @@ namespace Snagged.Application.Catalog.Items
                         ImageUrl = img.ImageUrl,
                         IsMain = img.IsMain
                     })
-                    .ToList()
+                    .ToList(),
+                Tags = i.ItemTags.Select(it => it.Tag.Name).ToList()
             });
         }
 
@@ -46,7 +47,8 @@ namespace Snagged.Application.Catalog.Items
                 .Include(i => i.Subcategory)
                 .Include(i => i.User).ThenInclude(u => u.Profile)
                 .Include(i => i.Images)
-                .Include(i => i.Favorites);
+                .Include(i => i.Favorites)
+                .Include(i => i.ItemTags).ThenInclude(it => it.Tag);
         }
     }
 }

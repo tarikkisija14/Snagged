@@ -28,6 +28,9 @@ namespace Snagged.Application.Abstractions
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
 
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ItemTag> ItemTags { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

@@ -1,4 +1,3 @@
-// MODIFIED
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -53,6 +52,7 @@ export class ItemService {
     minPrice?: number;
     maxPrice?: number;
     titleContains?: string;
+    tags?: string[];
   }): Observable<PageResult<ItemModel>> {
     let params = new HttpParams();
 
@@ -69,6 +69,8 @@ export class ItemService {
       filter.conditions.forEach(c => (params = params.append('Conditions', c)));
     if (filter.minPrice != null)    params = params.set('MinPrice', filter.minPrice.toString());
     if (filter.maxPrice != null)    params = params.set('MaxPrice', filter.maxPrice.toString());
+    if (filter.tags?.length)
+      filter.tags.forEach(t => (params = params.append('Tags', t)));
 
     return this.http.get<PageResult<ItemModel>>(`${this.apiUrl}/filtered`, { params });
   }

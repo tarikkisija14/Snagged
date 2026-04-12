@@ -21,5 +21,6 @@ namespace Snagged.Application.Catalog.Items.Dto
         public string? SellerUsername { get; set; }
 
         public List<ItemImageDto> Images { get; set; } = new();
+        public List<string> Tags { get; set; } = new();
     }
 }

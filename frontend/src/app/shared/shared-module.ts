@@ -1,4 +1,3 @@
-// MODIFIED
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -15,10 +14,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule }           from '@angular/material/chips';
 import { MatSnackBarModule }        from '@angular/material/snack-bar';
 
-import { ProductCardComponent }       from './components/product-card.component/product-card.component';
-import { LazyLoadImageDirective }     from './directives/lazy-load-image.directive';
-import { ButtonComponent }            from './components/button.component/button.component';
-import {SearchSuggestions} from './components/search-suggestions/search-suggestions';
+import { ProductCardComponent }  from './components/product-card.component/product-card.component';
+import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
+import { ButtonComponent }        from './components/button.component/button.component';
+import { SearchSuggestions }      from './components/search-suggestions/search-suggestions';
+import {TagInputComponent} from './components/tag-input-component/tag-input.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +26,7 @@ import {SearchSuggestions} from './components/search-suggestions/search-suggesti
     ProductCardComponent,
     ButtonComponent,
     SearchSuggestions,
+    TagInputComponent,
   ],
   imports: [
     CommonModule,
@@ -52,6 +53,7 @@ import {SearchSuggestions} from './components/search-suggestions/search-suggesti
     ProductCardComponent,
     ButtonComponent,
     SearchSuggestions,
+    TagInputComponent,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
