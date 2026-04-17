@@ -8,7 +8,7 @@ using Snagged.Domain.Entities;
 
 namespace Snagged.Application.Catalog.Cart.Commands.Checkout
 {
-    public class CheckoutHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+    public class CheckoutHandler(IAppDbContext ctx, ICurrentUserService currentUser, IWebPushService pushService)
         : IRequestHandler<CheckoutCommand, int>
     {
         public async Task<int> Handle(CheckoutCommand request, CancellationToken ct)
@@ -51,10 +51,9 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
 
             ctx.Orders.Add(order);
             ctx.CartItems.RemoveRange(cart.CartItems);
-
-           
             await ctx.SaveChangesAsync(ct);
 
+            
             ctx.Notifications.Add(new Notification
             {
                 UserId = userId,
@@ -63,6 +62,35 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
+
+            await pushService.SendAsync(
+                userId,
+                "Order placed 🛍️",
+                $"Your order #{order.Id} has been placed. Proceed to payment.",
+                ct);
+
+            
+            var sellerIds = cart.CartItems
+                .Select(ci => ci.Item.UserId)
+                .Distinct();
+
+            foreach (var sellerId in sellerIds)
+            {
+                ctx.Notifications.Add(new Notification
+                {
+                    UserId = sellerId,
+                    Message = $"Someone placed an order containing your item(s)! Order #{order.Id}",
+                    NotificationType = "Sale",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await pushService.SendAsync(
+                    sellerId,
+                    "New order for your item 🛒",
+                    $"Someone ordered your item(s). Order #{order.Id}",
+                    ct);
+            }
 
             await ctx.SaveChangesAsync(ct);
 

@@ -30,6 +30,8 @@ namespace Snagged.Application.Abstractions
 
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ItemTag> ItemTags { get; set; }
+        DbSet<PushSubscription> PushSubscriptions { get; set; }
+
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

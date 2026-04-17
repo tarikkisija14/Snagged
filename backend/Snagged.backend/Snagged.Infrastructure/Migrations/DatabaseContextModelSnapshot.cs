@@ -582,6 +582,45 @@ namespace Snagged.Infrastructure.Migrations
                     b.ToTable("Profiles", (string)null);
                 });
 
+            modelBuilder.Entity("Snagged.Domain.Entities.PushSubscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("P256DhKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Endpoint")
+                        .IsUnique();
+
+                    b.ToTable("PushSubscriptions", (string)null);
+                });
+
             modelBuilder.Entity("Snagged.Domain.Entities.Report", b =>
                 {
                     b.Property<int>("Id")
@@ -1010,6 +1049,17 @@ namespace Snagged.Infrastructure.Migrations
                     b.HasOne("Snagged.Domain.Entities.User", "User")
                         .WithOne("Profile")
                         .HasForeignKey("Snagged.Domain.Entities.Profile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Snagged.Domain.Entities.PushSubscription", b =>
+                {
+                    b.HasOne("Snagged.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

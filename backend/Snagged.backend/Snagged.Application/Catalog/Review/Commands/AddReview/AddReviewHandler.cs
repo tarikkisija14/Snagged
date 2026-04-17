@@ -6,7 +6,7 @@ using Snagged.Application.Common.Interfaces;
 
 namespace Snagged.Application.Catalog.Review.Commands.AddReview
 {
-    public class AddReviewHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+    public class AddReviewHandler(IAppDbContext ctx, ICurrentUserService currentUser, IWebPushService pushService)
         : IRequestHandler<AddReviewCommand, int>
     {
         public async Task<int> Handle(AddReviewCommand request, CancellationToken cancellationToken)
@@ -51,6 +51,12 @@ namespace Snagged.Application.Catalog.Review.Commands.AddReview
             });
 
             await ctx.SaveChangesAsync(cancellationToken);
+
+            await pushService.SendAsync(
+                request.ReviewedUserId,
+                "New review received ⭐",
+                $"You received a new {request.Rating}-star review!",
+                cancellationToken);
 
             await ReviewRatingService.RecalculateAsync(ctx, request.ReviewedUserId, cancellationToken);
 

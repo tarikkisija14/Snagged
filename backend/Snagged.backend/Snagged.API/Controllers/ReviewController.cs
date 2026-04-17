@@ -17,6 +17,7 @@ namespace Snagged.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class ReviewController(IMediator mediator) : ControllerBase
     {
         [HttpPost]
