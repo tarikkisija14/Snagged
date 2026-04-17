@@ -5,19 +5,17 @@ using Snagged.Application.Catalog.Payment;
 
 namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
 {
-    public class HandleStripeWebhookHandler(IAppDbContext ctx)
+    public class HandleStripeWebhookHandler(IAppDbContext ctx, IWebPushService pushService)
         : IRequestHandler<HandleStripeWebhookCommand>
     {
         public async Task Handle(HandleStripeWebhookCommand request, CancellationToken ct)
         {
             var alreadyProcessed = await ctx.Payments
                 .AnyAsync(p => p.StripePaymentIntentId == request.StripePaymentIntentId, ct);
-            if (alreadyProcessed)
-                return;
+            if (alreadyProcessed) return;
 
             var order = await ResolveOrderAsync(request, ct);
-            if (order is null)
-                return;
+            if (order is null) return;
 
             var payment = new Domain.Entities.Payment
             {
@@ -40,12 +38,7 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                 .Where(oi => oi.OrderId == order.Id)
                 .ToListAsync(ct);
 
-            foreach (var oi in orderItems)
-            {
-                if (oi.Item != null)
-                    oi.Item.IsSold = true;
-            }
-
+           
             ctx.Notifications.Add(new Domain.Entities.Notification
             {
                 UserId = order.BuyerId,
@@ -54,6 +47,35 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
+
+            await pushService.SendAsync(
+                order.BuyerId,
+                "Payment confirmed ✅",
+                $"Your payment for order #{order.Id} was successful. Thank you!",
+                ct);
+
+            
+            foreach (var oi in orderItems)
+            {
+                if (oi.Item is null) continue;
+
+                oi.Item.IsSold = true;
+
+                ctx.Notifications.Add(new Domain.Entities.Notification
+                {
+                    UserId = oi.Item.UserId,
+                    Message = $"Your item \"{oi.Item.Title}\" has been sold!",
+                    NotificationType = "Sale",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await pushService.SendAsync(
+                    oi.Item.UserId,
+                    "Item sold & payment confirmed 💰",
+                    $"\"{oi.Item.Title}\" has been sold and payment received!",
+                    ct);
+            }
 
             await ctx.SaveChangesAsync(ct);
         }
@@ -64,11 +86,8 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
             var order = await ctx.Orders
                 .FirstOrDefaultAsync(o => o.StripePaymentIntentId == request.StripePaymentIntentId, ct);
 
-            if (order is not null)
-                return order;
-
-            if (!request.OrderIdHint.HasValue)
-                return null;
+            if (order is not null) return order;
+            if (!request.OrderIdHint.HasValue) return null;
 
             order = await ctx.Orders.FirstOrDefaultAsync(o => o.Id == request.OrderIdHint.Value, ct);
             if (order is not null)

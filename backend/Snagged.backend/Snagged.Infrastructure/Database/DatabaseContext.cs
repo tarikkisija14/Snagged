@@ -34,6 +34,8 @@ namespace Snagged.Infrastructure.Database
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ItemTag> ItemTags { get; set; }
+        public DbSet<PushSubscription> PushSubscriptions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -254,6 +256,16 @@ namespace Snagged.Infrastructure.Database
                 entity.HasKey(it => new { it.ItemId, it.TagId });
             });
 
+            modelBuilder.Entity<PushSubscription>(entity =>
+            {
+                entity.ToTable("PushSubscriptions");
+                entity.HasIndex(s => new { s.UserId, s.Endpoint }).IsUnique();
+                entity.Property(s => s.Endpoint).IsRequired().HasMaxLength(500);
+                entity.Property(s => s.P256DhKey).IsRequired().HasMaxLength(200);
+                entity.Property(s => s.AuthKey).IsRequired().HasMaxLength(100);
+                entity.Property(s => s.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
+            });
+
             // User → Role
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
@@ -451,6 +463,13 @@ namespace Snagged.Infrastructure.Database
                 .WithMany(t => t.ItemTags)
                 .HasForeignKey(it => it.TagId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PushSubscription>()
+             .HasOne(s => s.User)
+             .WithMany()
+             .HasForeignKey(s => s.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
