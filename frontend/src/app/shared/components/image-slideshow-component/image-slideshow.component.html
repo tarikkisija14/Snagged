@@ -1,0 +1,100 @@
+<div
+  class="slideshow"
+  [class.slideshow--sold]="isSold"
+  [attr.tabindex]="hasMultiple ? '0' : null"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)"
+  aria-label="Item image gallery"
+>
+
+  <!-- ── Main preview ─────────────────────────────────────────────────────── -->
+  <div
+    class="slideshow__main"
+    [appImageZoom]="(isSold || !enableZoom) ? '' : activeImageUrl"
+  >
+    <img
+      [src]="activeImageUrl"
+      [alt]="itemTitle"
+      class="slideshow__main-img"
+      [class.slideshow__main-img--transitioning]="isTransitioning"
+      (error)="onMainImageError($event)"
+    />
+
+    <!-- Sold overlay -->
+    <div class="slideshow__sold-ribbon" *ngIf="isSold" aria-label="Sold">
+      <span>SOLD</span>
+    </div>
+
+    <!-- Zoom hint (desktop) -->
+    <div class="slideshow__zoom-hint" *ngIf="!isSold && enableZoom" aria-hidden="true">
+      <mat-icon>zoom_in</mat-icon>
+    </div>
+
+    <!-- Prev / Next arrows (only when multiple images) -->
+    <ng-container *ngIf="hasMultiple">
+      <button
+        class="slideshow__arrow slideshow__arrow--prev"
+        (click)="prev()"
+        aria-label="Previous image"
+        type="button"
+      >
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <button
+        class="slideshow__arrow slideshow__arrow--next"
+        (click)="next()"
+        aria-label="Next image"
+        type="button"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <!-- Dot indicators (mobile) -->
+      <div class="slideshow__dots" role="tablist" aria-label="Image navigation">
+        <button
+          *ngFor="let img of images; let i = index; trackBy: trackById"
+          class="slideshow__dot"
+          [class.slideshow__dot--active]="i === activeIndex"
+          (click)="selectIndex(i)"
+          role="tab"
+          [attr.aria-selected]="i === activeIndex"
+          [attr.aria-label]="'Image ' + (i + 1) + ' of ' + images.length"
+          type="button"
+        ></button>
+      </div>
+
+      <!-- Counter badge (visible on small screens where thumbnails hide) -->
+      <div class="slideshow__counter" aria-hidden="true">
+        {{ activeIndex + 1 }} / {{ images.length }}
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ── Thumbnails ────────────────────────────────────────────────────────── -->
+  <div
+    class="slideshow__thumbs"
+    *ngIf="hasMultiple"
+    role="tablist"
+    aria-label="Image thumbnails"
+  >
+    <button
+      *ngFor="let img of images; let i = index; trackBy: trackById"
+      class="slideshow__thumb"
+      [class.slideshow__thumb--active]="i === activeIndex"
+      (click)="selectIndex(i)"
+      role="tab"
+      [attr.aria-selected]="i === activeIndex"
+      [attr.aria-label]="'View image ' + (i + 1)"
+      type="button"
+    >
+      <img
+        [src]="resolveUrl(img.imageUrl)"
+        [alt]="itemTitle + ' thumbnail ' + (i + 1)"
+        (error)="onThumbError($event)"
+      />
+      <span class="slideshow__thumb-overlay" *ngIf="i === activeIndex" aria-hidden="true"></span>
+    </button>
+  </div>
+
+</div>

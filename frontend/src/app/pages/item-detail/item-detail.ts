@@ -24,8 +24,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
   addedToCart = false;
   cartError   = '';
 
-  selectedImage: ItemImageModel | null = null;
-  lightboxOpen  = false;
+  lightboxOpen = false;
 
   averageRating = 0;
   reviewCount   = 0;
@@ -73,9 +72,8 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (item) => {
-          this.item          = item;
-          this.selectedImage = item.images?.find(img => img.isMain) ?? item.images?.[0] ?? null;
-          this.isLoading     = false;
+          this.item      = item;
+          this.isLoading = false;
           this.cdr.markForCheck();
 
           if (item.userId && !this.isOwnItem) {
@@ -107,10 +105,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  selectImage(image: ItemImageModel): void {
-    this.selectedImage = image;
-  }
-
   openLightbox(): void {
     this.lightboxOpen = true;
   }
@@ -123,10 +117,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     if (!imageUrl) return `${this.baseUrl}/images/items/placeholder.png`;
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) return imageUrl;
     return `${this.baseUrl}${imageUrl}`;
-  }
-
-  get mainImageUrl(): string {
-    return this.resolveUrl(this.selectedImage?.imageUrl);
   }
 
   onImageError(event: Event): void {
