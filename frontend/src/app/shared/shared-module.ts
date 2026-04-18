@@ -21,6 +21,7 @@ import { SearchSuggestions }      from './components/search-suggestions/search-s
 import { TagInputComponent }      from './components/tag-input-component/tag-input.component';
 import { ImageZoomDirective }     from './directives/image-zoom.directive';
 
+
 @NgModule({
   declarations: [
     LazyLoadImageDirective,
@@ -29,6 +30,7 @@ import { ImageZoomDirective }     from './directives/image-zoom.directive';
     SearchSuggestions,
     TagInputComponent,
     ImageZoomDirective,
+
   ],
   imports: [
     CommonModule,

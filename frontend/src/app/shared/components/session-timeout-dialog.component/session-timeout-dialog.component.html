@@ -1,0 +1,40 @@
+<!-- Backdrop + dialog — only rendered when session is about to expire -->
+<div class="st-backdrop" *ngIf="isVisible" role="dialog" aria-modal="true" aria-labelledby="st-title">
+
+  <div class="st-dialog">
+
+    <!-- Icon -->
+    <div class="st-icon-wrap">
+      <mat-icon class="st-icon">schedule</mat-icon>
+    </div>
+
+    <!-- Title -->
+    <h2 class="st-title" id="st-title">Session Expiring Soon</h2>
+
+    <!-- Subtitle -->
+    <p class="st-subtitle">
+      Your session will expire in
+      <span class="st-timer">{{ formattedTime }}</span>
+      due to inactivity.
+    </p>
+
+    <!-- Progress bar -->
+    <div class="st-progress-track" role="progressbar"
+         [attr.aria-valuenow]="remainingSeconds"
+         aria-valuemin="0" aria-valuemax="120">
+      <div class="st-progress-fill" [style.width.%]="progressPercent"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="st-actions">
+      <button class="st-btn st-btn--secondary" (click)="onLogout()">
+        Log out now
+      </button>
+      <button class="st-btn st-btn--primary" (click)="onExtend()">
+        Stay logged in
+      </button>
+    </div>
+
+  </div>
+
+</div>

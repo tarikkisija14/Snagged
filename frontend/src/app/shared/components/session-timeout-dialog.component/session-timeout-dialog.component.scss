@@ -1,0 +1,138 @@
+
+
+.st-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+
+  // Subtle fade-in
+  animation: st-fade-in 0.2s ease;
+}
+
+@keyframes st-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.st-dialog {
+  background: #fff;
+  border-radius: var(--radius, 16px);
+  padding: 2.5rem 2rem 2rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow, 0 8px 30px rgba(138, 79, 255, 0.15));
+
+  animation: st-slide-up 0.25s ease;
+}
+
+@keyframes st-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+// ── Icon ────────────────────────────────────────────────────────────────────
+
+.st-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary, #a18ed7), var(--secondary, rgb(81,41,126)));
+  margin: 0 auto 1.25rem;
+}
+
+.st-icon {
+  color: #fff;
+  font-size: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 1 !important;
+}
+
+// ── Text ────────────────────────────────────────────────────────────────────
+
+.st-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text, #333);
+  margin: 0 0 0.75rem;
+}
+
+.st-subtitle {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.st-timer {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--secondary, rgb(81,41,126));
+  font-variant-numeric: tabular-nums;
+}
+
+// ── Progress bar ─────────────────────────────────────────────────────────────
+
+.st-progress-track {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.st-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary, #a18ed7), var(--secondary, rgb(81,41,126)));
+  border-radius: 99px;
+  transition: width 1s linear;
+}
+
+// ── Buttons ──────────────────────────────────────────────────────────────────
+
+.st-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.st-btn {
+  flex: 1;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+
+  &:hover  { opacity: 0.88; transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+}
+
+.st-btn--primary {
+  background: linear-gradient(135deg, var(--primary, #a18ed7), var(--secondary, rgb(81,41,126)));
+  color: #fff;
+}
+
+.st-btn--secondary {
+  background: transparent;
+  color: var(--text, #333);
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+
+  &:hover { background: rgba(0, 0, 0, 0.04); }
+}
