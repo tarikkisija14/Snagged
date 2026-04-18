@@ -14,11 +14,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule }           from '@angular/material/chips';
 import { MatSnackBarModule }        from '@angular/material/snack-bar';
 
-import { ProductCardComponent }  from './components/product-card.component/product-card.component';
+import { ProductCardComponent }   from './components/product-card.component/product-card.component';
 import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
 import { ButtonComponent }        from './components/button.component/button.component';
 import { SearchSuggestions }      from './components/search-suggestions/search-suggestions';
-import {TagInputComponent} from './components/tag-input-component/tag-input.component';
+import { TagInputComponent }      from './components/tag-input-component/tag-input.component';
+import { ImageZoomDirective }     from './directives/image-zoom.directive';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import {TagInputComponent} from './components/tag-input-component/tag-input.comp
     ButtonComponent,
     SearchSuggestions,
     TagInputComponent,
+    ImageZoomDirective,
   ],
   imports: [
     CommonModule,
@@ -54,6 +56,7 @@ import {TagInputComponent} from './components/tag-input-component/tag-input.comp
     ButtonComponent,
     SearchSuggestions,
     TagInputComponent,
+    ImageZoomDirective,
     MatCardModule,
     MatButtonModule,
     MatIconModule,

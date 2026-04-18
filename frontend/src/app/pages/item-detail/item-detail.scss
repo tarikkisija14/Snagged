@@ -1,10 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Item Detail — elegant editorial redesign
-// Brand tokens: --primary #a18ed7 · --secondary rgb(81,41,126) · --gradient
-//               --font-heading Playfair Display · --font-body Montserrat
+// Item Detail
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Loading ───────────────────────────────────────────────────────────────────
 .detail-loading {
   display: flex;
   justify-content: center;
@@ -17,7 +14,6 @@
   }
 }
 
-// ── Not found ─────────────────────────────────────────────────────────────────
 .detail-not-found {
   display: flex;
   justify-content: center;
@@ -60,14 +56,12 @@
   }
 }
 
-// ── Page shell ────────────────────────────────────────────────────────────────
 .detail-page {
   background: #faf9fc;
   min-height: 100vh;
   padding-bottom: 80px;
 }
 
-// ── Breadcrumb ────────────────────────────────────────────────────────────────
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -86,11 +80,7 @@
     align-items: center;
     gap: 2px;
 
-    mat-icon {
-      font-size: .85rem;
-      width: .85rem;
-      height: .85rem;
-    }
+    mat-icon { font-size: .85rem; width: .85rem; height: .85rem; }
   }
 
   .breadcrumb-sep { color: #d1d5db; }
@@ -111,7 +101,6 @@
   }
 }
 
-// ── Two-column layout ─────────────────────────────────────────────────────────
 .detail-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -131,7 +120,7 @@
 .gallery-main {
   position: relative;
   border-radius: 20px;
-  overflow: hidden;
+  overflow: hidden;        // keeps zoomed image clipped inside the box
   background: #f3f0f9;
   aspect-ratio: 3 / 4;
   box-shadow:
@@ -146,20 +135,13 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform .5s cubic-bezier(.25,.46,.45,.94);
+    transform-origin: center center;
+    // transition handled by the directive
   }
 
-  &:not(.is-sold):hover .main-image {
-    transform: scale(1.04);
-  }
-
-  // Sold ribbon — diagonal tape effect
   .sold-ribbon {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -179,7 +161,6 @@
     }
   }
 
-  // Subtle zoom hint on hover
   .zoom-hint {
     position: absolute;
     bottom: 14px;
@@ -207,7 +188,6 @@
   &:hover .zoom-hint { opacity: 1; }
 }
 
-// Thumbnails
 .gallery-thumbs {
   display: flex;
   flex-wrap: wrap;
@@ -254,7 +234,6 @@
   padding-top: 4px;
 }
 
-// Category chips
 .category-badges {
   display: flex;
   flex-wrap: wrap;
@@ -271,18 +250,10 @@
   letter-spacing: .04em;
   text-transform: uppercase;
 
-  &.chip-cat {
-    background: rgba(161,142,215,.15);
-    color: var(--secondary);
-  }
-
-  &.chip-sub {
-    background: rgba(188,146,189,.13);
-    color: #7c3aed;
-  }
+  &.chip-cat { background: rgba(161,142,215,.15); color: var(--secondary); }
+  &.chip-sub { background: rgba(188,146,189,.13); color: #7c3aed; }
 }
 
-// Title
 .item-title {
   font-family: var(--font-heading);
   font-size: 2rem;
@@ -293,7 +264,6 @@
   letter-spacing: -.02em;
 }
 
-// Price row
 .price-row {
   display: flex;
   align-items: baseline;
@@ -319,19 +289,14 @@
   background: #dcfce7;
   color: #166534;
 
-  &.sold-tag {
-    background: #fee2e2;
-    color: #991b1b;
-  }
+  &.sold-tag { background: #fee2e2; color: #991b1b; }
 }
 
-// Divider
 .info-divider {
   height: 1px;
   background: linear-gradient(to right, rgba(161,142,215,.3), transparent);
 }
 
-// Condition
 .condition-row {
   display: flex;
   align-items: center;
@@ -360,7 +325,6 @@
   }
 }
 
-// Description
 .item-description-wrapper {
   background: #fff;
   border: 1px solid rgba(161,142,215,.18);
@@ -385,7 +349,6 @@
   margin: 0;
 }
 
-// Seller card
 .seller-card {
   display: flex;
   align-items: center;
@@ -396,9 +359,7 @@
   border-radius: 14px;
   transition: box-shadow .2s;
 
-  &:hover {
-    box-shadow: 0 4px 16px rgba(161,142,215,.15);
-  }
+  &:hover { box-shadow: 0 4px 16px rgba(161,142,215,.15); }
 }
 
 .seller-avatar {
@@ -411,12 +372,7 @@
   justify-content: center;
   flex-shrink: 0;
 
-  mat-icon {
-    color: #fff;
-    font-size: 1.2rem;
-    width: 1.2rem;
-    height: 1.2rem;
-  }
+  mat-icon { color: #fff; font-size: 1.2rem; width: 1.2rem; height: 1.2rem; }
 }
 
 .seller-info {
@@ -449,12 +405,7 @@
 
     &:hover { color: var(--primary); }
 
-    .seller-link-icon {
-      font-size: .8rem;
-      width: .8rem;
-      height: .8rem;
-      opacity: .6;
-    }
+    .seller-link-icon { font-size: .8rem; width: .8rem; height: .8rem; opacity: .6; }
   }
 }
 
@@ -466,14 +417,9 @@
   color: #b0a8c0;
   flex-shrink: 0;
 
-  .meta-icon {
-    font-size: .9rem;
-    width: .9rem;
-    height: .9rem;
-  }
+  .meta-icon { font-size: .9rem; width: .9rem; height: .9rem; }
 }
 
-// ── CTA area ─────────────────────────────────────────────────────────────────
 .cta-area {
   display: flex;
   flex-direction: column;
@@ -500,11 +446,7 @@
   box-shadow: 0 6px 20px rgba(161,142,215,.4);
   transition: box-shadow .2s, transform .15s, background .2s;
 
-  mat-icon {
-    font-size: 1.2rem;
-    width: 1.2rem;
-    height: 1.2rem;
-  }
+  mat-icon { font-size: 1.2rem; width: 1.2rem; height: 1.2rem; }
 
   &:hover:not([disabled]) {
     box-shadow: 0 10px 28px rgba(161,142,215,.55);
@@ -516,12 +458,7 @@
     box-shadow: 0 4px 14px rgba(161,142,215,.35);
   }
 
-  &[disabled] {
-    opacity: .6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+  &[disabled] { opacity: .6; cursor: not-allowed; transform: none; box-shadow: none; }
 
   &.added {
     background: linear-gradient(135deg, #34d399, #10b981) !important;
@@ -533,12 +470,9 @@
     box-shadow: none !important;
   }
 
-  &.login-btn {
-    background: var(--reverse-gradient) !important;
-  }
+  &.login-btn { background: var(--reverse-gradient) !important; }
 }
 
-// Cart error
 .cart-error {
   display: flex;
   align-items: center;
@@ -560,7 +494,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-// Trust badges
 .trust-row {
   display: flex;
   gap: 12px;
@@ -576,17 +509,11 @@
   font-weight: 600;
   letter-spacing: .03em;
 
-  mat-icon {
-    font-size: .9rem;
-    width: .9rem;
-    height: .9rem;
-    color: var(--primary);
-    opacity: .8;
-  }
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; color: var(--primary); opacity: .8; }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// REVIEWS section
+// REVIEWS
 // ─────────────────────────────────────────────────────────────────────────────
 .reviews-wrapper {
   margin-top: 72px;
@@ -608,12 +535,7 @@
     align-items: center;
     gap: 10px;
 
-    mat-icon {
-      font-size: 1.3rem;
-      width: 1.3rem;
-      height: 1.3rem;
-      color: var(--primary);
-    }
+    mat-icon { font-size: 1.3rem; width: 1.3rem; height: 1.3rem; color: var(--primary); }
   }
 
   .reviews-sub {
@@ -650,22 +572,17 @@
 }
 
 @media (max-width: 560px) {
-  .detail-layout { padding: 0 16px; }
-  .breadcrumb    { padding: 20px 16px 16px; }
+  .detail-layout  { padding: 0 16px; }
+  .breadcrumb     { padding: 20px 16px 16px; }
   .reviews-wrapper { padding: 0 16px; margin-top: 48px; }
 
   .item-title { font-size: 1.45rem; }
   .item-price { font-size: 1.5rem; }
 
-  .gallery-thumbs .thumb-btn {
-    width: 58px;
-    height: 58px;
-  }
-
+  .gallery-thumbs .thumb-btn { width: 58px; height: 58px; }
   .add-cart-btn { height: 52px; font-size: .9rem; }
-
-  .seller-card { flex-wrap: wrap; }
-  .meta-date   { width: 100%; padding-left: 56px; }
+  .seller-card  { flex-wrap: wrap; }
+  .meta-date    { width: 100%; padding-left: 56px; }
 }
 
 .item-tags {
@@ -681,11 +598,7 @@
     margin-bottom: 6px;
   }
 
-  .tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+  .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
 
   .tag-chip-display {
     background: #f5f5f5;
@@ -696,7 +609,6 @@
     color: #555;
   }
 }
-
 
 @media (max-width: 360px) {
   .trust-row { flex-direction: column; gap: 6px; }

@@ -35,6 +35,7 @@ import { ReviewFormComponent } from './layouts/review-form-component/review-form
 import { ReviewListComponent } from './layouts/review-list-component/review-list-component';
 import { UserReviewsComponent } from './layouts/user-reviews-component/user-reviews-component';
 
+
 register();
 
 @NgModule({
@@ -53,6 +54,7 @@ register();
     ReviewFormComponent,
     ReviewListComponent,
     UserReviewsComponent,
+
   ],
   imports: [
     BrowserModule,

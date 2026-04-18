@@ -19,12 +19,13 @@ import { environment } from '../../../environments/environment';
 })
 export class ItemDetailComponent implements OnInit, OnDestroy {
   item: ItemModel | null = null;
-  isLoading  = true;
-  notFound   = false;
+  isLoading   = true;
+  notFound    = false;
   addedToCart = false;
   cartError   = '';
 
   selectedImage: ItemImageModel | null = null;
+  lightboxOpen  = false;
 
   averageRating = 0;
   reviewCount   = 0;
@@ -108,6 +109,14 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
   selectImage(image: ItemImageModel): void {
     this.selectedImage = image;
+  }
+
+  openLightbox(): void {
+    this.lightboxOpen = true;
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen = false;
   }
 
   resolveUrl(imageUrl: string | undefined | null): string {
