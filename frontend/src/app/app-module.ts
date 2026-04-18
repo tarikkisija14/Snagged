@@ -36,6 +36,10 @@ import { ReviewListComponent } from './layouts/review-list-component/review-list
 import { UserReviewsComponent } from './layouts/user-reviews-component/user-reviews-component';
 
 
+import {
+  SessionTimeoutDialogComponent
+} from './shared/components/session-timeout-dialog.component/session-timeout-dialog.component';
+
 register();
 
 @NgModule({
@@ -55,6 +59,8 @@ register();
     ReviewListComponent,
     UserReviewsComponent,
 
+    // Session timeout dialog
+    SessionTimeoutDialogComponent,
   ],
   imports: [
     BrowserModule,
