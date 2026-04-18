@@ -38,7 +38,11 @@
     <!-- ══ LEFT: Gallery ════════════════════════════════════════════ -->
     <div class="gallery">
 
-      <div class="gallery-main" [class.is-sold]="item.isSold">
+      <div
+        class="gallery-main"
+        [class.is-sold]="item.isSold"
+        [appImageZoom]="item.isSold ? '' : mainImageUrl"
+      >
         <img
           [src]="mainImageUrl"
           [alt]="item.title"
