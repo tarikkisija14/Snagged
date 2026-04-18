@@ -110,118 +110,12 @@
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GALLERY
+// GALLERY WRAPPER
+// (Internal gallery visuals live in image-slideshow.component.scss)
 // ─────────────────────────────────────────────────────────────────────────────
 .gallery {
   position: sticky;
   top: 28px;
-}
-
-.gallery-main {
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;        // keeps zoomed image clipped inside the box
-  background: #f3f0f9;
-  aspect-ratio: 3 / 4;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,.04),
-    0 12px 40px rgba(161,142,215,.18);
-  cursor: zoom-in;
-
-  &.is-sold { cursor: default; }
-
-  .main-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transform-origin: center center;
-    // transition handled by the directive
-  }
-
-  .sold-ribbon {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(10,5,20,.52);
-    backdrop-filter: blur(2px);
-
-    span {
-      font-family: var(--font-heading);
-      font-size: 2.8rem;
-      font-weight: 900;
-      color: rgba(255,255,255,.9);
-      letter-spacing: 10px;
-      text-transform: uppercase;
-      border: 3px solid rgba(255,255,255,.55);
-      padding: 8px 28px;
-      border-radius: 4px;
-    }
-  }
-
-  .zoom-hint {
-    position: absolute;
-    bottom: 14px;
-    right: 14px;
-    width: 36px;
-    height: 36px;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity .2s;
-    pointer-events: none;
-
-    mat-icon {
-      font-size: 1.1rem;
-      width: 1.1rem;
-      height: 1.1rem;
-      color: var(--secondary);
-    }
-  }
-
-  &:hover .zoom-hint { opacity: 1; }
-}
-
-.gallery-thumbs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
-
-  .thumb-btn {
-    width: 70px;
-    height: 70px;
-    padding: 0;
-    border: 2.5px solid transparent;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    background: none;
-    transition: border-color .15s, transform .15s, box-shadow .15s;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    &.active {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(161,142,215,.28);
-    }
-
-    &:hover:not(.active) {
-      border-color: rgba(161,142,215,.5);
-      transform: translateY(-2px);
-    }
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -572,17 +466,17 @@
 }
 
 @media (max-width: 560px) {
-  .detail-layout  { padding: 0 16px; }
-  .breadcrumb     { padding: 20px 16px 16px; }
+  .detail-layout   { padding: 0 16px; }
+  .breadcrumb      { padding: 20px 16px 16px; }
   .reviews-wrapper { padding: 0 16px; margin-top: 48px; }
 
   .item-title { font-size: 1.45rem; }
   .item-price { font-size: 1.5rem; }
 
-  .gallery-thumbs .thumb-btn { width: 58px; height: 58px; }
   .add-cart-btn { height: 52px; font-size: .9rem; }
   .seller-card  { flex-wrap: wrap; }
   .meta-date    { width: 100%; padding-left: 56px; }
+  .gallery-thumbs .thumb-btn { width: 58px; height: 58px; }
 }
 
 .item-tags {

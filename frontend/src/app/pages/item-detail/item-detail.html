@@ -37,43 +37,12 @@
 
     <!-- ══ LEFT: Gallery ════════════════════════════════════════════ -->
     <div class="gallery">
-
-      <div
-        class="gallery-main"
-        [class.is-sold]="item.isSold"
-        [appImageZoom]="item.isSold ? '' : mainImageUrl"
-      >
-        <img
-          [src]="mainImageUrl"
-          [alt]="item.title"
-          class="main-image"
-          (error)="onImageError($event)"
-        />
-
-        <!-- Sold ribbon -->
-        <div class="sold-ribbon" *ngIf="item.isSold">
-          <span>SOLD</span>
-        </div>
-
-        <!-- Zoom hint -->
-        <div class="zoom-hint" *ngIf="!item.isSold">
-          <mat-icon>zoom_in</mat-icon>
-        </div>
-      </div>
-
-      <!-- Thumbnails -->
-      <div class="gallery-thumbs" *ngIf="item.images.length > 1">
-        <button
-          *ngFor="let img of item.images || []"
-          class="thumb-btn"
-          [class.active]="selectedImage?.id === img.id"
-          (click)="selectImage(img)"
-          [attr.aria-label]="'View image ' + img.id"
-        >
-          <img [src]="resolveUrl(img.imageUrl)" [alt]="item.title" (error)="onImageError($event)" />
-        </button>
-      </div>
-
+      <app-image-slideshow
+        [images]="item.images"
+        [itemTitle]="item.title"
+        [isSold]="item.isSold"
+        [enableZoom]="true"
+      ></app-image-slideshow>
     </div>
 
     <!-- ══ RIGHT: Info panel ════════════════════════════════════════ -->
