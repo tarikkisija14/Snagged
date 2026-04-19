@@ -28,8 +28,8 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
             };
 
             ctx.Payments.Add(payment);
-            await ctx.SaveChangesAsync(ct);
 
+           
             order.PaymentId = payment.Id;
             order.Status = PaymentStatus.Paid;
 
@@ -38,7 +38,7 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                 .Where(oi => oi.OrderId == order.Id)
                 .ToListAsync(ct);
 
-           
+            
             ctx.Notifications.Add(new Domain.Entities.Notification
             {
                 UserId = order.BuyerId,
@@ -48,13 +48,7 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                 CreatedAt = DateTime.UtcNow
             });
 
-            await pushService.SendAsync(
-                order.BuyerId,
-                "Payment confirmed ✅",
-                $"Your payment for order #{order.Id} was successful. Thank you!",
-                ct);
-
-            
+           
             foreach (var oi in orderItems)
             {
                 if (oi.Item is null) continue;
@@ -69,15 +63,26 @@ namespace Snagged.Application.Catalog.Payment.Commands.HandleStripeWebhook
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
+            }
 
+           
+            await ctx.SaveChangesAsync(ct);
+
+           
+            await pushService.SendAsync(
+                order.BuyerId,
+                "Payment confirmed ",
+                $"Your payment for order #{order.Id} was successful. Thank you!",
+                ct);
+
+            foreach (var oi in orderItems.Where(oi => oi.Item is not null))
+            {
                 await pushService.SendAsync(
-                    oi.Item.UserId,
-                    "Item sold & payment confirmed 💰",
+                    oi.Item!.UserId,
+                    "Item sold & payment confirmed ",
                     $"\"{oi.Item.Title}\" has been sold and payment received!",
                     ct);
             }
-
-            await ctx.SaveChangesAsync(ct);
         }
 
         private async Task<Domain.Entities.Order?> ResolveOrderAsync(

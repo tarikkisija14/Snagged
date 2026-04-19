@@ -21,6 +21,7 @@ namespace Snagged.API.Controllers
     public class CartController(IMediator mediator) : ControllerBase
     {
         [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCarts()
         {
             var result = await mediator.Send(new GetAllCartsQuery());

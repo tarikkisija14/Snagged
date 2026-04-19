@@ -31,7 +31,7 @@
         </span>
         <span class="suggestion-meta">
           <span *ngIf="s.categoryName" class="suggestion-category">{{ s.categoryName }}</span>
-          <span class="suggestion-price">€{{ s.price | number:'1.2-2' }}</span>
+          <span class="suggestion-price">{{ s.price | itemPrice:'€' }}</span>
         </span>
       </div>
       <mat-icon class="suggestion-arrow">north_west</mat-icon>

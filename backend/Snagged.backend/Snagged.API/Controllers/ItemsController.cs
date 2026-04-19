@@ -18,6 +18,7 @@ namespace Snagged.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class ItemsController(IMediator mediator) : ControllerBase
     {
         [HttpGet]

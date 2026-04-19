@@ -3,7 +3,7 @@ import { ProfileService }           from '../../shared/services/profile-service'
 import { ProfileModel }              from '../../shared/models/profile.model';
 import { AuthService }               from '../../core/services/auth-service/AuthService';
 import { Router }                    from '@angular/router';
-import { Subject }                   from 'rxjs';
+import { Subject, EMPTY }            from 'rxjs';
 import { switchMap, takeUntil }      from 'rxjs/operators';
 import { ItemModel }                 from '../../shared/models/item.model';
 import { PushNotificationService }   from '../../shared/services/push-notification-service';
@@ -80,7 +80,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.pushPermissionDenied = this.pushNotificationService.permissionState === 'denied';
 
-    // Flat switchMap chain — no nested subscribe() calls.
     this.pushNotificationService.registerServiceWorker().pipe(
       switchMap(() => this.pushNotificationService.isSubscribed()),
       takeUntil(this.destroy$)
@@ -102,25 +101,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
           error: () => { this.pushLoading = false; this.cdr.markForCheck(); },
         });
     } else {
-      this.pushNotificationService.requestPermission()
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: permission => {
-            if (permission === 'denied') {
-              this.pushPermissionDenied = true;
-              this.pushLoading = false;
-              this.cdr.markForCheck();
-              return;
-            }
-            this.pushNotificationService.subscribe()
-              .pipe(takeUntil(this.destroy$))
-              .subscribe({
-                next:  success => { this.pushSubscribed = success; this.pushLoading = false; this.cdr.markForCheck(); },
-                error: ()      => { this.pushLoading = false; this.cdr.markForCheck(); },
-              });
-          },
-          error: () => { this.pushLoading = false; this.cdr.markForCheck(); },
-        });
+
+      this.pushNotificationService.requestPermission().pipe(
+        takeUntil(this.destroy$),
+        switchMap(permission => {
+          if (permission === 'denied') {
+            this.pushPermissionDenied = true;
+            this.pushLoading = false;
+            this.cdr.markForCheck();
+            return EMPTY;
+          }
+          return this.pushNotificationService.subscribe();
+        }),
+      ).subscribe({
+        next:  (success: boolean) => {
+          this.pushSubscribed = success;
+          this.pushLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => { this.pushLoading = false; this.cdr.markForCheck(); },
+      });
     }
   }
 

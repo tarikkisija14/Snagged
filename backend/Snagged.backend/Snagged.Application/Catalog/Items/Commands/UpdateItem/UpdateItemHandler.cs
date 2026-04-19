@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
 using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Common.Interfaces;
 using Snagged.Domain.Entities;
 
 namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
 {
-    public class UpdateItemHandler(IAppDbContext ctx) : IRequestHandler<UpdateItemCommand, Unit>
+    public class UpdateItemHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+        : IRequestHandler<UpdateItemCommand, Unit>
     {
         public async Task<Unit> Handle(UpdateItemCommand request, CancellationToken ct)
         {
@@ -14,6 +16,9 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
 
             if (item is null)
                 throw new SnaggedNotFoundException($"Item with id {request.Id} was not found.");
+
+            if (item.UserId != currentUser.UserId)
+                throw new UnauthorizedAccessException("You can only update your own items.");
 
             item.Title = request.Title;
             item.Description = request.Description;
@@ -43,11 +48,9 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
                 .Distinct()
                 .ToHashSet();
 
-            
             var toRemove = existing.Where(it => !desired.Contains(it.Tag.Name)).ToList();
             ctx.ItemTags.RemoveRange(toRemove);
 
-            
             var currentNames = existing
                 .Where(it => desired.Contains(it.Tag.Name))
                 .Select(it => it.Tag.Name)

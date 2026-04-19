@@ -83,7 +83,6 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private syncInputRating(): void {
-    console.log('[UserReviews] syncInputRating - averageRatingInput:', this.averageRatingInput, '| reviewCountInput:', this.reviewCountInput);
     if (this.averageRating === 0) {
       this.averageRating = this.averageRatingInput;
     }
@@ -134,26 +133,25 @@ export class UserReviewsComponent implements OnInit, OnChanges, OnDestroy {
     this.isLoadingReviews = true;
     this.cdr.markForCheck();
 
+    // Use real server-side pagination — do NOT fetch 1000 rows and slice client-side.
     this.reviewService
-      .getPagedReviews(this.reviewedUserId, 1, 1000, this.sortOrder)
+      .getPagedReviews(this.reviewedUserId, this.page, this.pageSize, this.sortOrder)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
-          console.log('[UserReviews] loadReviews result:', result);
-          const allReviews = result.items ?? [];
+          const pageReviews = result.items ?? [];
           this.totalReviews = result.total;
 
-          if (allReviews.length > 0) {
-            const sum = allReviews.reduce((acc, r) => acc + r.rating, 0);
-            this.averageRating = Math.round((sum / allReviews.length) * 10) / 10;
-          } else {
+          // Recompute average from the current page's items as a best-effort display.
+          // The authoritative value is stored on the server Profile (AverageRating).
+          if (pageReviews.length > 0) {
+            const sum = pageReviews.reduce((acc, r) => acc + r.rating, 0);
+            this.averageRating = Math.round((sum / pageReviews.length) * 10) / 10;
+          } else if (result.total === 0) {
             this.averageRating = 0;
           }
-          console.log('[UserReviews] computed averageRating:', this.averageRating, '| totalReviews:', this.totalReviews);
 
-          const start = (this.page - 1) * this.pageSize;
-          this.reviews = allReviews.slice(start, start + this.pageSize);
-
+          this.reviews = pageReviews;
           this.isLoadingReviews = false;
           this.cdr.markForCheck();
         },

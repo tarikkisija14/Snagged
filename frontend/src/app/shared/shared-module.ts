@@ -20,8 +20,13 @@ import { ButtonComponent }           from './components/button.component/button.
 import { SearchSuggestions }         from './components/search-suggestions/search-suggestions';
 import { TagInputComponent }         from './components/tag-input-component/tag-input.component';
 import { ImageZoomDirective }        from './directives/image-zoom.directive';
-import {ImageSlideshowComponent} from './components/image-slideshow-component/image-slideshow.component';
-
+import { ImageSlideshowComponent } from './components/image-slideshow-component/image-slideshow.component';
+import {TruncatePipe} from './pipes/Truncate.pipe';
+import {FallbackPipe} from './pipes/Fallback.pipe';
+import {ItemPricePipe} from './pipes/Itemprice.pipe';
+import {ConditionLabelPipe} from './pipes/Conditionlabel.pipe';
+import {RelativeDatePipe} from './pipes/Relativedate.pipe';
+import {ItemImageUrlPipe} from './pipes/Itemimage.pipe';
 
 @NgModule({
   declarations: [
@@ -32,6 +37,12 @@ import {ImageSlideshowComponent} from './components/image-slideshow-component/im
     TagInputComponent,
     ImageZoomDirective,
     ImageSlideshowComponent,
+    TruncatePipe,
+    FallbackPipe,
+    ItemPricePipe,
+    ConditionLabelPipe,
+    RelativeDatePipe,
+    ItemImageUrlPipe,
   ],
   imports: [
     CommonModule,
@@ -61,6 +72,12 @@ import {ImageSlideshowComponent} from './components/image-slideshow-component/im
     TagInputComponent,
     ImageZoomDirective,
     ImageSlideshowComponent,
+    TruncatePipe,
+    FallbackPipe,
+    ItemPricePipe,
+    ConditionLabelPipe,
+    RelativeDatePipe,
+    ItemImageUrlPipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,

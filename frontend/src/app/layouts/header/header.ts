@@ -4,8 +4,8 @@ import {
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService }         from '../../core/services/auth-service/AuthService';
 import { Router }              from '@angular/router';
-import { Subscription, interval } from 'rxjs';
-import { switchMap, startWith } from 'rxjs/operators';
+import { Subscription, interval, of } from 'rxjs';
+import { switchMap, startWith, catchError } from 'rxjs/operators';
 import { NotificationService } from '../../shared/services/notification-service';
 import { Notification }        from '../../shared/models/notification';
 import { SearchService }       from '../../shared/services/search-service';
@@ -19,6 +19,7 @@ import { SearchSuggestion }    from '../../shared/models/search-suggestion.model
 })
 export class Header implements OnInit, OnDestroy {
   isMobile = false;
+  isLoggedIn = false;
 
   notifications: Notification[] = [];
   unreadCount    = 0;
@@ -63,6 +64,7 @@ export class Header implements OnInit, OnDestroy {
       .subscribe(r => { this.isMobile = r.matches; });
 
     this.authSub = this.authService.currentUser$.subscribe(userId => {
+      this.isLoggedIn = !!userId;
       if (userId) { this.startPolling(); }
       else {
         this.stopPolling();
@@ -70,6 +72,7 @@ export class Header implements OnInit, OnDestroy {
         this.unreadCount    = 0;
         this.showNotifPanel = false;
       }
+      this.cdr.markForCheck();
     });
 
     this.searchSub = this.searchService.suggestions.subscribe(s => {
@@ -123,7 +126,6 @@ export class Header implements OnInit, OnDestroy {
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
-    // Tab accepts the inline autocomplete hint
     if (event.key === 'Tab' && this.autocompleteHint && this.searchQuery) {
       event.preventDefault();
       this.searchQuery      = this.autocompleteHint;
@@ -132,7 +134,6 @@ export class Header implements OnInit, OnDestroy {
       return;
     }
 
-    // ArrowRight at end of input also accepts hint
     if (event.key === 'ArrowRight' && this.autocompleteHint && this.searchQuery) {
       const input = event.target as HTMLInputElement;
       if (input.selectionStart === input.value.length) {
@@ -220,13 +221,16 @@ export class Header implements OnInit, OnDestroy {
     this.stopPolling();
     this.pollSub = interval(30000).pipe(
       startWith(0),
-      switchMap(() => this.notificationService.getMyNotifications())
-    ).subscribe({
-      next: list => {
-        this.notifications = list;
-        this.unreadCount   = list.filter(n => !n.isRead).length;
-      },
-      error: () => {}
+
+      switchMap(() =>
+        this.notificationService.getMyNotifications().pipe(
+          catchError(() => of([] as Notification[]))
+        )
+      )
+    ).subscribe(list => {
+      this.notifications = list;
+      this.unreadCount   = list.filter(n => !n.isRead).length;
+      this.cdr.markForCheck();
     });
   }
 
@@ -241,14 +245,14 @@ export class Header implements OnInit, OnDestroy {
     event.stopPropagation();
     if (notif.isRead) return;
     this.notificationService.markAsRead(notif.id).subscribe({
-      next: () => { notif.isRead = true; this.unreadCount = Math.max(0, this.unreadCount - 1); },
+      next: () => { notif.isRead = true; this.unreadCount = Math.max(0, this.unreadCount - 1); this.cdr.markForCheck(); },
       error: () => {}
     });
   }
 
   markAllRead(): void {
     this.notificationService.markAllAsRead().subscribe({
-      next: () => { this.notifications.forEach(n => (n.isRead = true)); this.unreadCount = 0; },
+      next: () => { this.notifications.forEach(n => (n.isRead = true)); this.unreadCount = 0; this.cdr.markForCheck(); },
       error: () => {}
     });
   }

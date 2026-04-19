@@ -89,16 +89,22 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadSellerRatingSummary(sellerId: number): void {
-    console.log('[ItemDetail] loadSellerRatingSummary - sellerId:', sellerId);
+    // Fetch a page large enough to compute an accurate average.
+    // The backend stores AverageRating on the Profile, so ideally
+    // a dedicated profile endpoint would be used — this is the current approach.
     this.reviewService
-      .getPagedReviews(sellerId, 1, 1, 'Newest')
+      .getPagedReviews(sellerId, 1, 100, 'Newest')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
-          console.log('[ItemDetail] getPagedReviews result:', result);
-          console.log('[ItemDetail] averageRating BEFORE:', this.averageRating, '| reviewCount BEFORE:', this.reviewCount);
           this.reviewCount = result.total;
-          console.log('[ItemDetail] averageRating AFTER:', this.averageRating, '| reviewCount AFTER:', this.reviewCount);
+          const items = result.items ?? [];
+          if (items.length > 0) {
+            const sum = items.reduce((acc, r) => acc + r.rating, 0);
+            this.averageRating = Math.round((sum / items.length) * 10) / 10;
+          } else {
+            this.averageRating = 0;
+          }
           this.cdr.markForCheck();
         },
         error: () => {},

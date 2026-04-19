@@ -27,6 +27,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LayoutModule } from '@angular/cdk/layout';
 
 import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { securityHeadersInterceptor } from './core/interceptors/security-headers.interceptor';
 import { SharedModule } from './shared/shared-module';
 
 import { register } from 'swiper/element/bundle';
@@ -79,7 +80,7 @@ register();
   ],
   providers: [
     provideHttpClient(
-      withInterceptors([authInterceptor])
+      withInterceptors([authInterceptor, securityHeadersInterceptor])
     ),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
