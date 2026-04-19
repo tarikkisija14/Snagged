@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Directive,
   ElementRef,
   Input,
@@ -24,9 +25,12 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
 
   private intersectionObserver?: IntersectionObserver;
 
+  private fadeTimer?: ReturnType<typeof setTimeout>;
+
   constructor(
     private el: ElementRef<HTMLImageElement>,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -85,12 +89,14 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
   private handleSuccess() {
     this.isLoading = false;
     this.isLoaded = true;
+    this.cdr.markForCheck();
 
     const img = this.el.nativeElement;
     this.renderer.setStyle(img, 'opacity', '0');
     this.renderer.setStyle(img, 'transition', 'opacity 0.3s ease-in');
 
-    setTimeout(() => {
+
+    this.fadeTimer = setTimeout(() => {
       this.renderer.setStyle(img, 'opacity', '1');
     }, 50);
   }
@@ -98,17 +104,20 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
   private handleError() {
     this.isLoading = false;
     this.hasError = true;
+    this.cdr.markForCheck();
 
     if (this.errorImage) {
       this.setImageSource(this.errorImage);
     }
 
-    console.error('LazyLoadImageDirective: Failed to load image:', this.appLazyLoad);
   }
 
   ngOnDestroy() {
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
+    }
+    if (this.fadeTimer !== undefined) {
+      clearTimeout(this.fadeTimer);
     }
   }
 }

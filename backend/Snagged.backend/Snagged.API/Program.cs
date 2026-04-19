@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Snagged.API.Extensions;
 using Snagged.Application.Abstractions;
 using Snagged.Application.Catalog.Auth.Commands.Register;
 using Snagged.Application.Catalog.Items.Queries.GetItems;
 using Snagged.Application.Common.Behaviours;
+using Snagged.Application.Common.Exceptions;
 using Snagged.Application.Common.Helper;
 using Snagged.Application.Common.Interfaces;
 using Snagged.Infrastructure.Commom;
@@ -19,6 +21,8 @@ using Stripe;
 using System.Reflection;
 using System.Text;
 using System.Threading.RateLimiting;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,11 +131,11 @@ builder.Services.AddSwaggerGen(c =>
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header. Example: 'Bearer {token}'",
-        Name = "Authorization",
+        Description = "CSRF zaštita. Dodaj header: X-CSRF-TOKEN: {tvoj-token}",
+        Name = "X-CSRF-TOKEN",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Scheme = "ApiKeyScheme"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -139,7 +143,7 @@ builder.Services.AddSwaggerGen(c =>
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                           Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "CSRF" }
             },
             Array.Empty<string>()
         }
@@ -153,8 +157,7 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 
 var app = builder.Build();
 
-// ── Middleware pipeline ──────────────────────────────────────────────────────
-// Exception handler MUST be first so it wraps all subsequent middleware.
+
 app.UseExceptionHandler(errApp => errApp.Run(async ctx =>
 {
     var ex = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
@@ -174,9 +177,40 @@ app.UseExceptionHandler(errApp => errApp.Run(async ctx =>
         return;
     }
 
+    if (ex is SnaggedConflictException sce)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+        await ctx.Response.WriteAsJsonAsync(new { message = sce.Message });
+        return;
+    }
+
+    if (ex is SnaggedBusinessRuleException sbe)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+        await ctx.Response.WriteAsJsonAsync(new { code = sbe.Code, message = sbe.Message });
+        return;
+    }
+
+    if (ex is SnaggedNotFoundException snfe)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+        await ctx.Response.WriteAsJsonAsync(new { message = snfe.Message });
+        return;
+    }
+
+    if (ex is UnauthorizedAccessException)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+        await ctx.Response.WriteAsJsonAsync(new { message = "Forbidden." });
+        return;
+    }
+
     ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
     await ctx.Response.WriteAsJsonAsync(new { message = "An unexpected error occurred." });
 }));
+
+// ── Security headers (applies to all responses, including errors)
+app.UseSecurityHeaders();
 
 if (app.Environment.IsDevelopment())
 {
@@ -203,8 +237,16 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowAngular");
 app.UseRateLimiter();
+
+// ── XSS body sanitization (before controllers read the body)
+app.UseXssSanitization();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ── CSRF header validation (after auth so we can inspect the JWT presence)
+// app.UseCsrfHeaderValidation(); // ukljucit na kraju
+
 app.MapControllers();
 
 await app.Services.InitializeDatabaseAsync(app.Environment);

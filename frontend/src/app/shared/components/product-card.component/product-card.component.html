@@ -9,7 +9,7 @@
     />
 
     <div class="product-badge" *ngIf="showBadge && item.condition">
-      {{ item.condition }}
+      {{ item.condition | conditionLabel }}
     </div>
 
     <div class="sold-overlay" *ngIf="item.isSold">
@@ -43,7 +43,7 @@
     </div>
 
     <div class="product-price">
-      ${{ item.price | number:'1.2-2' }}
+      {{ item.price | itemPrice }}
     </div>
 
     <div class="product-footer">

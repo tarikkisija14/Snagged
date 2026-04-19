@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { loadStripe, Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
@@ -12,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./payment.scss'],
   standalone: false,
 })
-export class Payment implements OnInit {
+export class Payment implements OnInit, AfterViewInit, OnDestroy {
   orderId!: number;
   stripe!: Stripe | null;
   elements!: StripeElements;
@@ -20,6 +20,9 @@ export class Payment implements OnInit {
   message      = '';
   errorMessage = '';
   loading      = false;
+
+
+  stripeReady  = false;
 
   totalAmount: number | null = null;
 
@@ -32,19 +35,34 @@ export class Payment implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.orderId = Number(this.route.snapshot.paramMap.get('orderId'));
-    this.stripe  = await loadStripe(environment.stripePublicKey);
-
-    if (this.stripe) {
-      this.elements    = this.stripe.elements();
-      this.cardElement = this.elements.create('card');
-      this.cardElement.mount('#card-element');
-    }
-
+    this.orderId     = Number(this.route.snapshot.paramMap.get('orderId'));
     this.totalAmount = this.calculateTotalFromCart();
     if (this.totalAmount === null) {
       this.fetchOrderTotal();
     }
+
+    this.stripe = await loadStripe(environment.stripePublicKey);
+
+    if (this.stripe) {
+      this.elements    = this.stripe.elements();
+      this.cardElement = this.elements.create('card');
+
+
+      setTimeout(() => {
+        this.stripeReady = true;
+        this.cd.detectChanges();
+        this.cardElement.mount('#card-element');
+      });
+    }
+  }
+
+  ngAfterViewInit(): void {
+
+  }
+
+  ngOnDestroy(): void {
+
+    this.cardElement?.destroy();
   }
 
   async pay(): Promise<void> {
@@ -107,7 +125,7 @@ export class Payment implements OnInit {
           }
         },
         error: () => {
-          // Total remains null; non-critical — payment still works
+
         },
       });
   }

@@ -2,7 +2,7 @@ import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, timer } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import {AuthService} from '../auth-service/AuthService';
+import { AuthService } from '../auth-service/AuthService';
 
 export interface SessionTimeoutEvent {
   remainingSeconds: number;
@@ -11,9 +11,7 @@ export interface SessionTimeoutEvent {
 @Injectable({ providedIn: 'root' })
 export class SessionTimeoutService implements OnDestroy {
 
-
   readonly showWarning$ = new Subject<SessionTimeoutEvent>();
-
   readonly sessionExpired$ = new Subject<void>();
 
   private readonly WARNING_BEFORE_MS = 2 * 60 * 1000;
@@ -42,12 +40,16 @@ export class SessionTimeoutService implements OnDestroy {
     this.authSub?.unsubscribe();
   }
 
-
   extendSession(): void {
 
     this.warningShown = false;
+    this.stop();
+    this.ngZone.runOutsideAngular(() => {
+      this.checkSub = timer(0, this.CHECK_INTERVAL_MS).subscribe(() => {
+        this.check();
+      });
+    });
   }
-
 
   forceLogout(): void {
     this.stop();
@@ -58,7 +60,6 @@ export class SessionTimeoutService implements OnDestroy {
   private start(): void {
     this.stop();
     this.warningShown = false;
-
 
     this.ngZone.runOutsideAngular(() => {
       this.checkSub = timer(0, this.CHECK_INTERVAL_MS).subscribe(() => {
@@ -80,7 +81,7 @@ export class SessionTimeoutService implements OnDestroy {
     let exp: number;
     try {
       const decoded: any = jwtDecode(token);
-      exp = decoded.exp * 1000; // convert to ms
+      exp = decoded.exp * 1000;
     } catch {
       return;
     }
@@ -89,7 +90,6 @@ export class SessionTimeoutService implements OnDestroy {
     const remaining = exp - now;
 
     if (remaining <= 0) {
-
       this.ngZone.run(() => {
         this.stop();
         this.authService.logout();

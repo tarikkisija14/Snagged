@@ -72,7 +72,7 @@
       </button>
 
       <!-- Notification Bell -->
-      <div class="notif-wrapper" *ngIf="authService.isLoggedIn()">
+      <div class="notif-wrapper" *ngIf="isLoggedIn">
         <button class="icon-btn notif-btn" aria-label="Notifications" (click)="toggleNotifPanel()">
           <mat-icon>notifications_none</mat-icon>
           <span class="notif-badge" *ngIf="unreadCount > 0">
@@ -97,7 +97,7 @@
               <div class="notif-dot" *ngIf="!n.isRead"></div>
               <div class="notif-content">
                 <p class="notif-message">{{ n.message }}</p>
-                <span class="notif-time">{{ n.createdAt | date:'MMM d, h:mm a' }}</span>
+                <span class="notif-time">{{ n.createdAt | relativeDate }}</span>
               </div>
               <button class="notif-delete-btn" title="Delete" (click)="deleteNotification(n, $event)">
                 <mat-icon>close</mat-icon>

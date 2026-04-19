@@ -37,7 +37,7 @@
             <div class="rating-row no-reviews" *ngIf="profile.reviewCount === 0">
               <span class="no-reviews-text">No reviews yet</span>
             </div>
-            <p class="bio">{{ profile.bio || 'No bio added yet.' }}</p>
+            <p class="bio">{{ profile.bio | fallback:'No bio added yet.' }}</p>
           </div>
 
           <div class="hero-actions">

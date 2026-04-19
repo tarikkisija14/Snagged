@@ -7,24 +7,31 @@ using Snagged.Application.Catalog.Payment.Commands.CreateStripePayment;
 using Snagged.Application.Catalog.Payment.Queries.GetAllPayments;
 using Snagged.Application.Catalog.Payment.Queries.GetAllPaymentsByUser;
 using Snagged.Application.Common.Exceptions;
+using Snagged.Application.Common.Interfaces;
 
 namespace Snagged.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class PaymentController(IMediator mediator) : ControllerBase
+    public class PaymentController(IMediator mediator, ICurrentUserService currentUser) : ControllerBase
     {
+        
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<PaymentDto>>> GetAllPayments()
         {
             var result = await mediator.Send(new GetAllPaymentsQuery());
             return Ok(result);
         }
 
+        
         [HttpGet("user/{userId:int}")]
         public async Task<ActionResult<List<PaymentDto>>> GetPaymentsByUser(int userId)
         {
+            if (currentUser.UserId != userId)
+                return Forbid();
+
             var result = await mediator.Send(new GetPaymentsByUserQuery { UserId = userId });
             return Ok(result);
         }

@@ -50,10 +50,11 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
             }
 
             ctx.Orders.Add(order);
+            
             ctx.CartItems.RemoveRange(cart.CartItems);
             await ctx.SaveChangesAsync(ct);
 
-            
+
             ctx.Notifications.Add(new Notification
             {
                 UserId = userId,
@@ -69,7 +70,7 @@ namespace Snagged.Application.Catalog.Cart.Commands.Checkout
                 $"Your order #{order.Id} has been placed. Proceed to payment.",
                 ct);
 
-            
+
             var sellerIds = cart.CartItems
                 .Select(ci => ci.Item.UserId)
                 .Distinct();

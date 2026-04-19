@@ -34,7 +34,7 @@
       <mat-card-subtitle class="review-meta">
         <app-star-rating [rating]="review.rating" [readonly]="true"></app-star-rating>
         <span class="dot">·</span>
-        <span>{{ review.createdAt | date: 'mediumDate' }}</span>
+        <span>{{ review.createdAt | relativeDate }}</span>
         <span class="edited-tag" *ngIf="isEdited(review)">(edited)</span>
       </mat-card-subtitle>
     </mat-card-header>

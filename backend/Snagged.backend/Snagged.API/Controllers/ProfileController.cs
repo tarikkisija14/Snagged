@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Snagged.Application.Catalog.Profiles;
 using Snagged.Application.Catalog.Profiles.Commands.CreateProfile;
 using Snagged.Application.Catalog.Profiles.Queries;
 using Snagged.Application.Common.Exceptions;
@@ -16,24 +17,36 @@ namespace Snagged.API.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetProfile()
         {
+           
+            ProfileDto? result = null;
+
             try
             {
-                var result = await mediator.Send(new GetProfileQuery { UserId = currentUser.UserId });
-                return Ok(result);
+                result = await mediator.Send(new GetProfileQuery { UserId = currentUser.UserId });
             }
             catch (SnaggedNotFoundException)
             {
-                
+                // Profile missing — create it once. Any subsequent request will find it.
+            }
+
+            if (result is null)
+            {
                 try
                 {
-                    var created = await mediator.Send(new CreateProfileCommand { UserId = currentUser.UserId });
-                    return Ok(created);
+                    result = await mediator.Send(new CreateProfileCommand { UserId = currentUser.UserId });
                 }
                 catch (SnaggedNotFoundException ex)
                 {
                     return NotFound(new { message = ex.Message });
                 }
+                catch (InvalidOperationException)
+                {
+                    
+                    result = await mediator.Send(new GetProfileQuery { UserId = currentUser.UserId });
+                }
             }
+
+            return Ok(result);
         }
     }
 }

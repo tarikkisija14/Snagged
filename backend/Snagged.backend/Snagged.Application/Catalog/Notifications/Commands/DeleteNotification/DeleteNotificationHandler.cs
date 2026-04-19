@@ -1,14 +1,11 @@
 ﻿using MediatR;
 using Snagged.Application.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snagged.Application.Common.Interfaces;
 
 namespace Snagged.Application.Catalog.Notifications.Commands.DeleteNotification
 {
-    public class DeleteNotificationHandler(IAppDbContext ctx) : IRequestHandler<DeleteNotificationCommand, bool>
+    public class DeleteNotificationHandler(IAppDbContext ctx, ICurrentUserService currentUser)
+        : IRequestHandler<DeleteNotificationCommand, bool>
     {
         public async Task<bool> Handle(DeleteNotificationCommand request, CancellationToken cancellationToken)
         {
@@ -16,6 +13,9 @@ namespace Snagged.Application.Catalog.Notifications.Commands.DeleteNotification
 
             if (notif == null)
                 return false;
+
+            if (notif.UserId != currentUser.UserId)
+                throw new UnauthorizedAccessException("You can only delete your own notifications.");
 
             ctx.Notifications.Remove(notif);
             await ctx.SaveChangesAsync(cancellationToken);

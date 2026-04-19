@@ -59,7 +59,7 @@
 
       <!-- Price -->
       <div class="price-row">
-        <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
+        <span class="item-price">{{ item.price | itemPrice }}</span>
         <span class="price-tag" *ngIf="!item.isSold">Available</span>
         <span class="price-tag sold-tag" *ngIf="item.isSold">Sold out</span>
       </div>
@@ -70,8 +70,8 @@
       <!-- Condition -->
       <div class="condition-row" *ngIf="item.condition">
         <span class="condition-label">Condition</span>
-        <span class="condition-badge condition-{{ (item.condition || '').toLowerCase() }}">
-          {{ item.condition }}
+        <span class="condition-badge condition-{{ item.condition | conditionLabel:'slug' }}">
+          {{ item.condition | conditionLabel }}
         </span>
       </div>
 
@@ -86,7 +86,7 @@
       <!-- Description -->
       <div class="item-description-wrapper" *ngIf="item.description">
         <p class="desc-label">Description</p>
-        <p class="item-description">{{ item.description }}</p>
+        <p class="item-description">{{ item.description | fallback:'No description provided.' }}</p>
       </div>
 
       <!-- Seller -->
@@ -103,7 +103,7 @@
         </div>
         <div class="meta-date">
           <mat-icon class="meta-icon">schedule</mat-icon>
-          {{ item.createdAt | date:'mediumDate' }}
+          {{ item.createdAt | relativeDate }}
         </div>
       </div>
 

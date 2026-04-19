@@ -1,7 +1,8 @@
 // MODIFIED
 import { Component, OnInit, OnDestroy, Input, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
 import { ItemModel } from '../../shared/models/item.model';
 import { Category } from '../../shared/models/category';
 import { Subcategory } from '../../shared/models/subcategory';
@@ -57,7 +58,13 @@ export class CatalogList implements OnInit, OnDestroy {
 
   private readonly baseImageUrl = environment.apiUrl.replace('/api', '');
   private categoryMap = new Map<number, string>();
+
+
   private subs = new Subscription();
+
+
+  private readonly load$ = new Subject<Parameters<ItemService['getFilteredItems']>[0]>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private itemService: ItemService,
@@ -76,16 +83,43 @@ export class CatalogList implements OnInit, OnDestroy {
     this.loadCategories();
     this.loadPopularTags();
 
+    // Wire the load$ subject through switchMap so only one request is active at a time.
+    this.load$.pipe(
+      switchMap(filter => {
+        this.isLoading = true;
+        this.cdr.markForCheck();
+        return this.itemService.getFilteredItems(filter);
+      }),
+      takeUntil(this.destroy$),
+    ).subscribe({
+      next: (res: PageResult<ItemModel>) => {
+        this.items      = Array.isArray(res?.items) ? [...res.items] : [];
+        this.totalItems = typeof res?.total === 'number' ? res.total : 0;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize) || 1;
+        this.isLoading  = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.items      = [];
+        this.totalItems = 0;
+        this.totalPages = 1;
+        this.isLoading  = false;
+        this.cdr.markForCheck();
+      },
+    });
+
     const paramSub = this.route.queryParamMap.subscribe(params => {
       this.activeSearchTerm = params.get('q') ?? '';
       this.page = 1;
-      this.loadItems();
+      this.triggerLoad();
     });
     this.subs.add(paramSub);
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadCategories(): void {
@@ -120,15 +154,16 @@ export class CatalogList implements OnInit, OnDestroy {
     this.selectedTags = this.isTagSelected(name)
       ? this.selectedTags.filter(t => t !== name)
       : [...this.selectedTags, name];
-    this.loadItems();
+    this.triggerLoad();
   }
 
+
   loadItems(): void {
-    this.isLoading = true;
-    this.cdr.markForCheck();
-
     this.page = Math.max(1, this.page);
+    this.triggerLoad();
+  }
 
+  private triggerLoad(): void {
     const filter: Parameters<ItemService['getFilteredItems']>[0] = {
       page: this.page, pageSize: this.pageSize,
       sortBy: this.selectedSortBy, sortOrder: this.selectedSortOrder,
@@ -142,40 +177,24 @@ export class CatalogList implements OnInit, OnDestroy {
     if (this.currentMaxPrice < this.maxPrice)   filter.maxPrice       = this.currentMaxPrice;
     if (this.selectedTags.length > 0)           filter.tags           = this.selectedTags;
 
-    const sub = this.itemService.getFilteredItems(filter).subscribe({
-      next: (res: PageResult<ItemModel>) => {
-        this.items      = Array.isArray(res?.items) ? [...res.items] : [];
-        this.totalItems = typeof res?.total === 'number' ? res.total : 0;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize) || 1;
-        this.isLoading  = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.items      = [];
-        this.totalItems = 0;
-        this.totalPages = 1;
-        this.isLoading  = false;
-        this.cdr.markForCheck();
-      },
-    });
-    this.subs.add(sub);
+    this.load$.next(filter);
   }
 
   loadSubcategories(): void {
     if (this.selectedCategoryIds.length === 0) {
       this.subcategories = [];
-      this.loadItems();
+      this.triggerLoad();
       return;
     }
     const categoryId = this.selectedCategoryIds[0];
     const sub = this.subcategoryService.getSubcategories(categoryId).subscribe({
       next: (subs) => {
         this.subcategories = subs;
-        this.loadItems();
+        this.triggerLoad();
       },
       error: () => {
         this.subcategories = [];
-        this.loadItems();
+        this.triggerLoad();
       },
     });
     this.subs.add(sub);
@@ -195,7 +214,7 @@ export class CatalogList implements OnInit, OnDestroy {
       this.selectedCategoryIds    = [];
       this.selectedSubcategoryIds = [];
       this.subcategories          = [];
-      this.loadItems();
+      this.triggerLoad();
     }
   }
 
@@ -208,7 +227,7 @@ export class CatalogList implements OnInit, OnDestroy {
     } else {
       this.selectedSubcategoryIds = this.selectedSubcategoryIds.filter(id => id !== subcategoryId);
     }
-    this.loadItems();
+    this.triggerLoad();
   }
 
   onConditionChange(condition: string, checked: boolean): void {
@@ -216,7 +235,7 @@ export class CatalogList implements OnInit, OnDestroy {
     this.selectedConditions = checked
       ? [...this.selectedConditions.filter(c => c !== condition), condition]
       : this.selectedConditions.filter(c => c !== condition);
-    this.loadItems();
+    this.triggerLoad();
   }
 
   onSortChange(event: Event): void {
@@ -231,7 +250,7 @@ export class CatalogList implements OnInit, OnDestroy {
     this.selectedSortBy    = sort.sortBy;
     this.selectedSortOrder = sort.sortOrder;
     this.page = 1;
-    this.loadItems();
+    this.triggerLoad();
   }
 
   onMinPriceChange(value: string): void {
@@ -239,7 +258,7 @@ export class CatalogList implements OnInit, OnDestroy {
     const num = Number(value);
     this.currentMinPrice = isNaN(num) ? this.minPrice : Math.min(Math.max(num, this.minPrice), this.maxPrice);
     if (this.currentMinPrice > this.currentMaxPrice) this.currentMaxPrice = this.currentMinPrice;
-    this.loadItems();
+    this.triggerLoad();
   }
 
   onMaxPriceChange(value: string): void {
@@ -247,11 +266,11 @@ export class CatalogList implements OnInit, OnDestroy {
     const num = Number(value);
     this.currentMaxPrice = isNaN(num) ? this.maxPrice : Math.min(Math.max(num, this.minPrice), this.maxPrice);
     if (this.currentMaxPrice < this.currentMinPrice) this.currentMinPrice = this.currentMaxPrice;
-    this.loadItems();
+    this.triggerLoad();
   }
 
-  clearCondition(): void  { this.page = 1; this.selectedConditions = []; this.loadItems(); }
-  clearPriceRange(): void { this.page = 1; this.currentMinPrice = this.minPrice; this.currentMaxPrice = this.maxPrice; this.loadItems(); }
+  clearCondition(): void  { this.page = 1; this.selectedConditions = []; this.triggerLoad(); }
+  clearPriceRange(): void { this.page = 1; this.currentMinPrice = this.minPrice; this.currentMaxPrice = this.maxPrice; this.triggerLoad(); }
 
   clearFilters(): void {
     this.page                   = 1;
@@ -262,12 +281,12 @@ export class CatalogList implements OnInit, OnDestroy {
     this.currentMinPrice        = this.minPrice;
     this.currentMaxPrice        = this.maxPrice;
     this.subcategories          = [];
-    this.loadItems();
+    this.triggerLoad();
   }
 
-  prevPage(): void { if (this.page > 1) { this.page--; this.loadItems(); } }
-  nextPage(): void { if (this.page < this.totalPages) { this.page++; this.loadItems(); } }
-  goToPage(n: number): void { if (n >= 1 && n <= this.totalPages) { this.page = n; this.loadItems(); } }
+  prevPage(): void { if (this.page > 1) { this.page--; this.triggerLoad(); } }
+  nextPage(): void { if (this.page < this.totalPages) { this.page++; this.triggerLoad(); } }
+  goToPage(n: number): void { if (n >= 1 && n <= this.totalPages) { this.page = n; this.triggerLoad(); } }
 
   get pageNumbers(): number[] {
     const maxVisible = 7;

@@ -32,7 +32,7 @@
           </div>
           <div class="cart-item-details">
             <h4>{{ cartItem.item?.title }}</h4>
-            <p>{{ cartItem.item?.condition }}</p>
+            <p>{{ cartItem.item?.condition | conditionLabel }}</p>
             <div class="quantity-controls">
               <button class="quantity-btn" (click)="decreaseQuantity(cartItem)"
                       [disabled]="cartItem.quantity <= 1">-</button>
@@ -41,7 +41,7 @@
             </div>
           </div>
           <div class="cart-item-price">
-            ${{ (cartItem.price * cartItem.quantity) | number:'1.2-2' }}
+            {{ cartItem.price * cartItem.quantity | itemPrice }}
           </div>
           <button class="remove-item" (click)="removeItem(cartItem)" aria-label="Remove item">
             <i class="fas fa-trash"></i>
@@ -63,19 +63,19 @@
         <h3>Order Summary</h3>
         <div class="summary-row">
           <span>Subtotal</span>
-          <span>${{ getSubtotal() | number:'1.2-2' }}</span>
+          <span>{{ getSubtotal() | itemPrice }}</span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span>${{ getShipping() | number:'1.2-2' }}</span>
+          <span>{{ getShipping() | itemPrice }}</span>
         </div>
         <div class="summary-row">
           <span>Tax (8%)</span>
-          <span>${{ getTax() | number:'1.2-2' }}</span>
+          <span>{{ getTax() | itemPrice }}</span>
         </div>
         <div class="summary-row summary-total">
           <span>Total</span>
-          <span>${{ getTotal() | number:'1.2-2' }}</span>
+          <span>{{ getTotal() | itemPrice }}</span>
         </div>
 
         <div class="checkout-error" *ngIf="checkoutError" role="alert">
@@ -136,11 +136,11 @@
         </div>
         <div class="cart-item-details">
           <h4>{{ savedItem.item?.title }}</h4>
-          <p>{{ savedItem.item?.condition }}</p>
+          <p>{{ savedItem.item?.condition | conditionLabel }}</p>
           <p style="font-size: 0.85rem; color: var(--text-light);">Qty: {{ savedItem.quantity }}</p>
         </div>
         <div class="cart-item-price">
-          ${{ (savedItem.price * savedItem.quantity) | number:'1.2-2' }}
+          {{ savedItem.price * savedItem.quantity | itemPrice }}
         </div>
         <button class="remove-item" (click)="removeSavedItem(savedItem)" aria-label="Remove saved item">
           <i class="fas fa-trash"></i>

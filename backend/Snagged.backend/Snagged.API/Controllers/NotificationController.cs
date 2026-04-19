@@ -18,18 +18,26 @@ namespace Snagged.API.Controllers
     [Authorize]
     public class NotificationController(IMediator mediator, ICurrentUserService currentUser) : ControllerBase
     {
+        
         [HttpPost("add")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add(AddNotificationCommand cmd)
         {
             var id = await mediator.Send(cmd);
             return Ok(new { id });
         }
 
+       
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var notif = await mediator.Send(new GetNotificationByIdQuery { Id = id });
             if (notif == null) return NotFound(new { message = "Notification not found" });
+
+            
+            if (notif.UserId != currentUser.UserId)
+                return Forbid();
+
             return Ok(notif);
         }
 
@@ -50,8 +58,15 @@ namespace Snagged.API.Controllers
         [HttpPut("{id}/read")]
         public async Task<IActionResult> MarkRead(int id)
         {
-            var ok = await mediator.Send(new MarkAsReadCommand { Id = id });
-            return ok ? Ok() : NotFound(new { message = "Notification not found" });
+            try
+            {
+                var ok = await mediator.Send(new MarkAsReadCommand { Id = id });
+                return ok ? Ok() : NotFound(new { message = "Notification not found" });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
         }
 
         [HttpPut("my/read-all")]
@@ -64,8 +79,15 @@ namespace Snagged.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var ok = await mediator.Send(new DeleteNotificationCommand { Id = id });
-            return ok ? Ok() : NotFound(new { message = "Notification not found" });
+            try
+            {
+                var ok = await mediator.Send(new DeleteNotificationCommand { Id = id });
+                return ok ? Ok() : NotFound(new { message = "Notification not found" });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
         }
 
         [HttpDelete("my")]

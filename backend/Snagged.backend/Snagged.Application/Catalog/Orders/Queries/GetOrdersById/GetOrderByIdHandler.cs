@@ -2,16 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Snagged.Application.Abstractions;
 using Snagged.Application.Catalog.Orders.Commands;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Snagged.Application.Common.Exceptions;
 
 namespace Snagged.Application.Catalog.Orders.Queries.GetOrdersById
 {
-    public class GetOrderByIdHandler(IAppDbContext ctx) :IRequestHandler<GetOrdersByIdQuery,OrderDto>
+    public class GetOrderByIdHandler(IAppDbContext ctx) : IRequestHandler<GetOrdersByIdQuery, OrderDto>
     {
         public async Task<OrderDto> Handle(GetOrdersByIdQuery request, CancellationToken ct)
         {
@@ -22,10 +17,9 @@ namespace Snagged.Application.Catalog.Orders.Queries.GetOrdersById
                 .FirstOrDefaultAsync(o => o.Id == request.Id, ct);
 
             if (order == null)
-                throw new KeyNotFoundException($"Order with id {request.Id} not found.");
+                throw new SnaggedNotFoundException($"Order with id {request.Id} not found.");
 
-            
-            var dto = new OrderDto
+            return new OrderDto
             {
                 Id = order.Id,
                 BuyerId = order.BuyerId,
@@ -42,7 +36,6 @@ namespace Snagged.Application.Catalog.Orders.Queries.GetOrdersById
                     Price = oi.Price
                 }).ToList()
             };
-            return dto;
         }
     }
 }

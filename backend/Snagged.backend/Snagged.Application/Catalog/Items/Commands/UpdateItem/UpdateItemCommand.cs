@@ -5,7 +5,7 @@ namespace Snagged.Application.Catalog.Items.Commands.UpdateItem
 {
     public class UpdateItemCommand : IRequest<Unit>
     {
-        [JsonIgnore]
+       
         public int Id { get; set; }
 
         public required string Title { get; set; }
